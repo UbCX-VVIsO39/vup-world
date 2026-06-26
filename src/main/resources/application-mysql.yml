@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    # Local MySQL verification only. The useSSL=false/allowPublicKeyRetrieval settings are not for public/prod deployment.
+    url: jdbc:mysql://localhost:3306/vup_world?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    # Local default for disposable or controlled MySQL checks; prod must use a least-privilege account from secrets/env.
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      # Flyway 接管初始化，不再通过 spring.sql.init 执行 schema.sql/data.sql。
+      mode: never
+  flyway:
+    enabled: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+server:
+  port: 8080

@@ -1,0 +1,819 @@
+{
+  "version": "commercial-route-content-v1",
+  "routeIdentities": [
+    {
+      "routeType": "ELECTRONIC_PICKLE",
+      "strategy": "steady",
+      "label": "稳健电子榨菜",
+      "fantasy": "把晚饭陪热，而不是把互联网点燃。",
+      "cost": "爆点少，增长慢，最后一周必须补一个能被复述的记忆点。",
+      "playerPromise": "低压陪伴、口碑、真爱粉会成为结局证据。",
+      "streamerHook": "主播可以问观众：你们要我继续稳，还是今天借一次热搜？"
+    },
+    {
+      "routeType": "SLICE_SAINT",
+      "strategy": "clip",
+      "label": "切片圣体",
+      "fantasy": "每一天都像能被剪成三十秒名场面。",
+      "cost": "素材会反过来定义本人，复读旧梗会被观众查重。",
+      "playerPromise": "梗浓度、乐子人和可传播片段会推高结局。",
+      "streamerHook": "主播可以让观众投票：这段要不要当场交给切片组？"
+    },
+    {
+      "routeType": "BLACK_RED_MAIN_STAGE",
+      "strategy": "black_red",
+      "label": "黑红主会场",
+      "fantasy": "把争议变成入口，把入口变成全站主会场。",
+      "cost": "旧账、口碑和米线压力会在后期一起讨债。",
+      "playerPromise": "围观热度足够厚时，黑红事件会成为结局证据。",
+      "streamerHook": "主播可以问观众：现在道歉会不会太亏，硬接会不会太脏？"
+    },
+    {
+      "routeType": "DD_BUS_STOP",
+      "strategy": "social",
+      "label": "DD公交站",
+      "fantasy": "让联动像换乘，让路过的人愿意在这站多坐一会儿。",
+      "cost": "主体性会变薄，观众可能只记住你去过谁家。",
+      "playerPromise": "DD占比、联动证据和留存动作共同决定成败。",
+      "streamerHook": "主播可以让观众决定：下一站蹭谁，还是回自家站牌？"
+    },
+    {
+      "routeType": "SINGING_IDOL",
+      "strategy": "singing",
+      "label": "唱歌偶像",
+      "fantasy": "用一首会被记住的歌，把慢热变成作品证据。",
+      "cost": "只练不展示会被系统当后台努力，断练会让路线变薄。",
+      "playerPromise": "歌力、真爱粉和作品露出会锁住偶像感。",
+      "streamerHook": "主播可以问观众：今天继续练，还是把不完美版本唱出去？"
+    },
+    {
+      "routeType": "CYBER_GIRLFRIEND",
+      "strategy": "cyber_girlfriend",
+      "label": "赛博女友",
+      "fantasy": "陪伴感强到观众开始把排班当承诺。",
+      "cost": "边界和商业化会互相抬价，不处理就会变成追责表。",
+      "playerPromise": "独角兽、商业化和陪伴证据会把稳健线推向赛博女友。",
+      "streamerHook": "主播可以问观众：今天立边界，还是继续营业到发烫？"
+    },
+    {
+      "routeType": "MAIN_STAGE_KING",
+      "strategy": "main_stage_king",
+      "label": "主会场之王",
+      "fantasy": "不是被开庭，而是把开庭变成自己的舞台。",
+      "cost": "门槛高，热度、梗和风险必须同时受控。",
+      "playerPromise": "极高热度与梗浓度会把黑红线推到王座。",
+      "streamerHook": "主播可以让观众决定：今天收手保结局，还是把楼继续盖高？"
+    },
+    {
+      "routeType": "GLORIOUS_GRADUATION",
+      "strategy": "glorious_graduation",
+      "label": "光荣毕业",
+      "fantasy": "不是爆火退场，而是体面地走下舞台。",
+      "cost": "不够刺激，最后一周乱冲热度会打穿体面。",
+      "playerPromise": "口碑、粉丝群维护和低风险证据会组成毕业证明。",
+      "streamerHook": "主播可以问观众：要不要为了体面放弃一个爆点？"
+    },
+    {
+      "routeType": "UNKNOWN",
+      "strategy": "idle",
+      "label": "查无此V",
+      "fantasy": "互联网没有讨厌你，它只是没怎么记住你。",
+      "cost": "没有成型标签，也没有足够可复述证据。",
+      "playerPromise": "缺席、摇摆或全程摸鱼会被归档成未知。",
+      "streamerHook": "主播可以拷打观众：我们到底是在养V，还是在看她下班？"
+    },
+    {
+      "routeType": "DANCE_MEME",
+      "strategy": "dance_meme",
+      "label": "梗舞整活",
+      "fantasy": "动作可以不完美，但必须能被复刻和鬼畜。",
+      "cost": "一旦只剩动作梗，本人会被二创吞掉。",
+      "playerPromise": "舞蹈、梗浓度和切片反馈会把路线推向整活。",
+      "streamerHook": "主播可以让观众投票：这动作是练到稳，还是先发出去被笑？"
+    },
+    {
+      "routeType": "SOCIAL_COLLAB",
+      "strategy": "social_collab",
+      "label": "社交联动",
+      "fantasy": "用同台关系网打开入口，再把入口沉淀成自家观众。",
+      "cost": "接车太多会稀释标签，老粉会问你本台节目是什么。",
+      "playerPromise": "联动证据和自家粉丝维护要一起成立。",
+      "streamerHook": "主播可以问观众：今天继续蹭车，还是回家写站牌？"
+    }
+  ],
+  "lateGameWindows": [
+    {
+      "key": "FINAL_PRESSURE",
+      "label": "收官压力",
+      "startDay": 24,
+      "endDay": 25
+    },
+    {
+      "key": "FINAL_LOCK",
+      "label": "结局锁线",
+      "startDay": 26,
+      "endDay": 27
+    },
+    {
+      "key": "FINAL_SCREENSHOT",
+      "label": "战报前夜",
+      "startDay": 28,
+      "endDay": 29
+    }
+  ],
+  "lateGameEvents": [
+    {
+      "id": "LATE_STEADY_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "MIXED",
+      "title": "饭点与谢幕排班审计",
+      "description": "录播组发现你已经连续被当成饭点背景音，也有人把最后一周排班做成谢幕清单。老粉很稳，路人却只记得你准时开灯，不太说得出昨天那句好在哪里。",
+      "effect": "稳健/光荣毕业收官压力证据+1；如果继续安全处理，口碑稳住但记忆点不足会被写进战报，小名场面能补短板。",
+      "screenshotLine": "这局不是没活，是把活做成习惯，再补一口能被复述的尾音。",
+      "streamerLine": "口播：稳健线进最后一周了，现在缺的不是安全，是能被复述的一口。",
+      "heckleLine": "观众拷打：你到底是陪饭谢幕，还是在给标题组放假？",
+      "choices": {
+        "safe": {
+          "label": "稳住排班",
+          "costPreview": "不冲热搜",
+          "riskPreview": "爆点继续偏少",
+          "effectPreview": "口碑+，真爱粉+，稳健/毕业证据+"
+        },
+        "traffic": {
+          "label": "借一口热度",
+          "costPreview": "低压感被打断",
+          "riskPreview": "可能偏向黑红",
+          "effectPreview": "围观+，路线摇摆风险+"
+        },
+        "meme": {
+          "label": "做饭点名场面",
+          "costPreview": "需要可剪素材",
+          "riskPreview": "梗会压过陪伴感",
+          "effectPreview": "乐子人+，战报记忆点+"
+        }
+      }
+    },
+    {
+      "id": "LATE_STEADY_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "POSITIVE",
+      "title": "老粉排班表确认",
+      "description": "粉丝群把你最近的直播和复盘整理成排班表，还标出哪些晚上适合挂后台。有人说不用大火，只要她别突然把自己播坏。",
+      "effect": "稳健/光荣毕业锁线证据+1；安全选择更利于体面收官，稳定开灯会变成结局证据。",
+      "screenshotLine": "最难的不是爆火，是没有把自己播坏。",
+      "streamerLine": "口播：最后几天别乱冲，稳健线现在最怕临门一脚贷款开庭。",
+      "heckleLine": "观众拷打：你们是想体面毕业，还是最后一天上桌？",
+      "choices": {
+        "safe": {
+          "label": "按表收官",
+          "costPreview": "热度不爆",
+          "riskPreview": "增长平缓",
+          "effectPreview": "口碑+，毕业证据+"
+        },
+        "traffic": {
+          "label": "临时加场",
+          "costPreview": "体力和口碑承压",
+          "riskPreview": "旧账可能被翻出",
+          "effectPreview": "围观+，风险+"
+        },
+        "meme": {
+          "label": "留一个小梗",
+          "costPreview": "需要控制分寸",
+          "riskPreview": "太抽象会破坏体面",
+          "effectPreview": "记忆点+，梗浓度小涨"
+        }
+      }
+    },
+    {
+      "id": "LATE_STEADY_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "POSITIVE",
+      "title": "最后一张饭点切片",
+      "description": "切片组没有找到大爆点，却截到你认真收尾的一段：你把明天排班说清楚，又把今天的情绪轻轻放下。评论区说这东西不炸，但很适合留着下饭。",
+      "effect": "结局战报会获得稳健口播句；安全选择让截图更体面，也补足稳健线的最后记忆点。",
+      "screenshotLine": "不炸场，不开庭，稳定陪饭，还留下一句明天见。",
+      "streamerLine": "口播：这张战报不是流量型，是饭点型，适合发群里让人说一句稳。",
+      "heckleLine": "观众拷打：这局赢得像保温杯，你们认不认？",
+      "choices": {
+        "safe": {
+          "label": "体面收尾",
+          "costPreview": "不再冲榜",
+          "riskPreview": "传播慢",
+          "effectPreview": "口碑+，战报体面+"
+        },
+        "traffic": {
+          "label": "压哨冲榜",
+          "costPreview": "低压感变形",
+          "riskPreview": "可能破坏毕业感",
+          "effectPreview": "围观+，口碑波动"
+        },
+        "meme": {
+          "label": "压哨小标题",
+          "costPreview": "要守住分寸",
+          "riskPreview": "标题党风险",
+          "effectPreview": "截图梗+，轻微风险+"
+        }
+      }
+    },
+    {
+      "id": "LATE_BURST_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "MIXED",
+      "title": "二创查重警报",
+      "description": "同一个笑点被剪了太多次，评论区开始有人说这梗昨天已经笑过。切片组需要新刀口。",
+      "effect": "切片路线证据+1；选梗会涨传播，但复读风险会写进战报。",
+      "screenshotLine": "坏消息是大家都看过，好消息是说明真的传出去了。",
+      "streamerLine": "口播：切片线最后一周最怕复读，今天要么换梗，要么补正片。",
+      "heckleLine": "观众拷打：这梗还能笑第几遍？",
+      "choices": {
+        "safe": {
+          "label": "补上下文",
+          "costPreview": "传播降速",
+          "riskPreview": "爆点变稳",
+          "effectPreview": "口碑+，切片证据+"
+        },
+        "traffic": {
+          "label": "继续推首页",
+          "costPreview": "查重声变大",
+          "riskPreview": "旧梗反噬",
+          "effectPreview": "围观+，风险+"
+        },
+        "meme": {
+          "label": "换新梗刀口",
+          "costPreview": "梗浓度上升",
+          "riskPreview": "本人被素材定义",
+          "effectPreview": "乐子人+，切片证据++"
+        }
+      }
+    },
+    {
+      "id": "LATE_BURST_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "POSITIVE",
+      "title": "素材库封面位争夺",
+      "description": "剪辑组把三段候选名场面摆在一起，争论哪一段最能代表你这一局。你必须决定让哪个版本进战报。",
+      "effect": "切片/梗舞结局锁线证据+1；选梗会更锋利，安全选项更稳。",
+      "screenshotLine": "本人还没下班，素材已经开始竞选代表作。",
+      "streamerLine": "口播：现在是素材库内战，观众决定哪段进毕业照。",
+      "heckleLine": "观众拷打：她本人重要，还是这三十秒重要？",
+      "choices": {
+        "safe": {
+          "label": "选完整上下文",
+          "costPreview": "不够炸",
+          "riskPreview": "传播稍慢",
+          "effectPreview": "口碑+，路线稳"
+        },
+        "traffic": {
+          "label": "选最高点击",
+          "costPreview": "标题更硬",
+          "riskPreview": "误读变多",
+          "effectPreview": "围观++，风险+"
+        },
+        "meme": {
+          "label": "选最抽象三十秒",
+          "costPreview": "本人被梗压住",
+          "riskPreview": "梗反客为主",
+          "effectPreview": "梗浓度++，切片证据++"
+        }
+      }
+    },
+    {
+      "id": "LATE_BURST_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "POSITIVE",
+      "title": "战报封面一秒截停",
+      "description": "最后一张战报图停在你最容易被截图的一秒。楼友已经开始替你写标题，甚至比标题组还熟练。",
+      "effect": "结局战报获得切片口播句；选梗会强化截图传播。",
+      "screenshotLine": "一秒能截封面，三秒能长出标题。",
+      "streamerLine": "口播：这局不是活得精彩，是每一秒都像素材。",
+      "heckleLine": "观众拷打：这张图到底是毕业照还是表情包？",
+      "choices": {
+        "safe": {
+          "label": "保留本人解释",
+          "costPreview": "梗味下降",
+          "riskPreview": "传播慢一点",
+          "effectPreview": "口碑+，战报清楚+"
+        },
+        "traffic": {
+          "label": "封面压满",
+          "costPreview": "标题党风险",
+          "riskPreview": "开庭概率+",
+          "effectPreview": "围观+，截图感+"
+        },
+        "meme": {
+          "label": "做成表情包",
+          "costPreview": "本人感变薄",
+          "riskPreview": "梗绑架+",
+          "effectPreview": "梗浓度+，传播++"
+        }
+      }
+    },
+    {
+      "id": "LATE_HEAT_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "NEGATIVE",
+      "title": "热搜锁门前夜",
+      "description": "争议词条开始互相引用，旧账和新梗叠在一起。你不是缺热度，是缺一个能解释为什么这局归你掌控的证据。",
+      "effect": "黑红/主会场证据+1；硬接会冲高热度，也会把旧账写进结局。",
+      "screenshotLine": "我不是来洗白的，我是来确认这场到底谁说了算。",
+      "streamerLine": "口播：黑红线最后一周别只看热度，要看还能不能收住旧账。",
+      "heckleLine": "观众拷打：现在道歉是不是亏，硬接是不是疯？",
+      "choices": {
+        "safe": {
+          "label": "拆旧账降温",
+          "costPreview": "热度回落",
+          "riskPreview": "王座感变弱",
+          "effectPreview": "口碑+，风险-"
+        },
+        "traffic": {
+          "label": "继续主会场",
+          "costPreview": "旧账变重",
+          "riskPreview": "口碑下滑",
+          "effectPreview": "围观++，黑红证据++"
+        },
+        "meme": {
+          "label": "把争议做成梗",
+          "costPreview": "梗味盖过解释",
+          "riskPreview": "误读扩散",
+          "effectPreview": "梗浓度+，围观+"
+        }
+      }
+    },
+    {
+      "id": "LATE_HEAT_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "MIXED",
+      "title": "主会场楼层结算",
+      "description": "楼已经盖到看不清一楼。有人只记住你嘴硬，也有人承认这场争议确实被你控住了节奏。",
+      "effect": "主会场锁线证据+1；交通选择更接近王座，但风险会更尖。",
+      "screenshotLine": "楼友记住了你，但也只记住了你。",
+      "streamerLine": "口播：这不是普通黑红了，这是主会场管理考试。",
+      "heckleLine": "观众拷打：这楼盖完算赢，还是算事故现场保护成功？",
+      "choices": {
+        "safe": {
+          "label": "收束楼层",
+          "costPreview": "热度少一点",
+          "riskPreview": "王座冲刺变慢",
+          "effectPreview": "风险-，口碑+"
+        },
+        "traffic": {
+          "label": "点亮最高层",
+          "costPreview": "旧账加压",
+          "riskPreview": "翻车概率高",
+          "effectPreview": "围观++，主会场证据++"
+        },
+        "meme": {
+          "label": "留楼层梗",
+          "costPreview": "解释权变窄",
+          "riskPreview": "被二创带偏",
+          "effectPreview": "梗浓度+，传播+"
+        }
+      }
+    },
+    {
+      "id": "LATE_HEAT_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "MIXED",
+      "title": "开庭截图定格",
+      "description": "战报图停在你被围观最多的一刻。这个截图会有人存，也会有人拿去继续辩。",
+      "effect": "结局战报获得黑红口播句；硬接会让战报更炸，但不一定更体面。",
+      "screenshotLine": "主会场能亮灯，也能照见运营作业。",
+      "streamerLine": "口播：这张战报发出去，评论区会自动开第二庭。",
+      "heckleLine": "观众拷打：你们想要好结局，还是想要好节目？",
+      "choices": {
+        "safe": {
+          "label": "带解释发战报",
+          "costPreview": "节目效果降温",
+          "riskPreview": "传播没那么炸",
+          "effectPreview": "口碑+，风险-"
+        },
+        "traffic": {
+          "label": "直接甩图",
+          "costPreview": "评论区开庭",
+          "riskPreview": "口碑承压",
+          "effectPreview": "围观++，截图传播++"
+        },
+        "meme": {
+          "label": "配抽象标题",
+          "costPreview": "解释权交给楼友",
+          "riskPreview": "误读风险+",
+          "effectPreview": "梗浓度+，主会场感+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SINGING_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "MIXED",
+      "title": "压轴曲候场审计",
+      "description": "歌单已经排到最后一首。观众不再只问你能不能唱准，而是问这首歌能不能代表这一局。",
+      "effect": "唱歌偶像证据+1；安全选择保作品感，流量选择提高曝光。",
+      "screenshotLine": "今天要的不是唱完，是让这首歌能代表这一轮。",
+      "streamerLine": "口播：唱歌线最后一周不是练功房，是压轴曲候场。",
+      "heckleLine": "观众拷打：不完美版本要不要现在唱出去？",
+      "choices": {
+        "safe": {
+          "label": "稳唱压轴曲",
+          "costPreview": "热度平稳",
+          "riskPreview": "传播不爆",
+          "effectPreview": "真爱粉+，歌势证据+"
+        },
+        "traffic": {
+          "label": "推到首页",
+          "costPreview": "压力变大",
+          "riskPreview": "失误会被放大",
+          "effectPreview": "围观+，DD+"
+        },
+        "meme": {
+          "label": "剪副歌高光",
+          "costPreview": "作品被短视频化",
+          "riskPreview": "完整感下降",
+          "effectPreview": "传播+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SINGING_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "POSITIVE",
+      "title": "副歌记忆点确认",
+      "description": "评论区开始有人只用一句副歌安利你。它不一定是全站爆款，但已经成为这局最稳定的记忆点。",
+      "effect": "唱歌偶像锁线证据+1；选安全能守住作品口碑。",
+      "screenshotLine": "作品感开始比热闹更站得住。",
+      "streamerLine": "口播：这句副歌现在就是本局身份证，别把它唱丢了。",
+      "heckleLine": "观众拷打：继续打磨，还是趁热发切片？",
+      "choices": {
+        "safe": {
+          "label": "继续打磨",
+          "costPreview": "传播较慢",
+          "riskPreview": "不够热闹",
+          "effectPreview": "歌势证据++，口碑+"
+        },
+        "traffic": {
+          "label": "推送歌回切片",
+          "costPreview": "曝光增加",
+          "riskPreview": "失误被放大",
+          "effectPreview": "围观+，DD+"
+        },
+        "meme": {
+          "label": "做副歌梗",
+          "costPreview": "偶像感变轻",
+          "riskPreview": "梗盖过歌",
+          "effectPreview": "传播+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SINGING_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "POSITIVE",
+      "title": "终演截图留档",
+      "description": "最后的战报图停在麦克风前。它没有把全站吵醒，但让留下来的人知道你为什么值得再听一次。",
+      "effect": "结局战报获得唱歌偶像口播句；安全选择让截图更像终演。",
+      "screenshotLine": "嗓子是好嗓子，这次终于被记住了。",
+      "streamerLine": "口播：这张不是爆款封面，是终演留档。",
+      "heckleLine": "观众拷打：你们是要她火，还是要她唱完？",
+      "choices": {
+        "safe": {
+          "label": "留终演截图",
+          "costPreview": "不冲流量",
+          "riskPreview": "传播平稳",
+          "effectPreview": "口碑+，战报作品感+"
+        },
+        "traffic": {
+          "label": "压哨推流",
+          "costPreview": "失误风险",
+          "riskPreview": "热度压力+",
+          "effectPreview": "围观+，粉丝+"
+        },
+        "meme": {
+          "label": "剪副歌封面",
+          "costPreview": "作品被压缩",
+          "riskPreview": "记忆点变窄",
+          "effectPreview": "传播+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "LATE_RELATION_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "MIXED",
+      "title": "排班表流出审计",
+      "description": "陪伴感开始被观众量化成排班表。有人认真等你，也有人把没有出现当成失约。",
+      "effect": "赛博女友证据+1；安全选择立边界，流量选择强化陪伴商业感。",
+      "screenshotLine": "我以为我在营业，观众开始给我排班。",
+      "streamerLine": "口播：赛博女友线现在最怕一句晚安变成责任合同。",
+      "heckleLine": "观众拷打：今天立边界，还是继续把糖熬厚？",
+      "choices": {
+        "safe": {
+          "label": "温柔立边界",
+          "costPreview": "营业感降温",
+          "riskPreview": "独角兽不满",
+          "effectPreview": "口碑+，边界风险-"
+        },
+        "traffic": {
+          "label": "继续陪伴营业",
+          "costPreview": "承诺变重",
+          "riskPreview": "边界债+",
+          "effectPreview": "独角兽+，商业化+"
+        },
+        "meme": {
+          "label": "把排班做成梗",
+          "costPreview": "严肃边界被玩笑化",
+          "riskPreview": "误读风险+",
+          "effectPreview": "梗浓度+，围观+"
+        }
+      }
+    },
+    {
+      "id": "LATE_RELATION_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "MIXED",
+      "title": "晚安债务结算",
+      "description": "粉丝开始统计你说过多少次晚安。陪伴感很强，但每一句温柔都变成了后期要解释的账。",
+      "effect": "赛博女友锁线证据+1；选流量会更接近结局，也更容易留下边界争议。",
+      "screenshotLine": "你不是虚拟的，但关系是。",
+      "streamerLine": "口播：这局要不要冲赛博女友，就看你敢不敢让晚安继续计息。",
+      "heckleLine": "观众拷打：这是糖，还是债？",
+      "choices": {
+        "safe": {
+          "label": "把晚安降温",
+          "costPreview": "商业感下降",
+          "riskPreview": "结局推进变慢",
+          "effectPreview": "口碑+，风险-"
+        },
+        "traffic": {
+          "label": "继续糖分营业",
+          "costPreview": "边界承压",
+          "riskPreview": "追责表变长",
+          "effectPreview": "独角兽++，商业化+"
+        },
+        "meme": {
+          "label": "晚安变固定梗",
+          "costPreview": "陪伴感被戏谑",
+          "riskPreview": "关系感变轻",
+          "effectPreview": "传播+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "LATE_RELATION_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "POSITIVE",
+      "title": "陪伴感战报定格",
+      "description": "最终战报选了一张很安静的画面。它像约定，也像提醒：观众喜欢确定性，但你还要保住自己。",
+      "effect": "结局战报获得赛博女友口播句；安全选择更体面，流量选择更强烈。",
+      "screenshotLine": "陪伴感很甜，但边界也要写在战报里。",
+      "streamerLine": "口播：这张战报适合问一句，你们到底爱的是陪伴，还是排班？",
+      "heckleLine": "观众拷打：要糖还是要边界，今天只能选一种主语。",
+      "choices": {
+        "safe": {
+          "label": "带边界收图",
+          "costPreview": "糖分下降",
+          "riskPreview": "传播较慢",
+          "effectPreview": "口碑+，战报体面+"
+        },
+        "traffic": {
+          "label": "糖分拉满",
+          "costPreview": "边界争议+",
+          "riskPreview": "追责风险+",
+          "effectPreview": "独角兽+，商业化+"
+        },
+        "meme": {
+          "label": "做排班梗图",
+          "costPreview": "关系感变轻",
+          "riskPreview": "误读风险",
+          "effectPreview": "截图传播+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SOCIAL_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "MIXED",
+      "title": "末班车响铃审计",
+      "description": "联动路线图已经排得像公交换乘表。路人很多，但结局组想知道：他们是因为谁留下来的？",
+      "effect": "社交/DD证据+1；安全选择沉淀自家粉丝，流量选择继续换乘。",
+      "screenshotLine": "结局不是去过谁家，而是谁愿意在你这站下车。",
+      "streamerLine": "口播：DD公交站最后一周要留站牌，不然全是路过。",
+      "heckleLine": "观众拷打：你到底是哪家的，先给个准话？",
+      "choices": {
+        "safe": {
+          "label": "回自家站牌",
+          "costPreview": "联动热度放缓",
+          "riskPreview": "DD增长变慢",
+          "effectPreview": "真爱粉+，留存+"
+        },
+        "traffic": {
+          "label": "继续接车",
+          "costPreview": "标签稀释",
+          "riskPreview": "主体感下降",
+          "effectPreview": "DD+，围观+"
+        },
+        "meme": {
+          "label": "把换乘做成梗",
+          "costPreview": "站牌变玩笑",
+          "riskPreview": "留存不稳",
+          "effectPreview": "乐子人+，传播+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SOCIAL_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "POSITIVE",
+      "title": "站牌归属确认",
+      "description": "DD开始在不同直播间之间报站名。有人终于不是路过，而是把你当成固定换乘点。",
+      "effect": "DD公交站锁线证据+1；安全选择提升留存，流量选择扩大换乘。",
+      "screenshotLine": "车流是入口，站牌才是结局。",
+      "streamerLine": "口播：今天不是蹭谁，是让路人知道这站叫什么。",
+      "heckleLine": "观众拷打：坐一站算粉丝吗？那月票算不算？",
+      "choices": {
+        "safe": {
+          "label": "立自家站牌",
+          "costPreview": "热闹少一点",
+          "riskPreview": "联动收益下降",
+          "effectPreview": "留存+，口碑+"
+        },
+        "traffic": {
+          "label": "开末班联动",
+          "costPreview": "主体感承压",
+          "riskPreview": "DD流动性+",
+          "effectPreview": "DD++，围观+"
+        },
+        "meme": {
+          "label": "做报站梗",
+          "costPreview": "标签被玩笑化",
+          "riskPreview": "记住梗不记住人",
+          "effectPreview": "传播+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "LATE_SOCIAL_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "POSITIVE",
+      "title": "公交站战报留牌",
+      "description": "战报图像一张换乘路线图，但中心终于写着你的名字。它证明热闹不是别人的余波。",
+      "effect": "结局战报获得社交/DD口播句；安全选择更像沉淀，流量选择更像换乘狂欢。",
+      "screenshotLine": "联动像换乘，气氛负责准点到站。",
+      "streamerLine": "口播：这张战报问的不是你去过谁家，是谁愿意在你这站下车。",
+      "heckleLine": "观众拷打：你们是乘客，还是终于办月票了？",
+      "choices": {
+        "safe": {
+          "label": "留站牌截图",
+          "costPreview": "热度稳定",
+          "riskPreview": "传播不炸",
+          "effectPreview": "口碑+，留存+"
+        },
+        "traffic": {
+          "label": "全线报站",
+          "costPreview": "主体被稀释",
+          "riskPreview": "DD流动+",
+          "effectPreview": "DD+，围观+"
+        },
+        "meme": {
+          "label": "做月票梗图",
+          "costPreview": "站牌变段子",
+          "riskPreview": "留存不稳",
+          "effectPreview": "截图传播+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "LATE_UNKNOWN_FINAL_PRESSURE",
+      "window": "FINAL_PRESSURE",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "存在感审计报告",
+      "description": "日报组翻完了前二十多天，发现你没有大错，也没有足够明确的标签。互联网很安静，安静到像没记住。",
+      "effect": "查无此V证据+1；安全选择保底未知，流量选择可能临时转线。",
+      "screenshotLine": "没有翻车，也没有被记住。",
+      "streamerLine": "口播：查无此V不是死亡，是系统说素材不够归档。",
+      "heckleLine": "观众拷打：我们这是在经营，还是在模拟下班？",
+      "choices": {
+        "safe": {
+          "label": "接受低存在感",
+          "costPreview": "不转线",
+          "riskPreview": "未知结局更近",
+          "effectPreview": "风险低，路线不推进"
+        },
+        "traffic": {
+          "label": "临时冲一次",
+          "costPreview": "路线摇摆",
+          "riskPreview": "可能翻车",
+          "effectPreview": "围观+，转线机会+"
+        },
+        "meme": {
+          "label": "把查无此V做梗",
+          "costPreview": "失败感被放大",
+          "riskPreview": "可能转切片",
+          "effectPreview": "梗浓度+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "LATE_UNKNOWN_FINAL_LOCK",
+      "window": "FINAL_LOCK",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "最后转向窗口",
+      "description": "结局系统把你放在待定栏。现在还可以硬转一条路线，但每个方向都像临时抱佛脚。",
+      "effect": "未知锁线预警；安全选择进入查无此V，其他选择提供最后转向机会。",
+      "screenshotLine": "这不是开放世界，这是结局系统在等你交卷。",
+      "streamerLine": "口播：最后转向窗口开了，但现在补证据会很狼狈。",
+      "heckleLine": "观众拷打：现在才想起做人设，是不是太晚？",
+      "choices": {
+        "safe": {
+          "label": "保留未知归档",
+          "costPreview": "放弃冲线",
+          "riskPreview": "查无此V锁定",
+          "effectPreview": "稳定未知，风险低"
+        },
+        "traffic": {
+          "label": "压哨冲线",
+          "costPreview": "非常摇摆",
+          "riskPreview": "翻车风险+",
+          "effectPreview": "围观+，可能转黑红"
+        },
+        "meme": {
+          "label": "压哨整活",
+          "costPreview": "标签很薄",
+          "riskPreview": "素材不一定够",
+          "effectPreview": "梗浓度+，可能转切片"
+        }
+      }
+    },
+    {
+      "id": "LATE_UNKNOWN_FINAL_SCREENSHOT",
+      "window": "FINAL_SCREENSHOT",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "无人认领的战报",
+      "description": "最终截图没有高光，只剩一张很干净的记录。它像失败，也像下一局重新定义自己的提示。",
+      "effect": "结局战报获得查无此V口播句；安全选择让失败更清楚。",
+      "screenshotLine": "互联网没有讨厌你，它只是没怎么记住你。",
+      "streamerLine": "口播：这张图发出去，观众会问下一局到底要当什么V。",
+      "heckleLine": "观众拷打：查无此V也算图鉴，问题是你们服不服？",
+      "choices": {
+        "safe": {
+          "label": "认领失败战报",
+          "costPreview": "不再转线",
+          "riskPreview": "锁定未知",
+          "effectPreview": "战报清楚，重开建议+"
+        },
+        "traffic": {
+          "label": "最后喊一嗓子",
+          "costPreview": "结果不可控",
+          "riskPreview": "可能开庭",
+          "effectPreview": "围观+，风险+"
+        },
+        "meme": {
+          "label": "把失败做成梗",
+          "costPreview": "体面下降",
+          "riskPreview": "被笑过头",
+          "effectPreview": "梗浓度+，截图传播+"
+        }
+      }
+    }
+  ]
+}

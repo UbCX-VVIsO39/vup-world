@@ -1,0 +1,365 @@
+/* utilities.css - 工具类、数据可视化、图表、辅助样式 */
+.metric-help-button {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(61, 214, 198, 0.42);
+    background: var(--cyan-tint);
+    color: var(--neon-cyan);
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.metric-help-button:hover,
+.metric-help-button:focus-visible {
+    border-color: rgba(243, 201, 105, 0.62);
+    background: rgba(243, 201, 105, 0.12);
+    color: var(--neon-yellow);
+}
+
+.route-gallery-card {
+    display: grid;
+    gap: 10px;
+}
+
+.route-gallery-head {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.route-gallery-head div {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.route-gallery-head span,
+.route-gallery-item span,
+.route-gallery-item em {
+    color: var(--neon-cyan);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.route-gallery-head strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.route-gallery-head small {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.route-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+/* 走势独立全宽区域 */
+.route-gallery-section {
+    margin-top: 16px;
+}
+
+.route-gallery-item {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid var(--border-subtle-light);
+    border-radius: 8px;
+    background: rgba(25, 22, 47, 0.58);
+    overflow: hidden;
+}
+
+.route-gallery-item.active {
+    border-color: color-mix(in srgb, var(--route-card-accent, var(--neon-cyan)) 58%, var(--border-subtle));
+    background: color-mix(in srgb, var(--route-card-accent, var(--neon-cyan)) 10%, rgba(25, 22, 47, 0.72));
+}
+
+.route-gallery-item[data-route="UNKNOWN"] {
+    --route-card-accent: var(--neon-yellow);
+}
+
+.route-gallery-item[data-route="ELECTRONIC_PICKLE"] {
+    --route-card-accent: #f0d179;
+}
+
+.route-gallery-item[data-route="SINGING_IDOL"] {
+    --route-card-accent: #ff8fb1;
+}
+
+.route-gallery-item[data-route="DANCE_MEME"] {
+    --route-card-accent: #8bff7a;
+}
+
+.route-gallery-item[data-route="SLICE_SAINT"] {
+    --route-card-accent: #55e6ff;
+}
+
+.route-gallery-item[data-route="SOCIAL_COLLAB"] {
+    --route-card-accent: #72d7ff;
+}
+
+.route-gallery-item[data-route="BLACK_RED_MAIN_STAGE"] {
+    --route-card-accent: #ff4f6f;
+}
+
+.route-gallery-item[data-route="CYBER_GIRLFRIEND"] {
+    --route-card-accent: #6ff7ff;
+}
+
+.route-gallery-item[data-route="DD_BUS_STOP"] {
+    --route-card-accent: #66e2b3;
+}
+
+.route-gallery-item[data-route="MAIN_STAGE_KING"] {
+    --route-card-accent: #ff3d4f;
+}
+
+.route-gallery-item[data-route="GLORIOUS_GRADUATION"] {
+    --route-card-accent: #f5e6a5;
+}
+
+.route-gallery-item img {
+    width: 72px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 6px;
+    background: rgba(16, 13, 34, 0.5);
+}
+
+.route-gallery-item div {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.route-gallery-item strong,
+.route-gallery-item small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.route-gallery-item strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.route-gallery-item small {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.route-gallery-item em {
+    grid-column: 1 / -1;
+    color: var(--text-muted);
+}
+
+.route-gallery-item[data-action] {
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.route-gallery-item[data-action]:hover {
+    border-color: var(--neon-cyan);
+    background: rgba(34, 31, 63, 0.78);
+}
+
+.route-gallery-item.expanded {
+    border-color: var(--neon-cyan);
+    background: rgba(34, 31, 63, 0.85);
+}
+
+/* === 粉丝饼图 === */
+.fan-chart-container { display: flex; justify-content: center; padding: 8px; }
+
+/* === 行动收益预览条 === */
+.action-effect-bars {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/* === 时间线 === */
+.visual-timeline { position: relative; padding: 16px 0 16px 24px; }
+/* === 债务链 === */
+.debt-chain { padding: 12px; }
+.debt-chain-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; }
+.debt-chain-section { margin-bottom: 16px; }
+.debt-chain-empty { font-size: 13px; color: rgba(255,255,255,0.4); text-align: center; padding: 16px; }
+
+/* === 术语提示 === */
+.term-highlight { border-bottom: 1px dashed rgba(61,214,198,0.5); cursor: help; transition: all 0.2s; }
+.term-highlight:hover { border-bottom-color: var(--neon-cyan, var(--neon-cyan)); color: var(--neon-cyan, var(--neon-cyan)); }
+.term-tooltip {
+  position: fixed; z-index: 10002;
+  background: var(--bg-card, var(--bg-card, #222)); border: 1px solid var(--neon-cyan, var(--neon-cyan));
+  border-radius: 8px; padding: 12px 16px; max-width: 300px; pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.term-tooltip-title { font-weight: bold; margin-bottom: 4px; color: var(--neon-cyan, var(--neon-cyan)); }
+.term-tooltip-desc { font-size: 13px; line-height: 1.4; }
+.term-tooltip-example { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; font-style: italic; }
+
+.metric-help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 8, 12, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.metric-help-dialog {
+  width: min(1040px, calc(100vw - 40px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid rgba(61,214,198,0.26);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(44, 47, 58, 0.98), rgba(24, 26, 33, 0.98)),
+    var(--bg-secondary, #20222b);
+  box-shadow: 0 28px 72px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.metric-help-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(27, 29, 37, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.metric-help-head span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--neon-cyan, var(--neon-cyan));
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.metric-help-head h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.metric-help-close {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.metric-help-close:hover,
+.metric-help-close:focus-visible {
+  border-color: rgba(243,201,105,0.58);
+  color: var(--neon-yellow, var(--neon-yellow));
+}
+
+.metric-help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.metric-help-card {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.035);
+}
+
+.metric-help-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.metric-help-card-title span {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(61,214,198,0.28);
+  border-radius: 8px;
+  color: var(--neon-cyan, var(--neon-cyan));
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.metric-help-card-title strong {
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.metric-help-card p {
+  margin: 0 0 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.metric-help-card p b,
+.metric-help-card li b {
+  display: inline-block;
+  min-width: 58px;
+  margin-right: 6px;
+  color: var(--neon-cyan, var(--neon-cyan));
+  font-weight: 900;
+}
+
+.metric-help-card ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-help-card li {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.42;
+}

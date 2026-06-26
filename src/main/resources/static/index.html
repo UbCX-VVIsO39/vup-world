@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VUP出道局</title>
+    <link rel="preload" as="image" href="/gallery/v4/live-room/shells/shell-default.png" type="image/png">
+    <link rel="preload" as="image" href="/gallery/v4/protagonist/avatars/avatar-default.png" type="image/png">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/bili-theme.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+    <link rel="icon" type="image/png" href="/gallery/v4/protagonist/avatars/avatar-default.png">
+    <!-- Chart.js: 本地vendor优先，CDN fallback由app.js initChartJs()处理 -->
+    <script src="/vendor/chartjs/chart.umd.min.js" defer data-optional-chartjs="true"></script>
+</head>
+<body data-app="vup-world">
+<a href="#mainContent" class="skip-link">跳到主要内容</a>
+<!-- 新手教程遮罩 -->
+<div class="tutorial-overlay hidden" id="tutorialOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="tutorialTitle" aria-describedby="tutorialIntro" hidden>
+    <div class="tutorial-content">
+        <div class="tutorial-header">
+            <h2 id="tutorialTitle">欢迎来到 VUP出道局</h2>
+            <p id="tutorialIntro">出道回合制模拟器</p>
+        </div>
+        <div class="tutorial-steps">
+            <div class="tutorial-step active" data-step="1">
+                <div class="step-icon">1</div>
+                <div class="step-content">
+                    <h3>开始第一局</h3>
+                    <p>点单机入口直接开局；本地档会自动写在当前机器。</p>
+                </div>
+            </div>
+            <div class="tutorial-step" data-step="2">
+                <div class="step-icon">2</div>
+                <div class="step-content">
+                    <h3>继续上一局</h3>
+                    <p>有本地存档时会优先显示继续按钮，读档后回到上次所在的天数和阶段。</p>
+                </div>
+            </div>
+            <div class="tutorial-step" data-step="3">
+                <div class="step-icon">3</div>
+                <div class="step-content">
+                    <h3>每日只选一个主行动</h3>
+                    <p>主面板会高亮当前卡片；稳健开局可优先杂谈、练歌、维护粉丝群。</p>
+                </div>
+            </div>
+            <div class="tutorial-step" data-step="4">
+                <div class="step-icon">4</div>
+                <div class="step-content">
+                    <h3>标题 / 事件 / 日报 / 下一天</h3>
+                    <p>每天按当前阶段收完流程；完整跑完会生成结局复盘。</p>
+                </div>
+            </div>
+        </div>
+        <div class="tutorial-actions">
+            <button class="tutorial-start" id="tutorialStart" type="button" data-action="close-tutorial">看懂了，去玩 →</button>
+            <button class="tutorial-skip" id="tutorialSkip" type="button" data-action="skip-tutorial">跳过教程，直接开播</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标题选择 模态框 -->
+<div class="modal-overlay" id="titleModalOverlay">
+    <div class="modal-content modal-content--wide">
+        <div class="panel title-panel hidden" id="titlePanel"></div>
+    </div>
+</div>
+
+<!-- 事件选择 模态框 -->
+<div class="modal-overlay" id="eventModalOverlay">
+    <div class="modal-content modal-content--wide">
+        <div class="panel event-panel hidden" id="eventPanel"></div>
+    </div>
+</div>
+
+<!-- 日报 模态框 -->
+<div class="report-modal-overlay live-report-hook" id="reportDrawer" aria-hidden="true"></div>
+
+<!-- 结局全屏展示 -->
+<div class="ending-fullscreen-overlay hidden" id="endingFullscreen" role="dialog" aria-modal="true" aria-label="结局展示">
+    <div class="ending-fs-bg" id="endingFsBg"></div>
+    <div class="ending-fs-content">
+        <div class="ending-fs-title" id="endingFsTitle"></div>
+        <div class="ending-fs-grade" id="endingFsGrade"></div>
+        <div class="ending-fs-score" id="endingFsScore"></div>
+        <div class="ending-fs-tags" id="endingFsTags"></div>
+        <div class="ending-fs-actions">
+            <button class="ending-fs-btn ending-fs-review" data-action="ending-review" type="button">查看复盘</button>
+            <button class="ending-fs-btn ending-fs-restart" data-action="ending-restart" type="button">选路线重开</button>
+        </div>
+    </div>
+</div>
+
+<!-- 成就解锁弹窗 -->
+<div class="achievement-popup hidden" id="achievementPopup" role="alert" aria-live="polite">
+    <div class="achievement-popup-content">
+        <div class="achievement-popup-glow"></div>
+        <div class="achievement-popup-icon" id="achievementPopupIcon"></div>
+        <div class="achievement-popup-name" id="achievementPopupName"></div>
+        <div class="achievement-popup-desc" id="achievementPopupDesc"></div>
+        <div class="achievement-popup-text">获得！</div>
+    </div>
+</div>
+
+<!-- 主游戏界面 -->
+<div class="game-container" id="gameContainer">
+    <!-- B站直播间顶部信息栏 -->
+    <div class="live-room-top-bar" id="liveRoomTopBar">
+        <div class="live-room-streamer">
+            <img class="live-room-streamer-avatar" id="liveRoomAvatar" src="/gallery/v4/protagonist/avatars/avatar-streaming.png" alt="主播头像">
+            <div class="live-room-streamer-info">
+                <span class="live-room-streamer-name" id="liveRoomStreamerName">VUP出道局</span>
+                <span class="live-room-streamer-id" id="liveRoomStreamerId">房间号: 23333</span>
+            </div>
+        </div>
+        <div class="live-room-meta">
+            <span class="live-room-viewers">
+                <span class="viewer-icon" aria-label="观看人数">👁</span>
+                <span id="liveRoomViewerCount">0人观看</span>
+            </span>
+            <span class="live-room-duration">
+                <span class="duration-icon" aria-label="直播时长">⏱</span>
+                <span id="liveRoomDuration">00:00:00</span>
+            </span>
+            <span class="live-room-category">
+                <span class="category-icon" aria-label="直播分类">📺</span>
+                <span>虚拟主播</span>
+            </span>
+            <span class="live-room-room-id">ID: 23333</span>
+        </div>
+    </div>
+
+    <!-- 顶部状态栏 -->
+    <header class="game-header bili-style">
+        <div class="header-left">
+            <div class="game-logo">
+                <span class="logo-v">V</span>
+                <span class="logo-text">出道局</span>
+            </div>
+            <div class="day-info">
+                <span class="day-badge" id="dayBadge">第--天</span>
+                <span class="phase-text" id="phaseText">等待开播</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="quick-stats" id="quickStats"></div>
+                        <!-- 骨架屏：加载期间显示 -->
+                        <div class="quick-stats skeleton-stats" id="quickStatsSkeleton" style="display:none; justify-content:center; gap:6px; width:100%; max-width:min(720px,52vw); overflow-x:auto; scrollbar-width:none;">
+                            <div class="skeleton skeleton-stat"><div class="skeleton skeleton-stat-icon"></div><div class="skeleton skeleton-stat-value"></div></div>
+                            <div class="skeleton skeleton-stat"><div class="skeleton skeleton-stat-icon"></div><div class="skeleton skeleton-stat-value"></div></div>
+                            <div class="skeleton skeleton-stat"><div class="skeleton skeleton-stat-icon"></div><div class="skeleton skeleton-stat-value"></div></div>
+                            <div class="skeleton skeleton-stat"><div class="skeleton skeleton-stat-icon"></div><div class="skeleton skeleton-stat-value"></div></div>
+                        </div>
+        </div>
+        <div class="header-right">
+            <div class="bgm-controls" aria-label="BGM controls">
+                <button type="button" class="bgm-toggle" id="bgmToggle" title="BGM" aria-label="Toggle BGM" aria-pressed="true" data-action="toggle-bgm">♪</button>
+                <input type="range" class="bgm-volume bgm-volume-compact" id="bgmVolume" min="0" max="100" value="30" data-input-action="set-bgm-volume" aria-label="BGM volume">
+            </div>
+            <button class="streamer-mode-toggle" id="streamerModeToggle" type="button" title="主播展示模式" aria-label="主播展示模式" aria-pressed="false">LIVE</button>
+            <span class="streamer-mode-hint hidden" id="streamerModeHint" role="status" aria-live="polite">主播展示：大字低噪，不改规则</span>
+            <!-- 折叠菜单：设置 + 帮助 -->
+            <div class="header-more-menu" id="headerMoreMenu">
+                <button class="header-more-trigger" type="button" aria-haspopup="true" aria-expanded="false" data-action="toggle-header-more">⋮</button>
+                <div class="header-more-dropdown hidden">
+                    <button type="button" data-action="toggle-settings-panel">⚙ 设置</button>
+                    <button type="button" data-action="open-metric-help">? 数值说明</button>
+                </div>
+            </div>
+            <button class="help-button metric-help-button header-more-inline" id="metricHelpButton" type="button" title="数值说明" aria-label="打开数值说明" data-action="open-metric-help">?</button>
+            <button class="settings-button header-more-inline" id="settingsButton" type="button" title="设置" aria-label="打开设置" data-action="toggle-settings-panel">⚙ 设置</button>
+            <div class="user-info" id="userInfo"></div>
+        </div>
+    </header>
+    <div class="app-status hidden" id="appStatus" role="status" aria-atomic="true" aria-live="polite"></div>
+    <div class="settings-panel hidden" id="settingsPanel" role="dialog" aria-label="设置">
+        <div class="settings-panel-head">
+            <strong>设置</strong>
+            <button type="button" class="settings-panel-close" data-action="close-settings-panel" aria-label="关闭设置">×</button>
+        </div>
+        <label class="settings-row">
+            <span>背景音乐</span>
+            <input type="checkbox" id="bgmSettingToggle" data-change-action="toggle-bgm">
+        </label>
+        <label class="settings-row">
+            <span>背景音乐音量</span>
+            <input type="range" class="settings-range" id="bgmSettingVolume" min="0" max="100" value="30" data-input-action="set-bgm-volume" aria-label="背景音乐音量">
+        </label>
+        <label class="settings-row">
+            <span>音效</span>
+            <input type="checkbox" id="sfxSettingToggle" data-change-action="toggle-sfx">
+        </label>
+        <label class="settings-row">
+            <span>AI语音</span>
+            <input type="checkbox" id="ttsSettingToggle" data-change-action="toggle-tts">
+        </label>
+    </div>
+
+    <!-- Tab 导航栏 -->
+    <nav class="main-tab-bar bili-style live-legacy-tabs" id="mainTabBar" role="tablist" aria-label="主导航">
+        <button class="main-tab active" data-main-tab="mainPanel" type="button" data-action="switch-main-tab" role="tab" aria-selected="true">🎮 今日</button>
+        <button class="main-tab" data-main-tab="platform" type="button" data-action="switch-main-tab" role="tab" aria-selected="false">🌐 平台</button>
+        <button class="main-tab" data-main-tab="infoHub" type="button" data-action="switch-main-tab" role="tab" aria-selected="false">📊 总览</button>
+        <span class="main-tab-indicator" id="mainTabIndicator"></span>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="play-shell game-main" id="mainContent">
+        <section class="boot-state-panel" id="bootStatePanel" role="status" aria-live="polite" aria-atomic="true">
+            <div class="boot-state-card loading">
+                <span class="boot-state-kicker">开播准备中</span>
+                <h1>正在接回你的出道局</h1>
+                <p>同步存档、角色、今日阶段和行动列表。</p>
+                <div class="boot-state-meter" aria-hidden="true"><span></span></div>
+            </div>
+        </section>
+
+        <!-- ===== Tab 1: 主面板 ===== -->
+        <div class="tab-panel active" id="tabMainPanel">
+            <div class="main-panel-grid">
+                <!-- 左侧：VUP状态卡片 -->
+                <div class="main-panel-left">
+                    <div class="vup-status-card">
+                        <div class="vup-avatar-section vup-live-window" id="vupLiveViewport">
+                            <img src="/gallery/v4/protagonist/avatars/avatar-default.png" sizes="(max-width: 640px) 100vw, 640px" width="640" height="360" decoding="async" alt="VUP头像" class="vup-avatar-img" id="vupAvatarImg">
+                            <div class="vup-live-danmaku-band" id="vupLiveDanmakuBand" aria-hidden="true"></div>
+                            <div class="vup-live-topline">
+                                <span class="vup-live-pill">直播中</span>
+                                <span id="vupLiveHeatLabel">围观 0</span>
+                            </div>
+                            <div class="vup-avatar-badge" id="vupAvatarBadge"></div>
+                        </div>
+                        <div class="vup-info-section" id="statsSection"></div>
+                        <div class="achievement-mini" id="achievementMini"></div>
+                    </div>
+                </div>
+                <!-- 右侧：行动区 -->
+                <div class="main-panel-right">
+                    <div class="top-brief-row">
+                        <div class="coach-card" id="coachPanel"></div>
+                        <div class="insight-digest" id="insightDigest" aria-label="场外情报摘要"></div>
+                    </div>
+                    <div class="auth-section" id="authSection"></div>
+                    <div class="game-panels">
+                        <div class="panel action-panel" id="actionPanel"></div>
+                        <!-- 骨架屏：行动面板 -->
+                        <div class="skeleton-panel" id="actionPanelSkeleton" style="display:none;">
+                            <div class="skeleton skeleton-card"><div class="skeleton skeleton-heading"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text medium"></div></div>
+                            <div class="skeleton skeleton-card"><div class="skeleton skeleton-heading"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text short"></div></div>
+                            <div class="skeleton skeleton-card"><div class="skeleton skeleton-heading"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text medium"></div></div>
+                        </div>
+                        <div class="panel offstream-panel hidden" id="offStreamPanel"></div>
+                        <div class="panel ending-panel hidden" id="endingPanel"></div>
+                        <details class="secondary-panels" id="secondaryPanels">
+                            <summary>展开更多：粉丝议题 / 弹幕</summary>
+                            <div class="secondary-panels-wrap">
+                                <div class="panel fan-topic-panel" id="fanTopicPanel"></div>
+                                <div class="panel danmaku-panel" id="danmakuPanel"></div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Tab 2: 平台 ===== -->
+        <div class="tab-panel" id="tabPlatform">
+            <div class="platform-shell">
+                <div class="platform-header">
+                    <h2 class="platform-title">🌐 主播平台</h2>
+                    <p class="platform-subtitle">查看其他主播、发弹幕、申请联动、偷学技巧</p>
+                    <div class="platform-steal-buff" id="platformStealBuff"></div>
+                </div>
+                <div class="platform-npc-grid" id="platformNpcGrid"></div>
+                <div class="platform-interact-panel hidden" id="platformInteractPanel"></div>
+            </div>
+        </div>
+
+        <!-- ===== Tab 3: 总览 ===== -->
+        <div class="tab-panel" id="tabInfoHub">
+            <!-- 核心 6 格：一眼看清关键信息 -->
+            <div class="info-hub-grid">
+                <div class="info-hub-section timeline-section">
+                    <div class="info-panel" id="timelinePanel"></div>
+                </div>
+                <div class="info-hub-section">
+                    <h3 class="info-hub-title">📡 热点</h3>
+                    <div class="info-panel" id="buzzPanel"></div>
+                </div>
+                <div class="info-hub-section">
+                    <h3 class="info-hub-title">👥 粉丝</h3>
+                    <div class="info-panel" id="funAudiencePanel"></div>
+                </div>
+                <div class="info-hub-section">
+                    <h3 class="info-hub-title">📋 历史</h3>
+                    <div class="info-panel" id="reportHistoryPanel"></div>
+                </div>
+            </div>
+            <!-- 走势/路线图库：独立全宽区域，点击卡片看路线要求 -->
+            <div class="route-gallery-section">
+                <div class="info-panel" id="routeGalleryPanel"></div>
+            </div>
+            <!-- 更多面板：折叠收起 -->
+            <details class="info-hub-extra">
+                <summary>📂 更多面板</summary>
+                <div class="info-hub-grid">
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">📊 排行榜</h3>
+                        <div class="info-panel" id="leaderboardPanel"></div>
+                    </div>
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">🔮 预测</h3>
+                        <div class="info-panel" id="endingForecastPanel"></div>
+                    </div>
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">🔥 热梗</h3>
+                        <div class="info-panel" data-collapsible="true" id="memeLifecyclePanel"></div>
+                        <div class="info-panel" data-collapsible="true" id="ambientPanel"></div>
+                    </div>
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">🎪 企划</h3>
+                        <div class="info-panel" data-collapsible="true" id="stageBriefingPanel"></div>
+                    </div>
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">💭 期望</h3>
+                        <div class="info-panel" data-collapsible="true" id="audienceExpectationPanel"></div>
+                        <div class="info-panel" data-collapsible="true" id="personaTagPanel"></div>
+                    </div>
+                    <div class="info-hub-section">
+                        <h3 class="info-hub-title">🔗 连击</h3>
+                        <div class="info-panel" data-collapsible="true" id="comboPanel"></div>
+                        <div class="panel hidden" id="demoPanel"></div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <!-- B站直播间底部互动栏 -->
+    <div class="live-room-bottom-bar" id="liveRoomBottomBar">
+        <div class="danmaku-input-wrapper">
+            <input type="text" id="danmakuInput" placeholder="发条弹幕..." maxlength="50">
+            <button class="danmaku-send-btn" id="danmakuSendBtn" type="button" data-action="send-danmaku">发送</button>
+        </div>
+        <div class="live-room-actions">
+            <button class="live-action-btn" id="giftToggleBtn" type="button" data-action="toggle-gift-panel">
+                <span class="btn-icon">🎁</span>
+                <span>互动</span>
+            </button>
+            <button class="live-action-btn" id="sidebarToggleBtn" type="button" data-action="toggle-right-sidebar">
+                <span class="btn-icon">📊</span>
+                <span>排行</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- B站直播间模拟互动面板 -->
+<div class="gift-panel-overlay" id="giftPanelOverlay">
+    <div class="gift-panel-header">
+        <span>🎁 模拟互动</span>
+        <button class="gift-panel-close" id="giftPanelClose" type="button" data-action="toggle-gift-panel">×</button>
+    </div>
+    <div class="gift-panel-balance">
+        活动预算: <strong id="giftBalance">0</strong>
+        <small>纯游戏内直播间模拟反馈</small>
+    </div>
+    <div class="gift-grid" id="giftGrid"></div>
+    <div class="gift-quantity-bar">
+        <button class="gift-qty-btn" type="button" data-qty="1" data-action="select-gift-qty">x1</button>
+        <button class="gift-qty-btn" type="button" data-qty="2" data-action="select-gift-qty">x2</button>
+        <button class="gift-qty-btn" type="button" data-qty="5" data-action="select-gift-qty">x5</button>
+        <button class="gift-qty-btn" type="button" data-qty="10" data-action="select-gift-qty">x10</button>
+        <button class="gift-qty-btn" type="button" data-qty="66" data-action="select-gift-qty">x66</button>
+        <button class="gift-qty-btn" type="button" data-qty="99" data-action="select-gift-qty">x99</button>
+        <button class="gift-send-btn" id="giftSendBtn" type="button" data-action="send-gift" disabled>模拟互动</button>
+    </div>
+</div>
+
+<!-- B站直播间模拟互动连击特效 -->
+<div class="gift-combo hidden" id="giftCombo">
+    <div class="gift-combo-count" id="giftComboCount">x2</div>
+    <div class="gift-combo-label">连击</div>
+</div>
+
+<!-- B站直播间模拟互动飘升容器 -->
+<div class="gift-float-container" id="giftFloatContainer"></div>
+
+<!-- B站直播间右侧排行榜 -->
+<div class="live-right-sidebar" id="liveRightSidebar">
+    <div class="live-right-sidebar-header">
+        <span>📊 排行榜</span>
+        <button class="sidebar-close" id="sidebarClose" type="button" data-action="toggle-right-sidebar">×</button>
+    </div>
+    <div class="sidebar-tabs">
+        <button class="sidebar-tab active" type="button" data-action="switch-sidebar-tab" data-sidebar-tab="rankFans">粉丝榜</button>
+        <button class="sidebar-tab" type="button" data-action="switch-sidebar-tab" data-sidebar-tab="rankGifts">互动榜</button>
+        <button class="sidebar-tab" type="button" data-action="switch-sidebar-tab" data-sidebar-tab="rankDm">弹幕榜</button>
+    </div>
+    <div class="sidebar-content" id="sidebarContent">
+        <div id="sidebarRankFans">
+            <div class="sidebar-rank-item">
+                <span class="sidebar-rank-num top1">1</span>
+                <div class="sidebar-rank-avatar"></div>
+                <div class="sidebar-rank-info">
+                    <div class="sidebar-rank-name">--</div>
+                    <div class="sidebar-rank-value">粉丝数: --</div>
+                </div>
+            </div>
+        </div>
+        <div id="sidebarRankGifts" class="hidden"></div>
+        <div id="sidebarRankDm" class="hidden"></div>
+    </div>
+</div>
+
+<!-- B站直播间右侧排行榜切换按钮 -->
+<button class="sidebar-toggle-btn" id="sidebarToggleFloat" type="button" data-action="toggle-right-sidebar">排<br>行</button>
+
+<script src="/app.js"></script>
+<script src="/bili-ui.js"></script>
+<script type="module" src="/js/main.js"></script>
+</body>
+</html>

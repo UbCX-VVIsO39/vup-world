@@ -1,0 +1,38 @@
+server:
+  servlet:
+    session:
+      timeout: 24h
+
+spring:
+  datasource:
+    # Local MySQL verification only. Do not use this default profile for public/prod deployment.
+    url: jdbc:mysql://localhost:3306/vup_world?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai
+    # Local default for coursework/demo machines; prod must use application-prod.yml and a least-privilege account.
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      # Flyway 接管 schema/data 初始化，Spring SQL init 不再执行。
+      mode: never
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # 对已有表的非空库（如 singleplayer 文件库、已部署的 MySQL）做 baseline，避免 Flyway 拒绝迁移。
+    baseline-on-migrate: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+game:
+  run:
+    max-day: 30

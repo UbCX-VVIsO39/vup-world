@@ -1,0 +1,655 @@
+{
+  "version": "midgame-events-v1",
+  "windows": [
+    {
+      "key": "FIRST_NAMING",
+      "label": "第一次被观众命名",
+      "startDay": 10,
+      "endDay": 12
+    },
+    {
+      "key": "MID_BACKLASH",
+      "label": "中期反噬",
+      "startDay": 16,
+      "endDay": 18
+    },
+    {
+      "key": "LOCK_WARNING",
+      "label": "结局锁线预警",
+      "startDay": 23,
+      "endDay": 25
+    }
+  ],
+  "events": [
+    {
+      "id": "MID_STEADY_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "MIXED",
+      "title": "饭点固定席被观众认领",
+      "description": "老粉开始在群里报到，录播组也把你标成饭点固定节目。热闹不算大，但稳定感第一次被观众叫出了名字。",
+      "effect": "稳健路线证据+1，口碑与真爱粉小幅上升；硬接流量会牺牲低压感。",
+      "choices": {
+        "safe": {
+          "label": "承认饭点定位，继续低压陪伴",
+          "costPreview": "爆点较小",
+          "riskPreview": "热度不涨，但口碑更稳",
+          "effectPreview": "真爱粉+，口碑+，电子榨菜证据+"
+        },
+        "traffic": {
+          "label": "把饭点做成标题，冲一波围观",
+          "costPreview": "稳定感被标题消费",
+          "riskPreview": "可能新增标题旧账",
+          "effectPreview": "围观+，人气+，口碑承压"
+        },
+        "meme": {
+          "label": "顺势做成饭点梗",
+          "costPreview": "容易被复读",
+          "riskPreview": "梗会稀释陪伴感",
+          "effectPreview": "乐子人+，梗浓度+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_STEADY_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "MIXED",
+      "title": "老粉问是不是太平了",
+      "description": "连续稳定让老粉安心，也让一部分观众开始问有没有新东西。有人把你三天的饭点开场白拼成表情包，运营表上没有红灯，但增长曲线明显放缓。",
+      "effect": "稳健路线进入瓶颈；补一个可复述小记忆点能保口碑，硬冲热度会破坏低压资产。",
+      "choices": {
+        "safe": {
+          "label": "补一次认真复盘，稳住基本盘",
+          "costPreview": "涨粉慢",
+          "riskPreview": "爆点不足",
+          "effectPreview": "口碑+，真爱粉+，光荣毕业证据+"
+        },
+        "traffic": {
+          "label": "借增长焦虑开标题会",
+          "costPreview": "低压感受损",
+          "riskPreview": "围观上升，口碑承压",
+          "effectPreview": "围观+，黑红证据+，可能留旧账"
+        },
+        "meme": {
+          "label": "把太平做成自嘲梗",
+          "costPreview": "梗会盖过陪伴",
+          "riskPreview": "老粉可能觉得你在敷衍",
+          "effectPreview": "乐子人+，梗浓度+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_STEADY_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "steady",
+      "routeTypes": ["ELECTRONIC_PICKLE", "GLORIOUS_GRADUATION"],
+      "eventType": "MIXED",
+      "title": "毕业预演排班被老粉收藏",
+      "description": "最后一周前，老粉把你的低压排班做成了收藏表，还给每晚的固定环节写了备注。现在最危险的不是没热度，而是临门一脚突然乱冲。",
+      "effect": "稳健/光荣毕业结局接近锁线；守口碑收益高，小范围补记忆点有利，乱冲热度风险高。",
+      "choices": {
+        "safe": {
+          "label": "守住体面收束",
+          "costPreview": "不抢主会场",
+          "riskPreview": "增长平稳",
+          "effectPreview": "口碑+，真爱粉+，光荣毕业证据+"
+        },
+        "traffic": {
+          "label": "最后一周冲热度",
+          "costPreview": "破坏毕业感",
+          "riskPreview": "旧账容易回流",
+          "effectPreview": "围观++，黑红证据+，口碑-"
+        },
+        "meme": {
+          "label": "把毕业预演剪成梗",
+          "costPreview": "体面感被娱乐化",
+          "riskPreview": "切片可能反向定义结局",
+          "effectPreview": "梗浓度+，乐子人+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_BURST_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "MIXED",
+      "title": "第一批二创开始排队",
+      "description": "切片组和二创观众同时出现，你今天的一个表情被做成循环素材。素材开始自己长腿，但本人标签也开始被素材牵着走。",
+      "effect": "切片/梗舞路线证据+1；继续玩梗会涨快，降温可保本人叙事。",
+      "choices": {
+        "safe": {
+          "label": "补上下文，别让素材抢走本人",
+          "costPreview": "爆点降温",
+          "riskPreview": "乐子人增长变慢",
+          "effectPreview": "口碑+，真爱粉+，风险-"
+        },
+        "traffic": {
+          "label": "挂上标题直接吃二创流量",
+          "costPreview": "本人被素材定义",
+          "riskPreview": "标题旧账概率上升",
+          "effectPreview": "围观++，乐子人+，黑红证据+"
+        },
+        "meme": {
+          "label": "官方认领，让楼友继续施工",
+          "costPreview": "梗会复读",
+          "riskPreview": "查重疲劳会提前",
+          "effectPreview": "梗浓度++，切片圣体证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_BURST_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "MIXED",
+      "title": "同梗查重警报响了",
+      "description": "同一个梗被复读太多次，乐子人还在笑，老粉已经开始叹气。切片组要新素材，不然中期会变成素材回锅。",
+      "effect": "切片路线进入疲劳期；换素材可续命，硬吃会留回旋镖。",
+      "choices": {
+        "safe": {
+          "label": "停一手复读，补新素材",
+          "costPreview": "当天热度低",
+          "riskPreview": "爆点冷却",
+          "effectPreview": "口碑+，素材感+，风险-"
+        },
+        "traffic": {
+          "label": "把查重也做成标题",
+          "costPreview": "争议加重",
+          "riskPreview": "回旋镖切片概率上升",
+          "effectPreview": "围观++，黑红证据+"
+        },
+        "meme": {
+          "label": "顺势发起二创挑战",
+          "costPreview": "梗浓度继续升",
+          "riskPreview": "老粉疲劳",
+          "effectPreview": "乐子人++，切片证据+，口碑-"
+        }
+      }
+    },
+    {
+      "id": "MID_BURST_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "burst",
+      "routeTypes": ["SLICE_SAINT", "DANCE_MEME"],
+      "eventType": "MIXED",
+      "title": "素材审判日前夜",
+      "description": "最后一周前，切片组已经有足够素材。系统开始追问：你是切片圣体，还是只是被一个梗拖着走？",
+      "effect": "爆点路线接近锁线；需要把素材变成结局证据，而不是继续复读。",
+      "choices": {
+        "safe": {
+          "label": "整理素材，补本人叙事",
+          "costPreview": "热度降一点",
+          "riskPreview": "错过一波爆点",
+          "effectPreview": "口碑+，路线证据+，风险-"
+        },
+        "traffic": {
+          "label": "最后一周冲主会场",
+          "costPreview": "路线可能转黑红",
+          "riskPreview": "旧账回流",
+          "effectPreview": "围观++，黑红证据+"
+        },
+        "meme": {
+          "label": "做最终名场面二创",
+          "costPreview": "梗会吞掉本人",
+          "riskPreview": "回旋镖风险",
+          "effectPreview": "切片圣体证据++，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "MID_HEAT_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "MIXED",
+      "title": "标题组开始等你出事",
+      "description": "围观热度把你送到主会场边缘，标题组已经开始预写下一场开庭标题。热度是真的，口碑压力也是真的。",
+      "effect": "黑红/主会场路线证据+1；硬接流量收益高，降温能防旧账。",
+      "choices": {
+        "safe": {
+          "label": "提前补口径，别让旧账发酵",
+          "costPreview": "少吃一波热度",
+          "riskPreview": "主会场降温",
+          "effectPreview": "口碑+，风险-，稳健证据+"
+        },
+        "traffic": {
+          "label": "把主会场门票卖满",
+          "costPreview": "口碑承压",
+          "riskPreview": "标题旧账上升",
+          "effectPreview": "围观++，黑红证据++"
+        },
+        "meme": {
+          "label": "把争议包装成梗",
+          "costPreview": "误读变多",
+          "riskPreview": "回旋镖概率上升",
+          "effectPreview": "梗浓度+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_HEAT_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "NEGATIVE",
+      "title": "旧账回流到主会场",
+      "description": "中期热度开始反噬，考据楼把前几天的标题和片段重新拼起来。你可以继续硬接，但这次不是免费流量。",
+      "effect": "黑红路线进入压力段；拆旧账能保命，硬接能冲主会场之王但代价更高。",
+      "choices": {
+        "safe": {
+          "label": "先拆最高风险旧账",
+          "costPreview": "热度回落",
+          "riskPreview": "少一波流量",
+          "effectPreview": "口碑+，风险-，结局稳定"
+        },
+        "traffic": {
+          "label": "继续开庭，主会场坐满",
+          "costPreview": "口碑大压",
+          "riskPreview": "新增旧账",
+          "effectPreview": "围观++，主会场证据++"
+        },
+        "meme": {
+          "label": "把旧账做成自嘲包",
+          "costPreview": "黑历史被固化",
+          "riskPreview": "切片回旋",
+          "effectPreview": "梗浓度++，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "MID_HEAT_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "heat",
+      "routeTypes": ["BLACK_RED_MAIN_STAGE", "MAIN_STAGE_KING"],
+      "eventType": "NEGATIVE",
+      "title": "主会场王座开始点名",
+      "description": "最后一周前，主会场已经记住你。现在要么把热度、事故素材和旧账处理成闭环，要么被普通黑红事故吞掉。",
+      "effect": "主会场之王锁线预警；需要高光证据和风险控制同时存在。",
+      "choices": {
+        "safe": {
+          "label": "留证据同时拆一笔旧账",
+          "costPreview": "热度不爆冲",
+          "riskPreview": "王座推进慢",
+          "effectPreview": "口碑+，风险-，结局证据+"
+        },
+        "traffic": {
+          "label": "最后一周冲顶主会场",
+          "costPreview": "口碑大幅承压",
+          "riskPreview": "高严重旧账",
+          "effectPreview": "围观++，主会场之王证据++"
+        },
+        "meme": {
+          "label": "把主会场剪成名场面",
+          "costPreview": "争议被二创固化",
+          "riskPreview": "回旋镖旧账",
+          "effectPreview": "梗浓度+，事故素材+"
+        }
+      }
+    },
+    {
+      "id": "MID_SINGING_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "POSITIVE",
+      "title": "副歌第一次被催二创",
+      "description": "有人在评论区点名你今天的副歌，歌势路线终于有了可以被复述的作品记忆点。",
+      "effect": "唱歌偶像证据+1；继续补作品最稳，吃流量会带来高音贷款。",
+      "choices": {
+        "safe": {
+          "label": "回到基本功，稳住作品感",
+          "costPreview": "传播慢",
+          "riskPreview": "热度不爆",
+          "effectPreview": "真爱粉+，歌势证据+"
+        },
+        "traffic": {
+          "label": "用副歌标题冲推荐",
+          "costPreview": "高音贷款",
+          "riskPreview": "标题反噬",
+          "effectPreview": "人气+，围观+，口碑承压"
+        },
+        "meme": {
+          "label": "剪成副歌挑战",
+          "costPreview": "作品被娱乐化",
+          "riskPreview": "梗盖过唱功",
+          "effectPreview": "乐子人+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_SINGING_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "MIXED",
+      "title": "练了很多，但需要一次公开证明",
+      "description": "歌力在涨，观众却开始问什么时候拿出能安利的作品。后台努力不能自动变成结局证据。",
+      "effect": "歌势路线进入作品压力段；需要公开展示或可转述切片。",
+      "choices": {
+        "safe": {
+          "label": "开一次低压歌回验收",
+          "costPreview": "节奏较慢",
+          "riskPreview": "没有大流量",
+          "effectPreview": "真爱粉+，口碑+，歌势证据+"
+        },
+        "traffic": {
+          "label": "把练习成果做成大标题",
+          "costPreview": "期待抬高",
+          "riskPreview": "翻车会掉口碑",
+          "effectPreview": "围观+，人气+，风险+"
+        },
+        "meme": {
+          "label": "剪一段最容易传播的副歌",
+          "costPreview": "唱功评价变碎片",
+          "riskPreview": "切片误读",
+          "effectPreview": "乐子人+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_SINGING_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "singing",
+      "routeTypes": ["SINGING_IDOL"],
+      "eventType": "MIXED",
+      "title": "终演候场曲被观众预定",
+      "description": "最后一周前，粉丝已经在等压轴曲。唱歌偶像路线能不能成立，取决于这首歌能不能写进结局材料。",
+      "effect": "唱歌偶像锁线预警；需要作品证据，而不是只留后台练习记录。",
+      "choices": {
+        "safe": {
+          "label": "稳稳唱完压轴曲",
+          "costPreview": "不抢热搜",
+          "riskPreview": "传播较慢",
+          "effectPreview": "真爱粉+，口碑+，唱歌偶像证据++"
+        },
+        "traffic": {
+          "label": "把压轴曲做成最终标题",
+          "costPreview": "期待值过高",
+          "riskPreview": "失误会被开庭",
+          "effectPreview": "人气++，围观+，风险+"
+        },
+        "meme": {
+          "label": "放出副歌切片抢传播",
+          "costPreview": "作品被截成梗",
+          "riskPreview": "唱功争议",
+          "effectPreview": "切片证据+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "MID_RELATION_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "MIXED",
+      "title": "有人开始记你的排班",
+      "description": "陪伴感第一次被观众认真对待。有人开始问你明天几点来，也有人把这种确定性当成默认承诺。",
+      "effect": "赛博女友证据+1；营业收益高，边界成本也开始出现。",
+      "choices": {
+        "safe": {
+          "label": "轻轻立边界，说明排班弹性",
+          "costPreview": "糖度下降",
+          "riskPreview": "独角兽期待降温",
+          "effectPreview": "口碑+，风险-，稳健证据+"
+        },
+        "traffic": {
+          "label": "把陪伴感做成营业标题",
+          "costPreview": "期待被抬高",
+          "riskPreview": "商业反噬",
+          "effectPreview": "商业化+，独角兽+，围观+"
+        },
+        "meme": {
+          "label": "玩排班表边界梗",
+          "costPreview": "边界变模糊",
+          "riskPreview": "粉丝群压力",
+          "effectPreview": "梗浓度+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "MID_RELATION_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "NEGATIVE",
+      "title": "陪伴营业变成排班压力",
+      "description": "榜一和独角兽开始认真看排班，陪伴感从糖变成了隐形考勤。观众想要确定性，但你不能把自己交给排班表。",
+      "effect": "赛博女友进入边界压力段；继续营业能冲路线，但不立边界会留债。",
+      "choices": {
+        "safe": {
+          "label": "立边界，补一次低压说明",
+          "costPreview": "商业化涨慢",
+          "riskPreview": "部分观众失望",
+          "effectPreview": "口碑+，风险-，真爱粉+"
+        },
+        "traffic": {
+          "label": "继续营业，接住期待",
+          "costPreview": "边界压力上升",
+          "riskPreview": "独角兽旧账",
+          "effectPreview": "商业化++，独角兽+，赛博女友证据+"
+        },
+        "meme": {
+          "label": "把排班压力做成梗",
+          "costPreview": "严肃问题娱乐化",
+          "riskPreview": "粉丝群争议",
+          "effectPreview": "梗浓度+，围观+"
+        }
+      }
+    },
+    {
+      "id": "MID_RELATION_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "relationship",
+      "routeTypes": ["CYBER_GIRLFRIEND"],
+      "eventType": "MIXED",
+      "title": "榜一排班表被截图转发",
+      "description": "最后一周前，陪伴感和商业化都接近锁线。现在要么把边界说清楚冲赛博女友，要么被排班表反噬。",
+      "effect": "赛博女友锁线预警；商业化收益高，但边界不清会反噬结局。",
+      "choices": {
+        "safe": {
+          "label": "边界优先，保住口碑",
+          "costPreview": "商业化少涨",
+          "riskPreview": "路线推进变慢",
+          "effectPreview": "口碑+，风险-，光荣毕业证据+"
+        },
+        "traffic": {
+          "label": "冲陪伴商业化闭环",
+          "costPreview": "压力很高",
+          "riskPreview": "商业旧账",
+          "effectPreview": "商业化++，赛博女友证据++"
+        },
+        "meme": {
+          "label": "把排班表变成节目效果",
+          "costPreview": "关系感被玩坏",
+          "riskPreview": "粉丝群旧账",
+          "effectPreview": "围观+，梗浓度+"
+        }
+      }
+    },
+    {
+      "id": "MID_SOCIAL_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "MIXED",
+      "title": "DD把你当换乘站",
+      "description": "联动和查房带来了新头像，DD开始在你直播间上下车。车流是真的，留存还没证明。",
+      "effect": "DD公交站证据+1；继续接车能涨快，维护群聊能沉淀。",
+      "choices": {
+        "safe": {
+          "label": "用粉丝群接住换乘观众",
+          "costPreview": "少接一站",
+          "riskPreview": "联动热度下降",
+          "effectPreview": "真爱粉+，DD留存+，口碑+"
+        },
+        "traffic": {
+          "label": "继续查房接车",
+          "costPreview": "自家标签变弱",
+          "riskPreview": "DD流失",
+          "effectPreview": "DD+，围观+，社交证据+"
+        },
+        "meme": {
+          "label": "把换乘做成站牌梗",
+          "costPreview": "本体被站牌盖过",
+          "riskPreview": "老粉不满",
+          "effectPreview": "梗浓度+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "MID_SOCIAL_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "MIXED",
+      "title": "DD来了，但老粉问你本体是什么",
+      "description": "中期联动带来很多过站流量，老粉却开始问自家节目标签在哪。人脉不是结局，留存才是。",
+      "effect": "社交路线进入留存压力段；接车和沉淀要二选一优先。",
+      "choices": {
+        "safe": {
+          "label": "暂停接车，补自家节目标签",
+          "costPreview": "DD增长放慢",
+          "riskPreview": "错过联动窗口",
+          "effectPreview": "口碑+，真爱粉+，留存+"
+        },
+        "traffic": {
+          "label": "继续联动，把车流做大",
+          "costPreview": "本体稀释",
+          "riskPreview": "DD过站不留",
+          "effectPreview": "DD++，围观+，社交证据+"
+        },
+        "meme": {
+          "label": "玩公交站自嘲",
+          "costPreview": "标签被固定",
+          "riskPreview": "老粉觉得你摆烂",
+          "effectPreview": "梗浓度+，乐子人+"
+        }
+      }
+    },
+    {
+      "id": "MID_SOCIAL_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "social",
+      "routeTypes": ["SOCIAL_COLLAB", "DD_BUS_STOP"],
+      "eventType": "MIXED",
+      "title": "末班车响铃回放",
+      "description": "最后一周前，DD公交站已经有车流。系统现在看的是：这些人愿不愿意在你这一站下车，再回来。",
+      "effect": "DD公交站锁线预警；需要联动证据和留存证据同时存在。",
+      "choices": {
+        "safe": {
+          "label": "补站牌规则，留住乘客",
+          "costPreview": "不再狂接联动",
+          "riskPreview": "热度平稳",
+          "effectPreview": "口碑+，真爱粉+，DD留存+"
+        },
+        "traffic": {
+          "label": "末班车继续接人",
+          "costPreview": "留存不稳",
+          "riskPreview": "社交过载",
+          "effectPreview": "DD++，围观+，DD公交站证据+"
+        },
+        "meme": {
+          "label": "把末班车做成名场面",
+          "costPreview": "路线被梗化",
+          "riskPreview": "本体记忆变弱",
+          "effectPreview": "梗浓度+，切片证据+"
+        }
+      }
+    },
+    {
+      "id": "MID_UNKNOWN_FIRST_NAMING",
+      "window": "FIRST_NAMING",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "观众还没给你取名",
+      "description": "第十天左右，直播间没有形成稳定外号，也没有哪一组观众真的把你记成某种节目。空气很安静，安静到日报组只能写今天依旧没被互联网点名。",
+      "effect": "查无此V路线证据+1，但不推进任何商业路线；这是缺席感，而不是稳健陪伴感。",
+      "choices": {
+        "safe": {
+          "label": "承认存在感不足，继续观察",
+          "costPreview": "没有爆点",
+          "riskPreview": "路线仍未成型",
+          "effectPreview": "口碑微升，不加路线分"
+        },
+        "traffic": {
+          "label": "硬发一条存在感声明",
+          "costPreview": "容易显得尴尬",
+          "riskPreview": "围观只涨一点",
+          "effectPreview": "热度微升，仍不定线"
+        },
+        "meme": {
+          "label": "把没人取名做成自嘲梗",
+          "costPreview": "梗很轻",
+          "riskPreview": "记忆点仍弱",
+          "effectPreview": "乐子微升，不加路线分"
+        }
+      }
+    },
+    {
+      "id": "MID_UNKNOWN_BACKLASH",
+      "window": "MID_BACKLASH",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "中期数据像一张白纸",
+      "description": "第十六天之后，平台后台开始给出冷冰冰的数据：没有明显黑红、没有切片循环、没有固定饭点，也没有DD接车。不是失败事故，是没人知道该怎么概括你。",
+      "effect": "查无此V路线继续保留；它会压低主路线证据，但不会制造债务爆点。",
+      "choices": {
+        "safe": {
+          "label": "保持低声量，不强行定型",
+          "costPreview": "增长很慢",
+          "riskPreview": "结局可能查无此V",
+          "effectPreview": "风险微降，不加路线分"
+        },
+        "traffic": {
+          "label": "尝试一次低成本标题试水",
+          "costPreview": "很难出圈",
+          "riskPreview": "小幅围观压力",
+          "effectPreview": "热度微升，不定线"
+        },
+        "meme": {
+          "label": "把白纸数据截图念出来",
+          "costPreview": "自嘲强于传播",
+          "riskPreview": "观众可能笑完就走",
+          "effectPreview": "乐子微升，不加路线分"
+        }
+      }
+    },
+    {
+      "id": "MID_UNKNOWN_LOCK_WARNING",
+      "window": "LOCK_WARNING",
+      "routeGroup": "unknown",
+      "routeTypes": ["UNKNOWN"],
+      "eventType": "NEUTRAL",
+      "title": "结局组找不到归档夹",
+      "description": "最后一周前，结局组开始翻你这一个月的材料。翻得到开播记录，翻得到日报，却翻不到足够清楚的路线名字。不是被讨厌，是还没被记住。",
+      "effect": "查无此V锁线预警；继续摸鱼会保留未知结局，临时冲线则可能转向其他路线。",
+      "choices": {
+        "safe": {
+          "label": "接受空白档案，体面收束",
+          "costPreview": "没有逆转",
+          "riskPreview": "查无此V概率高",
+          "effectPreview": "口碑微升，不加路线分"
+        },
+        "traffic": {
+          "label": "最后一周试图喊一嗓子",
+          "costPreview": "来得太晚",
+          "riskPreview": "可能偏到黑红",
+          "effectPreview": "热度微升，证据仍弱"
+        },
+        "meme": {
+          "label": "把查无此V当成名场面念",
+          "costPreview": "自嘲收束",
+          "riskPreview": "梗不足以定线",
+          "effectPreview": "乐子微升，不加路线分"
+        }
+      }
+    }
+  ]
+}

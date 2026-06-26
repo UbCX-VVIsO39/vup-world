@@ -1,0 +1,1095 @@
+{
+  "version": "v4-release",
+  "total": 363,
+  "assets": [
+    {
+      "file": "actions/fan-group-maintain.png"
+    },
+    {
+      "file": "actions/npc-interact.png"
+    },
+    {
+      "file": "actions/publish-clip.png"
+    },
+    {
+      "file": "actions/publish-video.png"
+    },
+    {
+      "file": "actions/rest.png"
+    },
+    {
+      "file": "actions/risk/apology-review.png"
+    },
+    {
+      "file": "actions/risk/clarify-boundary.png"
+    },
+    {
+      "file": "actions/risk/evidence-chain.png"
+    },
+    {
+      "file": "actions/risk/restoration-stream.png"
+    },
+    {
+      "file": "actions/risk/slow-mode.png"
+    },
+    {
+      "file": "actions/risk/topic-cooling.png"
+    },
+    {
+      "file": "actions/stream-plan.png"
+    },
+    {
+      "file": "actions/train-dance.png"
+    },
+    {
+      "file": "actions/train-song.png"
+    },
+    {
+      "file": "actions/train-talk.png"
+    },
+    {
+      "file": "backgrounds/algorithm-dashboard.png"
+    },
+    {
+      "file": "backgrounds/day-01-first-night.png"
+    },
+    {
+      "file": "backgrounds/day-02-morning-recovery.png"
+    },
+    {
+      "file": "backgrounds/day-03-week-one.png"
+    },
+    {
+      "file": "backgrounds/day-04-midgame-rush.png"
+    },
+    {
+      "file": "backgrounds/day-05-before-final.png"
+    },
+    {
+      "file": "backgrounds/day-06-final-day.png"
+    },
+    {
+      "file": "backgrounds/day-07-crisis-night.png"
+    },
+    {
+      "file": "backgrounds/day-08-recovery-room.png"
+    },
+    {
+      "file": "backgrounds/ending-neutral-stage.png"
+    },
+    {
+      "file": "backgrounds/neutral-config-check.png"
+    },
+    {
+      "file": "backgrounds/neutral-creation-room.png"
+    },
+    {
+      "file": "backgrounds/neutral-gallery-room.png"
+    },
+    {
+      "file": "backgrounds/neutral-rebirth-room.png"
+    },
+    {
+      "file": "backgrounds/report-echo-wall.png"
+    },
+    {
+      "file": "backgrounds/rush-clip-room.png"
+    },
+    {
+      "file": "backgrounds/rush-fan-room.png"
+    },
+    {
+      "file": "backgrounds/rush-stage-room.png"
+    },
+    {
+      "file": "commercial-v1/backgrounds/debut-room.png"
+    },
+    {
+      "file": "commercial-v1/backgrounds/ending-stage.png"
+    },
+    {
+      "file": "commercial-v1/backgrounds/event-pressure.png"
+    },
+    {
+      "file": "commercial-v1/backgrounds/report-wall.png"
+    },
+    {
+      "file": "commercial-v1/routes/opening-black-red.png"
+    },
+    {
+      "file": "commercial-v1/routes/opening-pickle.png"
+    },
+    {
+      "file": "commercial-v1/routes/opening-slice.png"
+    },
+    {
+      "file": "events/common/apology-review.png"
+    },
+    {
+      "file": "events/common/black-red-breakthrough.png"
+    },
+    {
+      "file": "events/common/clip-explosion.png"
+    },
+    {
+      "file": "events/common/collab-rumor.png"
+    },
+    {
+      "file": "events/common/commercial-backlash.png"
+    },
+    {
+      "file": "events/common/hot-mic-misfire.png"
+    },
+    {
+      "file": "events/common/title-backlash.png"
+    },
+    {
+      "file": "events/common/unicorn-expectation.png"
+    },
+    {
+      "file": "events/risk/algorithm-swing.png"
+    },
+    {
+      "file": "events/risk/chat-meltdown.png"
+    },
+    {
+      "file": "events/risk/dd-drain.png"
+    },
+    {
+      "file": "events/risk/meme-fatigue.png"
+    },
+    {
+      "file": "events/risk/privacy-boundary.png"
+    },
+    {
+      "file": "events/risk/sponsor-pressure.png"
+    },
+    {
+      "file": "events/risk/stage-burnout.png"
+    },
+    {
+      "file": "events/routes/black-red-main-stage/first-hit.png"
+    },
+    {
+      "file": "events/routes/black-red-main-stage/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/black-red-main-stage/signature.png"
+    },
+    {
+      "file": "events/routes/cyber-girlfriend/first-hit.png"
+    },
+    {
+      "file": "events/routes/cyber-girlfriend/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/cyber-girlfriend/signature.png"
+    },
+    {
+      "file": "events/routes/dance-meme/first-hit.png"
+    },
+    {
+      "file": "events/routes/dance-meme/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/dance-meme/signature.png"
+    },
+    {
+      "file": "events/routes/dd-bus-stop/first-hit.png"
+    },
+    {
+      "file": "events/routes/dd-bus-stop/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/dd-bus-stop/signature.png"
+    },
+    {
+      "file": "events/routes/electronic-pickle/first-hit.png"
+    },
+    {
+      "file": "events/routes/electronic-pickle/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/electronic-pickle/signature.png"
+    },
+    {
+      "file": "events/routes/glorious-graduation/first-hit.png"
+    },
+    {
+      "file": "events/routes/glorious-graduation/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/glorious-graduation/signature.png"
+    },
+    {
+      "file": "events/routes/main-stage-king/first-hit.png"
+    },
+    {
+      "file": "events/routes/main-stage-king/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/main-stage-king/signature.png"
+    },
+    {
+      "file": "events/routes/singing-idol/first-hit.png"
+    },
+    {
+      "file": "events/routes/singing-idol/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/singing-idol/signature.png"
+    },
+    {
+      "file": "events/routes/slice-saint/first-hit.png"
+    },
+    {
+      "file": "events/routes/slice-saint/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/slice-saint/signature.png"
+    },
+    {
+      "file": "events/routes/social-collab/first-hit.png"
+    },
+    {
+      "file": "events/routes/social-collab/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/social-collab/signature.png"
+    },
+    {
+      "file": "events/routes/unknown/first-hit.png"
+    },
+    {
+      "file": "events/routes/unknown/mid-crisis.png"
+    },
+    {
+      "file": "events/routes/unknown/signature.png"
+    },
+    {
+      "file": "live-room/overlays/achievement.png"
+    },
+    {
+      "file": "live-room/overlays/audience-pressure.png"
+    },
+    {
+      "file": "live-room/overlays/clip-timeline.png"
+    },
+    {
+      "file": "live-room/overlays/combo-discovery.png"
+    },
+    {
+      "file": "live-room/overlays/daily-report.png"
+    },
+    {
+      "file": "live-room/overlays/danmaku-horizontal.png"
+    },
+    {
+      "file": "live-room/overlays/danmaku-side-chat.png"
+    },
+    {
+      "file": "live-room/overlays/ending-atlas.png"
+    },
+    {
+      "file": "live-room/overlays/fan-room.png"
+    },
+    {
+      "file": "live-room/overlays/gift-panel.png"
+    },
+    {
+      "file": "live-room/overlays/moderator-console.png"
+    },
+    {
+      "file": "live-room/overlays/platform-trend.png"
+    },
+    {
+      "file": "live-room/overlays/replay-player.png"
+    },
+    {
+      "file": "live-room/overlays/route-forecast.png"
+    },
+    {
+      "file": "live-room/overlays/sc-panel.png"
+    },
+    {
+      "file": "live-room/overlays/share-card.png"
+    },
+    {
+      "file": "live-room/platform/analytics.png"
+    },
+    {
+      "file": "live-room/platform/fan-room-active.png"
+    },
+    {
+      "file": "live-room/platform/hot-search.png"
+    },
+    {
+      "file": "live-room/platform/recommend-feed.png"
+    },
+    {
+      "file": "live-room/platform/submission-box.png"
+    },
+    {
+      "file": "live-room/shells/mood-clip-night.png"
+    },
+    {
+      "file": "live-room/shells/mood-cold-start.png"
+    },
+    {
+      "file": "live-room/shells/mood-crisis.png"
+    },
+    {
+      "file": "live-room/shells/mood-farewell.png"
+    },
+    {
+      "file": "live-room/shells/mood-recovery.png"
+    },
+    {
+      "file": "live-room/shells/mood-sc-rain.png"
+    },
+    {
+      "file": "live-room/shells/mood-viral-spike.png"
+    },
+    {
+      "file": "live-room/shells/mood-warm-room.png"
+    },
+    {
+      "file": "live-room/shells/shell-compact.png"
+    },
+    {
+      "file": "live-room/shells/shell-default.png"
+    },
+    {
+      "file": "live-room/shells/shell-vertical.png"
+    },
+    {
+      "file": "live-room/shells/shell-wide.png"
+    },
+    {
+      "file": "npcs/community/clip-community.png"
+    },
+    {
+      "file": "npcs/community/fan-group-night.png"
+    },
+    {
+      "file": "npcs/portraits/clipper-editor.png"
+    },
+    {
+      "file": "npcs/portraits/collab-streamer.png"
+    },
+    {
+      "file": "npcs/portraits/dance-coach.png"
+    },
+    {
+      "file": "npcs/portraits/fan-moderator.png"
+    },
+    {
+      "file": "npcs/portraits/platform-analyst.png"
+    },
+    {
+      "file": "npcs/portraits/rival-commentator.png"
+    },
+    {
+      "file": "npcs/portraits/singing-mentor.png"
+    },
+    {
+      "file": "npcs/portraits/sponsor-manager.png"
+    },
+    {
+      "file": "npcs/scenes/clipper-editor-scene.png"
+    },
+    {
+      "file": "npcs/scenes/collab-streamer-scene.png"
+    },
+    {
+      "file": "npcs/scenes/dance-coach-scene.png"
+    },
+    {
+      "file": "npcs/scenes/fan-moderator-scene.png"
+    },
+    {
+      "file": "npcs/scenes/platform-analyst-scene.png"
+    },
+    {
+      "file": "npcs/scenes/rival-commentator-scene.png"
+    },
+    {
+      "file": "npcs/scenes/singing-mentor-scene.png"
+    },
+    {
+      "file": "npcs/scenes/sponsor-manager-scene.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-default.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-ending.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-event.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-fan-room.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-rebirth.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-report.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-risk.png"
+    },
+    {
+      "file": "protagonist/avatars/avatar-streaming.png"
+    },
+    {
+      "file": "protagonist/base/base-casual-room.png"
+    },
+    {
+      "file": "protagonist/base/base-closeup.png"
+    },
+    {
+      "file": "protagonist/base/base-desk-console.png"
+    },
+    {
+      "file": "protagonist/base/base-halfbody.png"
+    },
+    {
+      "file": "protagonist/base/base-live-avatar.png"
+    },
+    {
+      "file": "protagonist/base/base-standing.png"
+    },
+    {
+      "file": "protagonist/base/identity-fullbody.png"
+    },
+    {
+      "file": "protagonist/base/identity-game-cover.png"
+    },
+    {
+      "file": "protagonist/base/identity-live-room.png"
+    },
+    {
+      "file": "protagonist/base/identity-master.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-angry.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-breakdown.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-confident.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-focused.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-laughing.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-nervous.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-neutral.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-smug.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-soft.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-surprised.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-teary.png"
+    },
+    {
+      "file": "protagonist/expressions/expression-tired.png"
+    },
+    {
+      "file": "protagonist/props/pixel-heart-choker.png"
+    },
+    {
+      "file": "protagonist/props/star-hairclip-earrings.png"
+    },
+    {
+      "file": "protagonist/props/star-mic-desk.png"
+    },
+    {
+      "file": "protagonist/props/star-mic-handheld.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/card-square.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/cover-landscape.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/ending-cost.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/ending-highlight.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/event-first-hit.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/expression-breakdown.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/expression-nervous.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/expression-smug.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/expression-soft.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/live-halfbody.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/mini-avatar.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/room-bg.png"
+    },
+    {
+      "file": "routes/black-red-main-stage/standing-outfit.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/card-square.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/cover-landscape.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/ending-cost.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/ending-highlight.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/event-first-hit.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/expression-breakdown.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/expression-nervous.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/expression-smug.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/expression-soft.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/live-halfbody.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/mini-avatar.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/room-bg.png"
+    },
+    {
+      "file": "routes/cyber-girlfriend/standing-outfit.png"
+    },
+    {
+      "file": "routes/dance-meme/card-square.png"
+    },
+    {
+      "file": "routes/dance-meme/cover-landscape.png"
+    },
+    {
+      "file": "routes/dance-meme/ending-cost.png"
+    },
+    {
+      "file": "routes/dance-meme/ending-highlight.png"
+    },
+    {
+      "file": "routes/dance-meme/event-first-hit.png"
+    },
+    {
+      "file": "routes/dance-meme/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/dance-meme/expression-breakdown.png"
+    },
+    {
+      "file": "routes/dance-meme/expression-nervous.png"
+    },
+    {
+      "file": "routes/dance-meme/expression-smug.png"
+    },
+    {
+      "file": "routes/dance-meme/expression-soft.png"
+    },
+    {
+      "file": "routes/dance-meme/live-halfbody.png"
+    },
+    {
+      "file": "routes/dance-meme/mini-avatar.png"
+    },
+    {
+      "file": "routes/dance-meme/room-bg.png"
+    },
+    {
+      "file": "routes/dance-meme/standing-outfit.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/card-square.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/cover-landscape.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/ending-cost.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/ending-highlight.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/event-first-hit.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/expression-breakdown.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/expression-nervous.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/expression-smug.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/expression-soft.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/live-halfbody.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/mini-avatar.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/room-bg.png"
+    },
+    {
+      "file": "routes/dd-bus-stop/standing-outfit.png"
+    },
+    {
+      "file": "routes/electronic-pickle/card-square.png"
+    },
+    {
+      "file": "routes/electronic-pickle/cover-landscape.png"
+    },
+    {
+      "file": "routes/electronic-pickle/ending-cost.png"
+    },
+    {
+      "file": "routes/electronic-pickle/ending-highlight.png"
+    },
+    {
+      "file": "routes/electronic-pickle/event-first-hit.png"
+    },
+    {
+      "file": "routes/electronic-pickle/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/electronic-pickle/expression-breakdown.png"
+    },
+    {
+      "file": "routes/electronic-pickle/expression-nervous.png"
+    },
+    {
+      "file": "routes/electronic-pickle/expression-smug.png"
+    },
+    {
+      "file": "routes/electronic-pickle/expression-soft.png"
+    },
+    {
+      "file": "routes/electronic-pickle/live-halfbody.png"
+    },
+    {
+      "file": "routes/electronic-pickle/mini-avatar.png"
+    },
+    {
+      "file": "routes/electronic-pickle/room-bg.png"
+    },
+    {
+      "file": "routes/electronic-pickle/standing-outfit.png"
+    },
+    {
+      "file": "routes/glorious-graduation/card-square.png"
+    },
+    {
+      "file": "routes/glorious-graduation/cover-landscape.png"
+    },
+    {
+      "file": "routes/glorious-graduation/ending-cost.png"
+    },
+    {
+      "file": "routes/glorious-graduation/ending-highlight.png"
+    },
+    {
+      "file": "routes/glorious-graduation/event-first-hit.png"
+    },
+    {
+      "file": "routes/glorious-graduation/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/glorious-graduation/expression-breakdown.png"
+    },
+    {
+      "file": "routes/glorious-graduation/expression-nervous.png"
+    },
+    {
+      "file": "routes/glorious-graduation/expression-smug.png"
+    },
+    {
+      "file": "routes/glorious-graduation/expression-soft.png"
+    },
+    {
+      "file": "routes/glorious-graduation/live-halfbody.png"
+    },
+    {
+      "file": "routes/glorious-graduation/mini-avatar.png"
+    },
+    {
+      "file": "routes/glorious-graduation/room-bg.png"
+    },
+    {
+      "file": "routes/glorious-graduation/standing-outfit.png"
+    },
+    {
+      "file": "routes/main-stage-king/card-square.png"
+    },
+    {
+      "file": "routes/main-stage-king/cover-landscape.png"
+    },
+    {
+      "file": "routes/main-stage-king/ending-cost.png"
+    },
+    {
+      "file": "routes/main-stage-king/ending-highlight.png"
+    },
+    {
+      "file": "routes/main-stage-king/event-first-hit.png"
+    },
+    {
+      "file": "routes/main-stage-king/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/main-stage-king/expression-breakdown.png"
+    },
+    {
+      "file": "routes/main-stage-king/expression-nervous.png"
+    },
+    {
+      "file": "routes/main-stage-king/expression-smug.png"
+    },
+    {
+      "file": "routes/main-stage-king/expression-soft.png"
+    },
+    {
+      "file": "routes/main-stage-king/live-halfbody.png"
+    },
+    {
+      "file": "routes/main-stage-king/mini-avatar.png"
+    },
+    {
+      "file": "routes/main-stage-king/room-bg.png"
+    },
+    {
+      "file": "routes/main-stage-king/standing-outfit.png"
+    },
+    {
+      "file": "routes/singing-idol/card-square.png"
+    },
+    {
+      "file": "routes/singing-idol/cover-landscape.png"
+    },
+    {
+      "file": "routes/singing-idol/ending-cost.png"
+    },
+    {
+      "file": "routes/singing-idol/ending-highlight.png"
+    },
+    {
+      "file": "routes/singing-idol/event-first-hit.png"
+    },
+    {
+      "file": "routes/singing-idol/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/singing-idol/expression-breakdown.png"
+    },
+    {
+      "file": "routes/singing-idol/expression-nervous.png"
+    },
+    {
+      "file": "routes/singing-idol/expression-smug.png"
+    },
+    {
+      "file": "routes/singing-idol/expression-soft.png"
+    },
+    {
+      "file": "routes/singing-idol/live-halfbody.png"
+    },
+    {
+      "file": "routes/singing-idol/mini-avatar.png"
+    },
+    {
+      "file": "routes/singing-idol/room-bg.png"
+    },
+    {
+      "file": "routes/singing-idol/standing-outfit.png"
+    },
+    {
+      "file": "routes/slice-saint/card-square.png"
+    },
+    {
+      "file": "routes/slice-saint/cover-landscape.png"
+    },
+    {
+      "file": "routes/slice-saint/ending-cost.png"
+    },
+    {
+      "file": "routes/slice-saint/ending-highlight.png"
+    },
+    {
+      "file": "routes/slice-saint/event-first-hit.png"
+    },
+    {
+      "file": "routes/slice-saint/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/slice-saint/expression-breakdown.png"
+    },
+    {
+      "file": "routes/slice-saint/expression-nervous.png"
+    },
+    {
+      "file": "routes/slice-saint/expression-smug.png"
+    },
+    {
+      "file": "routes/slice-saint/expression-soft.png"
+    },
+    {
+      "file": "routes/slice-saint/live-halfbody.png"
+    },
+    {
+      "file": "routes/slice-saint/mini-avatar.png"
+    },
+    {
+      "file": "routes/slice-saint/room-bg.png"
+    },
+    {
+      "file": "routes/slice-saint/standing-outfit.png"
+    },
+    {
+      "file": "routes/social-collab/card-square.png"
+    },
+    {
+      "file": "routes/social-collab/cover-landscape.png"
+    },
+    {
+      "file": "routes/social-collab/ending-cost.png"
+    },
+    {
+      "file": "routes/social-collab/ending-highlight.png"
+    },
+    {
+      "file": "routes/social-collab/event-first-hit.png"
+    },
+    {
+      "file": "routes/social-collab/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/social-collab/expression-breakdown.png"
+    },
+    {
+      "file": "routes/social-collab/expression-nervous.png"
+    },
+    {
+      "file": "routes/social-collab/expression-smug.png"
+    },
+    {
+      "file": "routes/social-collab/expression-soft.png"
+    },
+    {
+      "file": "routes/social-collab/live-halfbody.png"
+    },
+    {
+      "file": "routes/social-collab/mini-avatar.png"
+    },
+    {
+      "file": "routes/social-collab/room-bg.png"
+    },
+    {
+      "file": "routes/social-collab/standing-outfit.png"
+    },
+    {
+      "file": "routes/unknown/card-square.png"
+    },
+    {
+      "file": "routes/unknown/cover-landscape.png"
+    },
+    {
+      "file": "routes/unknown/ending-cost.png"
+    },
+    {
+      "file": "routes/unknown/ending-highlight.png"
+    },
+    {
+      "file": "routes/unknown/event-first-hit.png"
+    },
+    {
+      "file": "routes/unknown/event-mid-crisis.png"
+    },
+    {
+      "file": "routes/unknown/expression-breakdown.png"
+    },
+    {
+      "file": "routes/unknown/expression-nervous.png"
+    },
+    {
+      "file": "routes/unknown/expression-smug.png"
+    },
+    {
+      "file": "routes/unknown/expression-soft.png"
+    },
+    {
+      "file": "routes/unknown/live-halfbody.png"
+    },
+    {
+      "file": "routes/unknown/mini-avatar.png"
+    },
+    {
+      "file": "routes/unknown/room-bg.png"
+    },
+    {
+      "file": "routes/unknown/standing-outfit.png"
+    },
+    {
+      "file": "stream-plans/live-room/asmr-radio.png"
+    },
+    {
+      "file": "stream-plans/live-room/clip-review.png"
+    },
+    {
+      "file": "stream-plans/live-room/collaboration.png"
+    },
+    {
+      "file": "stream-plans/live-room/cozy-chat.png"
+    },
+    {
+      "file": "stream-plans/live-room/dance.png"
+    },
+    {
+      "file": "stream-plans/live-room/debut-special.png"
+    },
+    {
+      "file": "stream-plans/live-room/endurance.png"
+    },
+    {
+      "file": "stream-plans/live-room/fan-meeting.png"
+    },
+    {
+      "file": "stream-plans/live-room/game.png"
+    },
+    {
+      "file": "stream-plans/live-room/sc-thanks.png"
+    },
+    {
+      "file": "stream-plans/live-room/sharp-commentary.png"
+    },
+    {
+      "file": "stream-plans/live-room/singing.png"
+    },
+    {
+      "file": "stream-plans/previews/asmr-radio.png"
+    },
+    {
+      "file": "stream-plans/previews/clip-review.png"
+    },
+    {
+      "file": "stream-plans/previews/collaboration.png"
+    },
+    {
+      "file": "stream-plans/previews/cozy-chat.png"
+    },
+    {
+      "file": "stream-plans/previews/dance.png"
+    },
+    {
+      "file": "stream-plans/previews/debut-special.png"
+    },
+    {
+      "file": "stream-plans/previews/endurance.png"
+    },
+    {
+      "file": "stream-plans/previews/fan-meeting.png"
+    },
+    {
+      "file": "stream-plans/previews/game.png"
+    },
+    {
+      "file": "stream-plans/previews/sc-thanks.png"
+    },
+    {
+      "file": "stream-plans/previews/sharp-commentary.png"
+    },
+    {
+      "file": "stream-plans/previews/singing.png"
+    },
+    {
+      "file": "ui-cards/states/achievement-empty.png"
+    },
+    {
+      "file": "ui-cards/states/config-check.png"
+    },
+    {
+      "file": "ui-cards/states/empty-gallery.png"
+    },
+    {
+      "file": "ui-cards/states/error.png"
+    },
+    {
+      "file": "ui-cards/states/leaderboard.png"
+    },
+    {
+      "file": "ui-cards/states/loading.png"
+    },
+    {
+      "file": "ui-cards/states/modal-backdrop.png"
+    },
+    {
+      "file": "ui-cards/states/new-game.png"
+    },
+    {
+      "file": "ui-cards/states/offline.png"
+    },
+    {
+      "file": "ui-cards/states/save-slot.png"
+    },
+    {
+      "file": "ui-cards/states/share.png"
+    },
+    {
+      "file": "ui-cards/states/tutorial.png"
+    }
+  ]
+}

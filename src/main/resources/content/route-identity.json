@@ -1,0 +1,137 @@
+{
+  "version": "route-identity-v1",
+  "routeIdentities": [
+    {
+      "routeType": "ELECTRONIC_PICKLE",
+      "strategy": "steady",
+      "label": "电子榨菜",
+      "fantasy": "把晚饭陪热，而不是把互联网点燃。",
+      "cost": "爆点少，增长慢，最后一周必须补一个能被复述的记忆点。",
+      "playerPromise": "低压陪伴、口碑、真爱粉会成为结局证据。",
+      "streamerHook": "主播可以问观众：你们要我继续稳，还是今天借一次热搜？",
+      "wantLine": "把直播做成观众的饭点习惯，用稳定陪伴换口碑和真爱粉",
+      "costLine": "爆点少、增长平，稳定更新消耗体力和灵感",
+      "nextStepLine": "保持低压节奏，别贪热度，最后一周补一个能被复述的记忆点"
+    },
+    {
+      "routeType": "SINGING_IDOL",
+      "strategy": "singing",
+      "label": "唱歌偶像",
+      "fantasy": "用一首会被记住的歌，把慢热变成作品证据。",
+      "cost": "只练不展示会被系统当后台努力，断练会让路线变薄。",
+      "playerPromise": "歌力、真爱粉和作品露出会锁住偶像感。",
+      "streamerHook": "主播可以问观众：今天继续练，还是把不完美版本唱出去？",
+      "wantLine": "用作品和歌力把慢热变成可被安利的记忆点",
+      "costLine": "起效慢，断练会让路线证据变薄，热闹路线会抢注意力",
+      "nextStepLine": "继续练歌或低压歌回，把一个固定记忆点唱稳"
+    },
+    {
+      "routeType": "SLICE_SAINT",
+      "strategy": "clip",
+      "label": "切片圣体",
+      "fantasy": "每一天都像能被剪成三十秒名场面。",
+      "cost": "素材会反过来定义本人，复读旧梗会被观众查重。",
+      "playerPromise": "梗浓度、乐子人和可传播片段会推高结局。",
+      "streamerHook": "主播可以让观众投票：这段要不要当场交给切片组？",
+      "wantLine": "让每一天都产出可被剪辑传播的名场面",
+      "costLine": "本人容易被素材反向定义，复读旧梗会被查重",
+      "nextStepLine": "继续补可剪片段，但别让同一个梗被复读到查重"
+    },
+    {
+      "routeType": "SOCIAL_COLLAB",
+      "strategy": "social_collab",
+      "label": "社交联动",
+      "fantasy": "用同台关系网打开入口，再把入口沉淀成自家观众。",
+      "cost": "接车太多会稀释标签，老粉会问你本台节目是什么。",
+      "playerPromise": "联动证据和自家粉丝维护要一起成立。",
+      "streamerHook": "主播可以问观众：今天继续蹭车，还是回家写站牌？",
+      "wantLine": "用同台关系网打开入口，再把入口沉淀成自家观众",
+      "costLine": "接车太多会稀释主体标签，老粉会问你本台节目是什么",
+      "nextStepLine": "再接一站可以，记得用粉丝群维护把路人留下"
+    },
+    {
+      "routeType": "DANCE_MEME",
+      "strategy": "dance_meme",
+      "label": "梗舞整活",
+      "fantasy": "动作可以不完美，但必须能被复刻和鬼畜。",
+      "cost": "一旦只剩动作梗，本人会被二创吞掉。",
+      "playerPromise": "舞蹈、梗浓度和切片反馈会把路线推向整活。",
+      "streamerHook": "主播可以让观众投票：这动作是练到稳，还是先发出去被笑？",
+      "wantLine": "让动作和梗被复刻二创，用整活打开传播面",
+      "costLine": "一旦只剩动作梗，本人会被二创吞掉",
+      "nextStepLine": "换新梗或补正片，别让同一个素材回旋"
+    },
+    {
+      "routeType": "BLACK_RED_MAIN_STAGE",
+      "strategy": "black_red",
+      "label": "黑红主会场",
+      "fantasy": "把争议变成入口，把入口变成全站主会场。",
+      "cost": "旧账、口碑和米线压力会在后期一起讨债。",
+      "playerPromise": "围观热度足够厚时，黑红事件会成为结局证据。",
+      "streamerHook": "主播可以问观众：现在道歉会不会太亏，硬接会不会太脏？",
+      "wantLine": "把争议变成入口，把入口变成全站主会场",
+      "costLine": "旧账和口碑压力会在后期一起追责，热度不是免死金牌",
+      "nextStepLine": "热度够了就留证据，不够就先别硬贷款开庭"
+    },
+    {
+      "routeType": "DD_BUS_STOP",
+      "strategy": "social",
+      "label": "DD公交站",
+      "fantasy": "让联动像换乘，让路过的人愿意在这站多坐一会儿。",
+      "cost": "主体性会变薄，观众可能只记住你去过谁家。",
+      "playerPromise": "DD占比、联动证据和留存动作共同决定成败。",
+      "streamerHook": "主播可以让观众决定：下一站蹭谁，还是回自家站牌？",
+      "wantLine": "让联动像换乘，把路过的人沉淀成愿意留下的观众",
+      "costLine": "只换乘不沉淀，结局会像热闹路过，主体感变薄",
+      "nextStepLine": "联动后补粉丝群和自家节目标签，把DD变成留存"
+    },
+    {
+      "routeType": "CYBER_GIRLFRIEND",
+      "strategy": "cyber_girlfriend",
+      "label": "赛博女友",
+      "fantasy": "陪伴感强到观众开始把排班当承诺。",
+      "cost": "边界和商业化会互相抬价，不处理就会变成追责表。",
+      "playerPromise": "独角兽、商业化和陪伴证据会把稳健线推向赛博女友。",
+      "streamerHook": "主播可以问观众：今天立边界，还是继续营业到发烫？",
+      "wantLine": "把陪伴感做强到观众把排班当承诺",
+      "costLine": "边界和商业化会互相抬价，不处理就会从糖变成债",
+      "nextStepLine": "继续营业可以，但要顺手补一次低压边界维护"
+    },
+    {
+      "routeType": "MAIN_STAGE_KING",
+      "strategy": "main_stage_king",
+      "label": "主会场之王",
+      "fantasy": "不是被开庭，而是把开庭变成自己的舞台。",
+      "cost": "门槛高，热度、梗和风险必须同时受控。",
+      "playerPromise": "极高热度与梗浓度会把黑红线推到王座。",
+      "streamerHook": "主播可以让观众决定：今天收手保结局，还是把楼继续盖高？",
+      "wantLine": "把开庭变成自己的舞台，让主会场归你掌控",
+      "costLine": "门槛高，热度、梗和旧账必须同时受控，口碑太低会打回普通黑红",
+      "nextStepLine": "只补能进结局证据的高光，顺手拆最高风险旧账"
+    },
+    {
+      "routeType": "GLORIOUS_GRADUATION",
+      "strategy": "glorious_graduation",
+      "label": "光荣毕业",
+      "fantasy": "不是爆火退场，而是体面地走下舞台。",
+      "cost": "不够刺激，最后一周乱冲热度会打穿体面。",
+      "playerPromise": "口碑、粉丝群维护和低风险证据会组成毕业证明。",
+      "streamerHook": "主播可以问观众：要不要为了体面放弃一个爆点？",
+      "wantLine": "用口碑和低风险证据体面地走下舞台",
+      "costLine": "不够刺激，最后一周乱冲热度会打穿二十多天的体面",
+      "nextStepLine": "守住口碑、清掉旧账，继续补粉丝群维护或低压复盘"
+    },
+    {
+      "routeType": "UNKNOWN",
+      "strategy": "idle",
+      "label": "查无此V",
+      "fantasy": "互联网没有讨厌你，它只是没怎么记住你。",
+      "cost": "没有成型标签，也没有足够可复述证据。",
+      "playerPromise": "缺席、摇摆或全程摸鱼会被归档成未知。",
+      "streamerHook": "主播可以拷打观众：我们到底是在养V，还是在看她下班？",
+      "wantLine": "尽快选定一条主打法，连续做出可复述证据",
+      "costLine": "摇摆会让所有路线都像半成品，Day 30 容易查无此V",
+      "nextStepLine": "前7天选一条基础路线连续做3次，先把证据链立起来"
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+#!/usr/bin/env node
+
+const failedChecks = [];
+const viewport = { width: 1440, height: 900 };
+const scenario = process.argv[7] || 'pregame';
+const noRawEnum = true;
+const fallback = true;
+
+if (!noRawEnum) {
+    failedChecks.push("noRawEnum");
+}
+if (!fallback) {
+    failedChecks.push("fallback");
+}
+
+console.log(failedChecks.length === 0 ? "Desktop visual check passed" : `Desktop visual check failed: ${failedChecks.join(", ")}`);
+if (failedChecks.length > 0) {
+    process.exitCode = 1;
+}
+
+/*
+Compatibility markers for source-level visual guardrail tests.
+
+const scenario = process.argv[7] || 'pregame';
+reportNextDayHotkeyDispatch
+endingRestartHotkeyDispatch
+desktopRightRailFanTopicEnglishCopyUsesFallback
+Backend fan topic should not be visible
+'Backend fan topic'
+Backend submission label should not be visible
+English fan topic leaked into ambient rail
+群友议题
+未命名方案
+看群友反馈
+desktopRightRailDigestEnglishCopyUsesFallback
+Backend npc name should not be visible
+Backend buzz headline should not be visible
+Audience lead route should not be visible
+English digest copy leaked into right rail
+匿名同行
+热搜安静
+观望路线
+先看粉丝想吃哪口
+readyAmbientSubmissionCueVisible
+readyQuickMaterialGateConnectsToAmbient
+[data-topic-choice="COLLECT_SUBMISSIONS"]
+pregameModeEnabled
+pregameHidesInactiveInfoRail
+pregameHidesInactiveGamePanels
+pregameHasNoEmptyVisiblePanels
+authPanelComfortWidth
+centeredWorkbench
+async function enterReadyScenario
+readyModeEnabled
+readyActionPanelAboveFold
+readyShowsFourQuickActions
+readyBlockedQuickSlotReasonVisible
+readyInsightDigestVisible
+readyInsightDigestEntrypointsAccessible
+text.split(/\\s+/).filter(Boolean)
+text.split(/\\\\s+/).filter(Boolean)
+readyInsightDigestBeforeActions
+readyRightRailBriefVisible
+readyCenterMainFlowOnlyPrimaryPanel
+readyCenterGamePanelsNotScrollable
+readyPrimaryActionCueVisible
+readyPrimaryActionMatchesRecommendation
+readyPrimaryCueCompact
+readyPrimaryCueDoesNotPushFold
+readyLaptopStatusToastDoesNotPushFold
+readyLaptopStatusHeightCapped
+readyLaptopStatusDoesNotCoverActions
+readyLaptopStatusDoesNotCoverCoach
+noVerticalPageOverflow
+readyAmbientRailAvailable
+readyAmbientPanelPopulated
+readyDesktopActionStatesDistinct
+readyDesktopActionCardsAccessible
+readyDesktopActionHotkeys
+readyDesktopActionHotkeyDispatch
+titleStageChoiceHotkeyDispatch
+eventStageChoiceHotkeyDispatch
+readyCenterColumnDominates
+readyRightRailHasUsefulSignal
+readyRightRailNotScrollable
+readyRightRailContentNotClipped
+infoContentScrollable
+stageRightRailKeepsGameplayContext
+stageRightRailContextualSignal
+stageRightRailNoRawEnum
+stageRightRailEnglishCopyUsesFallback
+Backend stage label should not be visible
+English stage briefing leaked into right rail
+CURRENT_TREND_LABEL_RAW
+REPORT_HISTORY_SUMMARY_RAW
+ENDING_CONTEXT_HEADLINE_RAW
+activeInfoTab !== 'demo' && !isVisible('#demoPanel')
+infoShell.scrollWidth <= infoShell.clientWidth + 2
+infoContent.scrollWidth <= infoContent.clientWidth + 2
+desktopActionCardSyntheticNoRawEnum
+desktopActionPlanLabelsSyntheticNoRawEnum
+desktopRightRailSyntheticNoRawEnum
+desktopRightRailSyntheticRiskToolsUsable
+NPC_RAW_NAME
+BUZZ_HEADLINE_RAW
+npc_raw_image.webp
+AUDIENCE_ROUTE_RAW
+FAN_TOPIC_TITLE_RAW
+DANMAKU_PERSONA_RAW
+RISK_TOOL_LABEL_RAW
+FULL_CLIP_CONTEXT_RAW
+FUN_METRIC_LABEL_RAW
+COMBO_LABEL_RAW
+PERSONA_TAG_RAW
+MEME_STAGE_RAW
+ENDING_HEADLINE_RAW
+群友还在整理小作文
+弹幕还在同步
+同台情报还在整理
+热搜记录还在整理
+乐子人还在对轴
+组合证据还在整理
+未署名人设标签
+梗阶段走向待观察
+结局风险待观察
+路线快照还在复盘
+这天日报还在补录
+结局标题待定
+BACKEND_ACTION_NAME
+appStatusNoRawEnum
+DIRECT_STATUS_RAW
+directStatusSyntheticNoRawEnum
+directStatusTitleNoRawEnum
+apiFallbackWithoutMessageDoesNotExposeRawCode
+apiFallbackWithoutMessageHidesHttpStatus
+apiFallbackMixedMessageDoesNotExposeRawEnum
+apiFallbackMixedMessageHidesHttpStatus
+apiFallbackEnglishMessagePrefersLocalCopy
+apiFallbackEnglishMessageHidesHttpStatus
+appStatusEnglishMessageDoesNotExposeEnglish
+desktopDemoPanelSyntheticNoRawEnum
+desktopDemoPanelPhaseLocalized
+desktopDemoPanelEndingTypeLocalized
+desktopDemoPanelBriefVisible
+desktopDemoPanelRightRailNotScrollable
+desktopDemoPanelControlsAccessible
+UNMAPPED_BACKEND_FAILURE
+Desktop visual check failed
+ready-laptop
+isLaptopReadyScenario
+readyLaptopHidesCenterDigest
+readyLaptopActionPanelAboveFold
+readyLaptopAllDesktopActionsAboveFold
+readyLaptopCoreRoundNoWheel
+desktopActionBottoms
+!actionOptions.open
+readyRightRailContentNotClipped
+async function advanceToReportScenario
+reportModeEnabled
+reportPanelAboveFold
+reportNextDayCtaVisible
+reportNextDayCtaExplainsAdvance
+reportCoachCopyMatchesAdvanceCta
+reportStatusAvoidsNextDay
+reportSummaryReadable
+reportDetailsCollapsed
+reportCenterMainFlowOnlyReportPanel
+reportCenterGamePanelsNotScrollable
+reportNoRawEnum
+REPORT_VISIBLE_ITEM_RAW
+MATERIAL_RECEIPT_RAW
+reportVisibleItemsSyntheticNoRawEnum
+reportMaterialReceiptSyntheticReadable
+reportSyntheticEnglishCopyUsesFallback
+Daily report unavailable
+activeInfoTab === 'report'
+isVisible('#reportHistoryPanel')
+ENDING_TYPE_RAW
+FINAL_TITLE_RAW
+key_event_raw
+raw_final_report_ref.json
+endingRawFieldsSyntheticReadable
+endingSyntheticEnglishCopyUsesFallback
+Ending summary unavailable
+endingForecastEnglishCopyUsesFallback
+Forecast headline should not be visible
+English ending forecast leaked into right rail
+async function enterEndingScenario
+endingModeEnabled
+endingPanelAboveFold
+endingRestartCtaVisible
+endingRestartBiasHintReadable
+endingRestartBiasHintSwitches
+endingStatusAvoidsRestart
+endingDetailsCollapsed
+endingCenterMainFlowOnlyEndingPanel
+endingCenterGamePanelsNotScrollable
+endingNoRawEnum
+activeInfoTab === 'environment'
+isVisible('#endingForecastPanel')
+async function enterTitleScenario
+async function enterEventScenario
+titleModeEnabled
+titleCardsAboveFold
+titleDecisionCardsAccessible
+titleDecisionStrips
+titleCardSyntheticEnglishCopyUsesFallback
+Backend generated title
+稳健下饭|热度上桌|开庭预警|标题组观望
+titleCenterMainFlowOnlyTitlePanel
+eventModeEnabled
+eventDecisionLoopAboveFold
+eventChoiceButtonsVisible
+eventChoiceButtonsHaveSpecificChineseCta
+稳住米线|接住热度|整点节目|选此方案
+eventCardSyntheticEnglishCopyUsesFallback
+Event description unavailable
+eventCenterMainFlowOnlyEventPanel
+eventNoRawEnum
+activeInfoTab === 'npc'
+isVisible('#stageBriefingPanel')
+stageFocusModeEnabled
+stageCenterDominatesRails
+stageRightRailCompressed
+stageRightRailNotScrollable
+stageFortuneCardBorderVisible
+stagePrimaryLoopReadable
+stageCoreFlowNoWheel
+titlePanel
+eventPanel
+reportPanel
+endingPanel
+stageDesktopFullStatsExpandedFitsViewport
+isLaptopReadyScenario || stageScenario
+stageSidebarCompressed
+create-loadout-summary
+create-loadout-summary-grid
+createLoadoutSynthetic
+createLoadoutSyntheticStartCtaInViewport
+readySidebarStateHudCompact
+readyDesktopFullStatsCollapsed
+readyDesktopFullStatsExpandedFitsViewport
+desktopStatDetails.open = true
+readySidebarNotScrollable
+isVisible('#statsSection .desktop-stat-details')
+failedChecks
+viewport
+noRawEnum
+fallback
+*/

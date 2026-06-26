@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.vupworld.mapper.DailyReportMapper">
+
+    <resultMap id="dailyReportMap" type="com.example.vupworld.model.DailyReport" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="vupId" column="vup_id"/>
+        <result property="selectedTitle" column="selected_title"/>
+        <result property="reportTone" column="report_tone"/>
+        <result property="platformTrendId" column="platform_trend_id"/>
+        <result property="fanDelta" column="fan_delta"/>
+        <result property="coinDelta" column="coin_delta"/>
+        <result property="popularityDelta" column="popularity_delta"/>
+        <result property="watchHeatDelta" column="watch_heat_delta"/>
+        <result property="reputationDelta" column="reputation_delta"/>
+        <result property="memeDelta" column="meme_delta"/>
+        <result property="commercialDelta" column="commercial_delta"/>
+        <result property="highlightEventId" column="highlight_event_id"/>
+        <result property="debtSummary" column="debt_summary"/>
+        <result property="riskHint" column="risk_hint"/>
+        <result property="visibleItemsJson" column="visible_items_json"/>
+        <result property="evidenceRefsJson" column="evidence_refs_json"/>
+        <result property="templateRefsJson" column="template_refs_json"/>
+        <result property="renderVersion" column="render_version"/>
+        <result property="strategyPanelJson" column="strategy_panel_json"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO daily_report (
+            vup_id, day, summary, selected_title, report_tone, platform_trend_id,
+            fan_delta, coin_delta, popularity_delta, watch_heat_delta, reputation_delta,
+            meme_delta, commercial_delta, highlight_event_id, debt_summary, risk_hint,
+            visible_items_json, evidence_refs_json, template_refs_json, render_version,
+            strategy_panel_json
+        ) VALUES (
+            #{vupId}, #{day}, #{summary}, #{selectedTitle}, #{reportTone}, #{platformTrendId},
+            #{fanDelta}, #{coinDelta}, #{popularityDelta}, #{watchHeatDelta}, #{reputationDelta},
+            #{memeDelta}, #{commercialDelta}, #{highlightEventId}, #{debtSummary}, #{riskHint},
+            #{visibleItemsJson}, #{evidenceRefsJson}, #{templateRefsJson}, #{renderVersion},
+            #{strategyPanelJson}
+        )
+    </insert>
+
+    <select id="findByVupIdAndDay" resultMap="dailyReportMap">
+        SELECT *
+        FROM daily_report
+        WHERE vup_id = #{vupId} AND day = #{day}
+    </select>
+
+    <select id="findAllByVupId" resultMap="dailyReportMap">
+        SELECT *
+        FROM daily_report
+        WHERE vup_id = #{vupId}
+        ORDER BY day ASC
+    </select>
+
+    <update id="updateStrategyPanelJson">
+        UPDATE daily_report
+        SET strategy_panel_json = #{strategyPanelJson}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
