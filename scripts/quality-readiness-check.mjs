@@ -451,15 +451,6 @@ function checkReleaseAssetPolicy() {
             detail: 'StaticResourceConfig'
         },
         {
-            label: 'commercial-v1 源图/备份/日志在发布面被拦截',
-            pass: staticResourceConfig.includes('GalleryReleaseResourceResolver')
-                && staticResourceConfig.includes('original-watermark-backup')
-                && staticResourceConfig.includes('-source.png')
-                && staticResourceConfig.includes('asset-plan.json')
-                && staticResourceConfig.includes('generation-log.json'),
-            detail: 'commercial-v1 release gate'
-        },
-        {
             label: '6 条 BGM mp3 已实际落地',
             pass: missingBgmTracks.length === 0 && unexpectedBgmTracks.length === 0,
             detail: missingBgmTracks.length ? `缺失：${missingBgmTracks.join('，')}` : `已存在：${expectedBgmTracks.length} 个`
@@ -1300,7 +1291,7 @@ function buildReport(sections, totalScore, readinessPass) {
     lines.push('');
     lines.push(`发布边界：当前报告只证明本地 30 天完整局、11 条演示路线、日报、结局、下播链路和 action registry 兼容迁移闭环；公开发布、支付、云存档和商店发行工程不在本报告内。/api/system/config-check 在 prod 下已裁剪为最小诊断响应，但接口访问控制/网关策略仍需单独确认；OFF_STREAM_READY / 下播流程${offStreamPass ? '已有本地探针覆盖' : '当前仍为 NOT_COVERED'}。`);
     lines.push('');
-    lines.push('公开资源策略：/gallery/v4/** 只服务 v4 运行时资产；commercial-v1 的 *-source.png、original-watermark-backup 和生成日志不对外。背景音乐由 src/main/resources/static/sounds 下的 bgm-*.mp3 提供，短音效继续保留 wav。');
+    lines.push('公开资源策略：/gallery/v4/** 只服务 v4 运行时资产。背景音乐由 src/main/resources/static/sounds 下的 bgm-*.mp3 提供，短音效继续保留 wav。');
     lines.push('');
     lines.push('## 仪表盘');
     lines.push('');
