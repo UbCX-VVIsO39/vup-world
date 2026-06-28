@@ -9,5 +9,12 @@ public enum ActionType {
     PUBLISH_CLIP,
     FAN_GROUP_MAINTAIN,
     NPC_INTERACT,
-    REST
+    REST;
+
+    /**
+     * 主行动消耗的行动点。统一 2 点；场外行动在别处单独处理。
+     */
+    public int actionPointCost() {
+        return 2;
+    }
 }

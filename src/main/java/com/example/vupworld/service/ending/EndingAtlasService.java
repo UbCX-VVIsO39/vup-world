@@ -6,6 +6,8 @@ import com.example.vupworld.common.GameException;
 import com.example.vupworld.domain.RouteType;
 import com.example.vupworld.dto.AchievementDtos.EndingAtlasSlotDTO;
 import com.example.vupworld.dto.AchievementDtos.EndingCollectionDTO;
+import com.example.vupworld.dto.EndingDtos.EndingAtlasDTO;
+import com.example.vupworld.dto.EndingDtos.EndingAtlasItem;
 import com.example.vupworld.mapper.EndingReviewMapper;
 import com.example.vupworld.model.EndingReview;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,31 @@ public class EndingAtlasService {
     public String nextRestartTargetType(Long userId) {
         String type = endingCollection(userId).nextTargetType();
         return "COMPLETE".equals(type) ? "UNKNOWN" : type;
+    }
+
+    /**
+     * 图鉴总览：9 个结局的解锁状态 + 推荐下一目标（精简版）。
+     */
+    public EndingAtlasDTO atlasOverview(Long userId) {
+        List<EndingReview> reviews = endingReviewMapper.findByUserId(userId);
+        Map<String, BestEndingScore> bestScores = bestEndingScoresByType(reviews);
+        List<EndingAtlasItem> items = ENDING_ATLAS.stream()
+                .map(ending -> {
+                    BestEndingScore best = bestScores.get(ending.type());
+                    boolean unlocked = best != null;
+                    String hint = unlocked
+                            ? "最佳" + best.score() + "分"
+                            : ending.description();
+                    return new EndingAtlasItem(ending.type(), ending.title(), unlocked, hint);
+                })
+                .toList();
+        long unlockedCount = items.stream().filter(EndingAtlasItem::unlocked).count();
+        String recommendedNext = items.stream()
+                .filter(item -> !item.unlocked())
+                .map(EndingAtlasItem::endingType)
+                .findFirst()
+                .orElse("COMPLETE");
+        return new EndingAtlasDTO(items, recommendedNext, (int) unlockedCount, items.size());
     }
 
     public int bestOverallScore(Long userId) {

@@ -269,8 +269,8 @@ public class EndingRuleEngine {
         return switch (routeType) {
             case "SINGING_IDOL" -> "TRAIN_SONG".equals(action)
                     || ("STREAM_PLAN".equals(action) && containsMarker(routeScoreChange, "SINGING_IDOL"))
-                    || containsMarker(result, "歌")
-                    || containsMarker(weightDetail, "singingEvidence");
+                    || containsMarker(weightDetail, "singingEvidence")
+                    || (result != null && (result.contains("练歌") || result.contains("歌势") || result.contains("唱歌")));
             case "SLICE_SAINT" -> "PUBLISH_VIDEO".equals(action)
                     || "PUBLISH_CLIP".equals(action)
                     || "TRAIN_DANCE".equals(action)
@@ -278,7 +278,7 @@ public class EndingRuleEngine {
                     || containsMarker(weightDetail, "clipMomentum");
             case "SOCIAL_COLLAB" -> "NPC_INTERACT".equals(action)
                     || containsMarker(weightDetail, "collabEvidence")
-                    || containsMarker(result, "联动");
+                    || (result != null && (result.contains("联动") || result.contains("合作") || result.contains("同台")));
             case "BLACK_RED_MAIN_STAGE" -> hasBlackRedEvidence(log)
                     || containsMarker(weightDetail, "trafficSpike")
                     || containsMarker(weightDetail, "archivePressure");

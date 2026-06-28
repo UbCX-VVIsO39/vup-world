@@ -23,6 +23,11 @@ public class EventOutcomeResolver {
         this.balanceConfig = balanceConfig;
     }
 
+    private int vary(int base, int variancePercent) {
+        int range = Math.max(1, base * variancePercent / 100);
+        return base + (int) (Math.random() * range * 2 - range);
+    }
+
     /**
      * 解析正式事件（债务事件或普通事件）的选择结果。
      */
@@ -54,15 +59,15 @@ public class EventOutcomeResolver {
         if (isDebtEvent) {
             delta = new RewardDelta(
                     0, 0, 0, 0, 0,
-                    0, -5, 2, 0, 0, 0, 0,
+                    0, vary(-5, 15), vary(2, 20), 0, 0, 0, 0,
                     0, 1, "ELECTRONIC_PICKLE",
                     Map.of("type", "formal_event_safe", "debtCleared", true),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}", "{}", "{}", "{}"
             );
         } else {
             delta = new RewardDelta(
-                    3, 0, 0, 0, 0,
-                    0, -3, 3, 0, 0, 0, 0,
+                    vary(3, 20), 0, 0, 0, 0,
+                    0, vary(-3, 15), vary(3, 20), 0, 0, 0, 0,
                     0, 1, "ELECTRONIC_PICKLE",
                     Map.of("type", "formal_event_safe"),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}", "{}", "{}", "{}"
@@ -78,8 +83,8 @@ public class EventOutcomeResolver {
         if (isDebtEvent) {
             // 高风险：大量围观热度和粉丝，但口碑下降，可能产生新债务
             delta = new RewardDelta(
-                    0, 15, 0, 20, 0,
-                    25, 20, -4, 5, 0, 0, 0,
+                    0, vary(15, 20), 0, vary(20, 20), 0,
+                    vary(25, 20), vary(20, 15), vary(-4, 20), vary(5, 25), 0, 0, 0,
                     0, 2, "BLACK_RED_MAIN_STAGE",
                     Map.of("type", "formal_event_traffic", "debtCleared", true, "risk", "high"),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}",
@@ -87,8 +92,8 @@ public class EventOutcomeResolver {
             );
         } else {
             delta = new RewardDelta(
-                    0, 8, 0, 10, 0,
-                    15, 12, -2, 3, 0, 0, 0,
+                    0, vary(8, 20), 0, vary(10, 20), 0,
+                    vary(15, 20), vary(12, 15), vary(-2, 20), vary(3, 25), 0, 0, 0,
                     0, 1, "BLACK_RED_MAIN_STAGE",
                     Map.of("type", "formal_event_traffic", "risk", "medium"),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}",
@@ -107,8 +112,8 @@ public class EventOutcomeResolver {
         if (isDebtEvent) {
             // 中风险：切片路线粉丝，梗等级上升，但可能产生事故素材
             delta = new RewardDelta(
-                    0, 12, 0, 5, 0,
-                    10, 5, -1, 8, 0, 0, 0,
+                    0, vary(12, 20), 0, vary(5, 20), 0,
+                    vary(10, 20), vary(5, 15), vary(-1, 20), vary(8, 20), 0, 0, 0,
                     0, 2, "SLICE_SAINT",
                     Map.of("type", "formal_event_meme", "debtCleared", true, "accidentRisk", true),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}",
@@ -116,8 +121,8 @@ public class EventOutcomeResolver {
             );
         } else {
             delta = new RewardDelta(
-                    0, 6, 0, 3, 0,
-                    8, 3, 0, 5, 0, 0, 0,
+                    0, vary(6, 20), 0, vary(3, 20), 0,
+                    vary(8, 20), vary(3, 15), 0, vary(5, 20), 0, 0, 0,
                     0, 1, "SLICE_SAINT",
                     Map.of("type", "formal_event_meme", "accidentRisk", true),
                     "{\"pipeline\":\"P0_SIMPLE\"}", "{}", "{}", "{}", "{}"
@@ -133,7 +138,7 @@ public class EventOutcomeResolver {
     private EventOutcome resolveInteractionSafe(Vup vup) {
         RewardDelta delta = new RewardDelta(
                 0, 0, 0, 0, 0,
-                0, -3, 1, 0, 0, 0, 0,
+                0, vary(-3, 15), vary(1, 20), 0, 0, 0, 0,
                 0, 1, "ELECTRONIC_PICKLE",
                 Map.of("type", "interaction_safe"),
                 "{\"pipeline\":\"P0_SIMPLE\"}", "{}", "{}", "{}", "{}"
@@ -145,8 +150,8 @@ public class EventOutcomeResolver {
 
     private EventOutcome resolveInteractionTraffic(Vup vup, String eventKey) {
         RewardDelta delta = new RewardDelta(
-                0, 10, 0, 15, 0,
-                20, 15, -3, 3, 0, 0, 0,
+                0, vary(10, 20), 0, vary(15, 20), 0,
+                vary(20, 20), vary(15, 15), vary(-3, 20), vary(3, 25), 0, 0, 0,
                 0, 2, "BLACK_RED_MAIN_STAGE",
                 Map.of("type", "interaction_traffic", "risk", "high"),
                 "{\"pipeline\":\"P0_SIMPLE\"}", "{}",
@@ -161,8 +166,8 @@ public class EventOutcomeResolver {
 
     private EventOutcome resolveInteractionMeme(Vup vup, String eventKey) {
         RewardDelta delta = new RewardDelta(
-                0, 8, 0, 5, 0,
-                12, 5, 0, 6, 0, 0, 0,
+                0, vary(8, 20), 0, vary(5, 20), 0,
+                vary(12, 20), vary(5, 15), 0, vary(6, 20), 0, 0, 0,
                 0, 1, "SLICE_SAINT",
                 Map.of("type", "interaction_meme", "accidentRisk", true),
                 "{\"pipeline\":\"P0_SIMPLE\"}", "{}", "{}", "{}", "{}"

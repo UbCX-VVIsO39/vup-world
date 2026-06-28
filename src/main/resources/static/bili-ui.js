@@ -58,20 +58,73 @@ function updateLiveRoomInfo() {
     }
 })();
 
-// --- 发送弹幕（视觉反馈）---
-function sendDanmaku() {
+// --- 发送弹幕（视觉反馈 + 1.2 后端累积）---
+let selectedDanmakuMood = 'positive';
+
+function selectDanmakuMood(mood) {
+    if (!mood) return;
+    selectedDanmakuMood = mood;
+    document.querySelectorAll('.danmaku-mood-btn').forEach(function(btn) {
+        const active = btn.dataset.mood === mood;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+}
+
+async function sendDanmaku() {
     const input = document.getElementById('danmakuInput');
     if (!input || !input.value.trim()) return;
 
     const text = input.value.trim();
     input.value = '';
 
-    // Spawn as overlay danmaku for visual feedback
+    const mood = selectedDanmakuMood || 'positive';
+
+    // Spawn as overlay danmaku for visual feedback（按 mood 着色）
     if (typeof spawnDanmakuOverlayMessage === 'function') {
         const persona = (state && state.user) ? (state.user.nickname || state.user.username || '我') : '我';
-        spawnDanmakuOverlayMessage(text, persona, false);
+        spawnDanmakuOverlayMessage(text, persona, false, mood);
+    }
+
+    // 1.2 调后端累积弹幕热度（失败静默）
+    sendDanmakuAccum(text, mood);
+}
+
+// 1.2 弹幕热度累积后端调用
+async function sendDanmakuAccum(text, mood) {
+    if (typeof window.apiPost !== 'function') return;
+    try {
+        const idempotencyKey = 'dm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const res = await window.apiPost('/api/stream/danmaku', { text: text, mood: mood, idempotencyKey: idempotencyKey });
+        if (res && typeof state !== 'undefined' && state) {
+            state.danmakuAccum = {
+                count: (typeof res.count === 'number') ? res.count : ((state.danmakuAccum && state.danmakuAccum.count) || 0) + 1,
+                heat: (typeof res.heat === 'number') ? res.heat : ((state.danmakuAccum && state.danmakuAccum.heat) || 0)
+            };
+            updateDanmakuHeatBadge();
+        }
+    } catch (e) {
+        if (window.console && console.warn) console.warn('danmaku accum failed:', e && e.message || e);
     }
 }
+
+function updateDanmakuHeatBadge() {
+    const badge = document.getElementById('danmakuHeatBadge');
+    if (!badge) return;
+    const heat = (state && state.danmakuAccum && state.danmakuAccum.heat) || 0;
+    badge.textContent = '💬 🔥' + heat;
+    badge.classList.toggle('hidden', heat === 0);
+}
+
+// --- 心情按钮事件委托 ---
+(function() {
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-action="select-danmaku-mood"]');
+        if (btn && btn.dataset.mood) {
+            selectDanmakuMood(btn.dataset.mood);
+        }
+    });
+})();
 
 // --- 礼物面板状态 ---
 let giftPanelOpen = false;
@@ -171,6 +224,36 @@ function sendGift() {
         const combo = document.getElementById('giftCombo');
         if (combo) combo.classList.add('hidden');
     }, 3000);
+
+    // 1.1 调后端累积礼物（不影响动画，失败静默）
+    sendGiftAccum(gift.id, selectedGiftQty);
+}
+
+// 1.1 礼物累积后端调用
+async function sendGiftAccum(giftId, qty) {
+    if (typeof window.apiPost !== 'function') return;
+    try {
+        const idempotencyKey = 'gift-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const res = await window.apiPost('/api/stream/gift', { giftId: giftId, qty: qty, idempotencyKey: idempotencyKey });
+        if (res && typeof state !== 'undefined' && state) {
+            state.giftAccum = {
+                count: (typeof res.giftCount === 'number') ? res.giftCount : ((state.giftAccum && state.giftAccum.count) || 0) + qty,
+                coinValue: (typeof res.giftCoinValue === 'number') ? res.giftCoinValue : ((state.giftAccum && state.giftAccum.coinValue) || 0)
+            };
+            updateGiftAccumBadge();
+        }
+    } catch (e) {
+        // 后端未就绪时静默，仅保留视觉动画
+        if (window.console && console.warn) console.warn('gift accum failed:', e && e.message || e);
+    }
+}
+
+function updateGiftAccumBadge() {
+    const badge = document.getElementById('giftAccumBadge');
+    if (!badge) return;
+    const count = (state && state.giftAccum && state.giftAccum.count) || 0;
+    badge.textContent = '🎁 ×' + count;
+    badge.classList.toggle('hidden', count === 0);
 }
 
 function spawnGiftFloat(icon, name) {
@@ -248,9 +331,16 @@ function updateSidebarContent() {
         const fans = state.vup.fanStructure?.fans || state.vup.fans || 0;
         const name = state.vup.name || 'VUP';
 
-        // Build ranking list: current VUP + rivals from platformData or mock
+        // Build ranking list: current VUP + rivals
+        // 优先使用 state.rivals（/api/rivals 真实数据），回退到 platformData.npcs
         var rivals = [];
-        if (state.platformData && Array.isArray(state.platformData.npcs)) {
+        if (state.rivals) {
+            var rivalList = Array.isArray(state.rivals) ? state.rivals : (state.rivals.rivals || []);
+            rivalList.forEach(function(r) {
+                rivals.push({ name: r.name || '???', fans: r.fans || 0, color: null });
+            });
+        }
+        if (rivals.length === 0 && state.platformData && Array.isArray(state.platformData.npcs)) {
             state.platformData.npcs.forEach(function(npc) {
                 var npcFans = npc.fans || Math.floor(fans * (0.3 + Math.abs(hashCode(npc.name || '')) % 70) / 100);
                 rivals.push({ name: npc.name || '???', fans: npcFans, color: npc.color || null });
@@ -306,6 +396,22 @@ function formatNumber(n) {
     return String(n);
 }
 
+// 4.7 非直播阶段强制关闭并重置内部状态（供 syncLiveRoomStage 调用）
+function closeLivePanels() {
+    if (giftPanelOpen) {
+        giftPanelOpen = false;
+        const panel = document.getElementById('giftPanelOverlay');
+        if (panel) panel.classList.remove('visible');
+    }
+    if (rightSidebarOpen) {
+        rightSidebarOpen = false;
+        const sidebar = document.getElementById('liveRightSidebar');
+        const toggleBtn = document.getElementById('sidebarToggleFloat');
+        if (sidebar) sidebar.classList.remove('visible');
+        if (toggleBtn) toggleBtn.style.display = '';
+    }
+}
+
 // --- B站样式初始化 ---
 window.updateLiveRoomInfo = updateLiveRoomInfo;
 window.sendDanmaku = sendDanmaku;
@@ -315,6 +421,7 @@ window.selectGiftQty = selectGiftQty;
 window.sendGift = sendGift;
 window.toggleRightSidebar = toggleRightSidebar;
 window.switchSidebarTab = switchSidebarTab;
+window.closeLivePanels = closeLivePanels;
 
 function initBiliStyle() {
     updateLiveRoomInfo();

@@ -22,7 +22,7 @@ class RewardCalculatorTest {
 
     @BeforeEach
     void setUp() {
-        BalanceConfig config = new BalanceConfig(30, true);
+        BalanceConfig config = new BalanceConfig(30, true, "STANDARD");
         JsonService jsonService = new JsonService(new ObjectMapper());
         calculator = new RewardCalculator(config, jsonService);
 

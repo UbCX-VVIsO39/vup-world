@@ -1708,12 +1708,12 @@ function normalizeInfoTab(target) {
 }
 
 const LIVE_DRAWERS = {
-    host: { title: '主播', kicker: 'PRIMARY', panels: ['statsSection', 'coachPanel', 'insightDigest', 'stageBriefingPanel'] },
+    host: { title: '主播', kicker: 'PRIMARY', panels: ['statsSection', 'statChartsSection', 'contextSidebar', 'coachPanel', 'insightDigest', 'stageBriefingPanel'] },
     fans: { title: '粉丝', kicker: 'PRIMARY', panels: ['funAudiencePanel', 'audienceExpectationPanel', 'personaTagPanel', 'fanTopicPanel', 'danmakuPanel'] },
     routes: { title: '路线', kicker: 'PRIMARY', panels: ['timelinePanel', 'routeGalleryPanel', 'endingForecastPanel', 'comboPanel'] },
     report: { title: '昨日结果', kicker: 'PRIMARY', panels: ['reportPanel', 'reportHistoryPanel'] },
     npcs: { title: '其他主播', kicker: 'PRIMARY', panels: ['platformStealBuff', 'npcPanel', 'platformNpcGrid', 'platformInteractPanel'] },
-    atlas: { title: '成就', kicker: 'SECONDARY', panels: ['achievementMini', 'unlockAtlasPanel'] },
+    atlas: { title: '成就', kicker: 'SECONDARY', panels: ['achievementMini', 'unlockAtlasPanel', 'endingAtlasPanel'] },
     environment: { title: '平台/环境', kicker: 'SECONDARY', panels: ['buzzPanel', 'memeLifecyclePanel', 'ambientPanel', 'leaderboardPanel', 'demoPanel'] }
 };
 
@@ -2857,6 +2857,8 @@ async function hydrate() {
 
         setBootState("ready");
         render();
+        if (typeof initStatCharts === 'function') initStatCharts();
+        if (typeof updateStatCharts === 'function') updateStatCharts();
         checkMilestones();
         if (state.session && state.session.phase === 'READY') triggerDailyDialogue();
         return;
@@ -2895,6 +2897,8 @@ async function hydrate() {
     }
     setBootState("ready");
     render();
+    if (typeof initStatCharts === 'function') initStatCharts();
+    if (typeof updateStatCharts === 'function') updateStatCharts();
     checkMilestones();
     if (state.session && state.session.phase === 'READY') triggerDailyDialogue();
 }
@@ -3029,6 +3033,36 @@ async function refreshPhaseData() {
         state.endingShareCard = null;
         state.restartBiasOverride = null;
     }
+
+    // 2.2 风险预警：危机倒计时
+    try {
+        state.crisisAlerts = await api('/api/risk-tool/alerts');
+    } catch (e) {
+        state.crisisAlerts = [];
+    }
+
+    // 1.4 对手威胁：竞争对手进度
+    try {
+        state.rivals = await api('/api/rivals');
+    } catch (e) {
+        state.rivals = null;
+    }
+
+    // 2.3 结局图鉴：已解锁结局集合
+    try {
+        state.endingAtlas = await api('/api/ending/atlas');
+    } catch (e) {
+        state.endingAtlas = null;
+    }
+
+    // 2.5 回放：结局时拉取本局时间线（需 vupId 参数）
+    if (state.session?.phase === 'ENDING_READY' && state.vup?.id) {
+        try {
+            state.timeline = await api('/api/reports/timeline?vupId=' + encodeURIComponent(state.vup.id));
+        } catch (e) {
+            state.timeline = null;
+        }
+    }
 }
 
 async function refreshAfterWrite() {
@@ -3038,6 +3072,8 @@ async function refreshAfterWrite() {
     await refreshLocalSaveSlots();
     await refreshPhaseData();
     animateStatChanges();
+    if (typeof initStatCharts === 'function') initStatCharts();
+    if (typeof updateStatCharts === 'function') updateStatCharts();
 }
 
 async function refreshAfterWriteFailure() {
@@ -3098,6 +3134,82 @@ function renderTimelinePanel() {
         + '</div>';
 }
 
+// ============ 4.3 中央主决策区：按 phase 显隐调度 + 阶段进度条 ============
+// phase → stepper 步骤索引（0 行动 / 1 标题 / 2 事件 / 3 日报）
+const PHASE_STEP_MAP = {
+    READY: 0, ACTION_RESOLVED: 0,
+    NEED_TITLE: 1,
+    NEED_INTERACTION_CHOICE: 2, NEED_EVENT_CHOICE: 2,
+    OFF_STREAM_READY: 2, OFF_STREAM_RESOLVED: 2,
+    REPORT_READY: 3,
+    ENDING_READY: 3
+};
+
+function renderMainDecisionCard() {
+    const phase = state.session?.phase || (state.vup ? 'READY' : null);
+    updatePhaseStepper(phase);
+
+    // 主决策区阶段提示：当 actionPanel/offStreamPanel/endingPanel 都不显示时，给一个引导卡片
+    const hint = document.getElementById('mainDecisionHint');
+    if (!hint) return;
+    const childVisible = ['actionPanel', 'offStreamPanel', 'endingPanel'].some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden') && el.innerHTML.trim() !== '';
+    });
+    const hintHtml = mainDecisionHintHtml(phase);
+    if (childVisible || !hintHtml) {
+        hint.classList.add('hidden');
+        hint.innerHTML = '';
+    } else {
+        hint.innerHTML = hintHtml;
+        hint.classList.remove('hidden');
+    }
+}
+
+function updatePhaseStepper(phase) {
+    const activeStep = PHASE_STEP_MAP[phase];
+    // 主卡片下方进度条
+    const stepper = document.getElementById('phaseStepper');
+    if (stepper) {
+        const steps = stepper.querySelectorAll('.phase-step');
+        steps.forEach((el, i) => {
+            const idx = (typeof activeStep === 'number') ? activeStep : 0;
+            el.classList.toggle('active', i === idx);
+            el.classList.toggle('done', i < idx);
+        });
+    }
+    // 顶栏 dayCycleStepper 同步高亮（data-phase: ACTION/TITLE/EVENT/REPORT）
+    const topStepper = document.getElementById('dayCycleStepper');
+    if (topStepper) {
+        const phaseKey = (typeof activeStep === 'number')
+            ? ['ACTION', 'TITLE', 'EVENT', 'REPORT'][activeStep]
+            : 'ACTION';
+        topStepper.querySelectorAll('.stepper-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.phase === phaseKey);
+        });
+    }
+}
+
+function mainDecisionHintHtml(phase) {
+    const hints = {
+        NEED_TITLE: { icon: '🎬', title: '选择直播标题', desc: '在弹出的标题面板里挑一个，或先在直播间打赏礼物提升热度加成。' },
+        ACTION_RESOLVED: { icon: '✅', title: '行动已结算', desc: '正在等待下一阶段，可在直播间继续互动累积热度。' },
+        NEED_INTERACTION_CHOICE: { icon: '⚡', title: '处理现场事件', desc: '请在弹出的事件面板中做出选择。' },
+        NEED_EVENT_CHOICE: { icon: '🎭', title: '处理事件', desc: '请在弹出的事件面板中做出选择。' },
+        OFF_STREAM_READY: { icon: '🏠', title: '下播时间', desc: '点击下播按钮处理场外事务。' },
+        OFF_STREAM_RESOLVED: { icon: '🏠', title: '场外已结算', desc: '等待进入日报。' },
+        REPORT_READY: { icon: '📋', title: '查看日报', desc: '请打开日报查看今日结算。' },
+        ENDING_READY: { icon: '🎬', title: '结局复盘', desc: '本局已结束，查看结局展示与回放。' }
+    };
+    const h = hints[phase];
+    if (!h) return '';
+    return '<div class="main-decision-hint-card">'
+        + '<div class="hint-icon">' + h.icon + '</div>'
+        + '<div class="hint-body"><strong>' + html(h.title) + '</strong>'
+        + '<span>' + html(h.desc) + '</span></div>'
+        + '</div>';
+}
+
 // 渲染函数
 function render() {
     renderBootState();
@@ -3123,6 +3235,7 @@ function render() {
     renderEvent();
     renderReport();
     renderEnding();
+    renderMainDecisionCard();
     renderNPC();
     renderPlatform();
     renderBuzz();
@@ -3487,6 +3600,20 @@ function renderHeader() {
         `;
     } else {
         userInfo.innerHTML = '';
+    }
+
+    // 1.1 礼物累积徽章 + 1.2 弹幕热度徽章
+    const giftBadge = document.getElementById('giftAccumBadge');
+    if (giftBadge) {
+        const giftCount = (state.giftAccum && state.giftAccum.count) || 0;
+        giftBadge.textContent = '🎁 ×' + giftCount;
+        giftBadge.classList.toggle('hidden', giftCount === 0);
+    }
+    const dmHeatBadge = document.getElementById('danmakuHeatBadge');
+    if (dmHeatBadge) {
+        const heat = (state.danmakuAccum && state.danmakuAccum.heat) || 0;
+        dmHeatBadge.textContent = '💬 🔥' + heat;
+        dmHeatBadge.classList.toggle('hidden', heat === 0);
     }
 }
 
@@ -5943,3 +6070,457 @@ function renderRiskStatus() {
     const header = urgentDebts.length > 0 ? '今天先处理' : '旧账在发酵';
     return '<div class="risk-status ' + (urgentDebts.length > 0 ? 'has-urgent' : 'has-risk') + '"><div class="risk-header">⚠️ ' + header + ' · ' + debts.length + '个旧账</div>' + rows + (urgentDebts.length > 0 ? '<div class="risk-urgent-hint">🔥 建议优先处理到期风险！</div>' : '') + '</div>';
 }
+
+// ============================================================
+// 第二批 - 体验闭环前端 (2.2 风险预警 / 1.4 对手威胁 / 2.3 结局图鉴 / 2.5 回放)
+// ============================================================
+
+// 2.2 风险预警面板：渲染 crisisAlerts 列表，daysLeft<=2 红色脉冲
+function renderCrisisAlerts() {
+    const panel = document.getElementById('crisisAlertPanel');
+    if (!panel) return;
+    const alerts = Array.isArray(state.crisisAlerts) ? state.crisisAlerts : [];
+    if (alerts.length === 0) {
+        panel.innerHTML = '<div class="context-sidebar-item empty"><span class="context-sidebar-title">🛡️ 危机预警</span><span class="context-sidebar-empty">暂无即将到期风险</span></div>';
+        return;
+    }
+    const sorted = alerts.slice().sort((a, b) => (a.daysLeft ?? 99) - (b.daysLeft ?? 99));
+    const rows = sorted.slice(0, 5).map(a => {
+        const days = Number(a.daysLeft ?? 99);
+        const urgent = days <= 2;
+        const sev = a.severity || (urgent ? 'high' : 'normal');
+        const dueText = days <= 0 ? '⚠️ 今天到期' : days === 1 ? '⏰ 明天到期' : `📅 ${days}天后`;
+        const cls = urgent ? 'crisis-alert-row urgent' : 'crisis-alert-row';
+        const title = visibleTextOrFallback(a.title, '风险');
+        const desc = visibleTextOrFallback(a.description, '');
+        const type = a.type ? `<span class="crisis-alert-type">${html(a.type)}</span>` : '';
+        return '<div class="' + cls + '" data-severity="' + html(sev) + '">'
+            + '<div class="crisis-alert-head">' + type + '<strong>' + html(title) + '</strong><span class="crisis-alert-due">' + dueText + '</span></div>'
+            + (desc ? '<p class="crisis-alert-desc">' + html(desc) + '</p>' : '')
+            + '</div>';
+    }).join('');
+    panel.innerHTML = '<div class="context-sidebar-item expanded" data-context-item="crisis">'
+        + '<button class="context-sidebar-head" type="button" data-action="toggle-context-item" data-context-target="crisis" aria-expanded="true">'
+        + '<span class="context-sidebar-title">🛡️ 危机预警 · ' + alerts.length + '</span>'
+        + '<span class="context-sidebar-chevron">▾</span></button>'
+        + '<div class="context-sidebar-body">' + rows + '</div>'
+        + '</div>';
+}
+
+// 1.4 对手威胁：水平进度条对比玩家 vs 最强对手
+function renderRivalThreat() {
+    const panel = document.getElementById('rivalThreatPanel');
+    if (!panel) return;
+    const rivals = state.rivals;
+    const playerFans = Number(state.vup?.fanStructure?.fans ?? state.vup?.fans ?? 0);
+    const rivalList = Array.isArray(rivals?.rivals) ? rivals.rivals : (Array.isArray(rivals) ? rivals : []);
+    if (rivalList.length === 0 || !state.vup) {
+        panel.innerHTML = '<div class="context-sidebar-item empty"><span class="context-sidebar-title">⚔️ 对手威胁</span><span class="context-sidebar-empty">暂无对手数据</span></div>';
+        return;
+    }
+    const topRival = rivalList.slice().sort((a, b) => (b.fans ?? 0) - (a.fans ?? 0))[0];
+    const rivalFans = Number(topRival?.fans ?? 0);
+    const max = Math.max(playerFans, rivalFans, 1);
+    const playerPct = Math.round((playerFans / max) * 100);
+    const rivalPct = Math.round((rivalFans / max) * 100);
+    const threat = (topRival?.threatLevel || '').toLowerCase();
+    const highThreat = threat === 'high' || threat === 'critical' || (rivalFans > playerFans * 1.1);
+    const overtaken = !!rivals?.overtaken || rivalFans > playerFans;
+    const cls = highThreat ? 'rival-threat-row high' : 'rival-threat-row';
+    const rivalName = visibleTextOrFallback(topRival?.name, '最强对手');
+    const rivalRoute = topRival?.route ? routeLabelFor(topRival.route) : '';
+    const growth = Number(topRival?.growthRate ?? 0);
+    const body = '<div class="' + cls + (highThreat ? ' threat-pulse' : '') + '">'
+        + '<div class="rival-threat-head"><strong>' + html(rivalName) + '</strong>'
+        + (rivalRoute ? '<span class="rival-threat-route">' + html(rivalRoute) + '</span>' : '')
+        + (overtaken ? '<span class="rival-threat-flag">⚠️ 已超越你</span>' : '')
+        + '</div>'
+        + '<div class="rival-threat-bars">'
+        + '<div class="rival-threat-bar player"><span class="rival-threat-label">你</span><div class="rival-threat-track"><div class="rival-threat-fill player" style="width:' + playerPct + '%"></div></div><span class="rival-threat-value">' + compactCount(playerFans) + '</span></div>'
+        + '<div class="rival-threat-bar rival"><span class="rival-threat-label">对手</span><div class="rival-threat-track"><div class="rival-threat-fill rival" style="width:' + rivalPct + '%"></div></div><span class="rival-threat-value">' + compactCount(rivalFans) + '</span></div>'
+        + '</div>'
+        + (growth ? '<div class="rival-threat-growth">增长率 +' + html(growth) + '/日</div>' : '')
+        + '</div>';
+    panel.innerHTML = '<div class="context-sidebar-item expanded" data-context-item="rival">'
+        + '<button class="context-sidebar-head" type="button" data-action="toggle-context-item" data-context-target="rival" aria-expanded="true">'
+        + '<span class="context-sidebar-title">⚔️ 对手威胁</span>'
+        + '<span class="context-sidebar-chevron">▾</span></button>'
+        + '<div class="context-sidebar-body">' + body + '</div>'
+        + '</div>';
+}
+
+// 2.3 结局图鉴：3x3 网格，未解锁灰显，推荐目标高亮
+function renderEndingAtlas() {
+    const panel = document.getElementById('endingAtlasPanel');
+    if (!panel) return;
+    const atlas = state.endingAtlas;
+    if (!atlas) {
+        panel.innerHTML = '<div class="ending-atlas-loading">图鉴加载中...</div>';
+        return;
+    }
+    const items = Array.isArray(atlas.items) ? atlas.items : [];
+    const recommended = atlas.recommendedNext || '';
+    const unlockedCount = Number(atlas.unlockedCount ?? 0);
+    const totalCount = Number(atlas.totalCount ?? (items.length || 9));
+    const cells = items.map(item => {
+        const unlocked = !!item.unlocked;
+        const isRec = recommended && item.endingType === recommended;
+        const cls = 'ending-atlas-item' + (unlocked ? '' : ' locked') + (isRec ? ' recommended' : '');
+        const title = visibleTextOrFallback(item.title, item.endingType || '结局');
+        const hint = visibleTextOrFallback(item.hint, '');
+        return '<div class="' + cls + '" data-ending-type="' + html(item.endingType || '') + '">'
+            + '<div class="ending-atlas-icon">' + (unlocked ? '✅' : '🔒') + '</div>'
+            + '<div class="ending-atlas-title">' + html(title) + '</div>'
+            + (hint ? '<div class="ending-atlas-hint">' + html(hint) + '</div>' : '')
+            + (isRec ? '<div class="ending-atlas-rec">推荐下一目标</div>' : '')
+            + '</div>';
+    }).join('');
+    panel.innerHTML = '<div class="ending-atlas-header">'
+        + '<span class="ending-atlas-kicker">结局图鉴</span>'
+        + '<strong>' + unlockedCount + '/' + totalCount + ' 已解锁</strong>'
+        + '</div>'
+        + '<div class="ending-atlas-grid">' + cells + '</div>'
+        + (recommended ? '<div class="ending-atlas-next">推荐下一目标：' + html(recommended) + '</div>' : '');
+}
+
+// 2.5 快速回放/复盘：Chart.js 画粉丝增长曲线 + 决策点
+let timelineReplayChart = null;
+
+function renderTimelineReplay() {
+    const panel = document.getElementById('timelineReplayPanel');
+    if (!panel) return;
+    const timeline = state.timeline;
+    if (!timeline || !Array.isArray(timeline.days) || timeline.days.length === 0) {
+        panel.innerHTML = '<div class="timeline-replay-empty">暂无回放数据</div>';
+        return;
+    }
+    const days = timeline.days;
+    const labels = days.map(d => '第' + (d.day ?? '?') + '天');
+    const fanData = days.map(d => Number(d.fanChange ?? 0));
+    const routeData = days.map(d => Number(d.routeScore ?? 0));
+    const highlightPoints = days.map(d => d.highlight ? visibleTextOrFallback(d.highlight, '') : '');
+    const actionLabels = days.map(d => visibleTextOrFallback(d.action, '') || '');
+
+    panel.classList.remove('hidden');
+    panel.innerHTML = '<div class="timeline-replay-card">'
+        + '<div class="timeline-replay-head"><strong>📈 本局回放</strong>'
+        + '<button class="timeline-replay-close" type="button" data-action="close-timeline-replay" aria-label="关闭回放">×</button></div>'
+        + '<div class="timeline-replay-canvas-wrap"><canvas id="timelineReplayChart" height="220"></canvas></div>'
+        + '<div class="timeline-replay-events">' + days.map((d, i) => {
+            if (!highlightPoints[i] && !actionLabels[i]) return '';
+            return '<div class="timeline-replay-event"><span class="timeline-replay-day">第' + html(d.day ?? '?') + '天</span>'
+                + (actionLabels[i] ? '<span class="timeline-replay-action">' + html(actionLabels[i]) + '</span>' : '')
+                + (highlightPoints[i] ? '<span class="timeline-replay-highlight">' + html(highlightPoints[i]) + '</span>' : '')
+                + '</div>';
+        }).join('') + '</div>'
+        + '</div>';
+
+    const canvas = document.getElementById('timelineReplayChart');
+    if (!canvas || typeof window === 'undefined' || !window.Chart) return;
+    if (timelineReplayChart) { try { timelineReplayChart.destroy(); } catch (e) {} timelineReplayChart = null; }
+    try {
+        timelineReplayChart = new window.Chart(canvas, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: '粉丝增量',
+                        data: fanData,
+                        borderColor: '#fb7299',
+                        backgroundColor: 'rgba(251,114,153,0.15)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: days.map((d, i) => d.highlight ? 6 : 3),
+                        pointBackgroundColor: days.map(d => d.highlight ? '#ffd700' : '#fb7299')
+                    },
+                    {
+                        label: '路线分',
+                        data: routeData,
+                        borderColor: '#23ade5',
+                        backgroundColor: 'rgba(35,173,229,0.1)',
+                        tension: 0.3,
+                        fill: false,
+                        borderDash: [4, 4]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#e8e8f0' } },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(ctx) {
+                                const idx = ctx.dataIndex;
+                                const hl = highlightPoints[idx];
+                                return hl ? '亮点：' + hl : '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#9d9db0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#9d9db0' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('timeline replay chart failed:', e);
+    }
+}
+
+function closeTimelineReplay() {
+    const panel = document.getElementById('timelineReplayPanel');
+    if (panel) panel.classList.add('hidden');
+    if (timelineReplayChart) { try { timelineReplayChart.destroy(); } catch (e) {} timelineReplayChart = null; }
+}
+
+// ============================================================
+// 4.4 右侧栏上下文情报：renderContextSidebar 调度5子面板
+// ============================================================
+function renderContextSidebar() {
+    // 5 子面板：crisisAlert / rivalThreat / fortune / comboHint / coachAdvice
+    renderCrisisAlerts();
+    renderRivalThreat();
+    renderFortunePanel();
+    renderComboHintPanel();
+    renderCoachAdvicePanel();
+}
+
+function renderFortunePanel() {
+    const panel = document.getElementById('fortunePanel');
+    if (!panel) return;
+    const v = state.vup;
+    if (!v) {
+        panel.innerHTML = '<div class="context-sidebar-item empty"><span class="context-sidebar-title">🔮 运势</span><span class="context-sidebar-empty">--</span></div>';
+        return;
+    }
+    const fortune = v.fortune || state.stageBriefing?.fortune || null;
+    const label = visibleTextOrFallback(fortune?.label, fortune?.name, '运势平稳');
+    const desc = visibleTextOrFallback(fortune?.description, fortune?.effect, '');
+    const tier = fortune?.tier || '';
+    panel.innerHTML = '<div class="context-sidebar-item expanded" data-context-item="fortune">'
+        + '<button class="context-sidebar-head" type="button" data-action="toggle-context-item" data-context-target="fortune" aria-expanded="true">'
+        + '<span class="context-sidebar-title">🔮 运势' + (tier ? ' · ' + html(tier) : '') + '</span>'
+        + '<span class="context-sidebar-chevron">▾</span></button>'
+        + '<div class="context-sidebar-body">'
+        + '<div class="fortune-card"><strong>' + html(label) + '</strong>'
+        + (desc ? '<p>' + html(desc) + '</p>' : '')
+        + '</div>'
+        + '</div></div>';
+}
+
+function renderComboHintPanel() {
+    const panel = document.getElementById('comboHintPanel');
+    if (!panel) return;
+    const combo = state.comboDiscovery;
+    if (!combo) {
+        panel.innerHTML = '<div class="context-sidebar-item empty"><span class="context-sidebar-title">🔗 连击提示</span><span class="context-sidebar-empty">暂无可用连击</span></div>';
+        return;
+    }
+    const label = visibleTextOrFallback(combo.label || combo.comboKey, '连击');
+    const hint = visibleTextOrFallback(combo.hint || combo.description, '');
+    const ready = !!combo.ready;
+    panel.innerHTML = '<div class="context-sidebar-item expanded" data-context-item="combo">'
+        + '<button class="context-sidebar-head" type="button" data-action="toggle-context-item" data-context-target="combo" aria-expanded="true">'
+        + '<span class="context-sidebar-title">🔗 连击提示' + (ready ? ' · 可用' : '') + '</span>'
+        + '<span class="context-sidebar-chevron">▾</span></button>'
+        + '<div class="context-sidebar-body">'
+        + '<div class="combo-hint-card"><strong>' + html(label) + '</strong>'
+        + (hint ? '<p>' + html(hint) + '</p>' : '')
+        + '</div>'
+        + '</div></div>';
+}
+
+// 4.4 教练建议精简为1条注入 #coachAdvicePanel（保留原 renderCoach 渲染 #coachPanel 兼容）
+function renderCoachAdvicePanel() {
+    const panel = document.getElementById('coachAdvicePanel');
+    if (!panel) return;
+    if (!state.vup) {
+        panel.innerHTML = '<div class="context-sidebar-item empty"><span class="context-sidebar-title">🎯 下一步建议</span><span class="context-sidebar-empty">--</span></div>';
+        return;
+    }
+    const phase = state.session?.phase || 'READY';
+    const copy = {
+        READY: ['今天只做一个主决定', '先看推荐卡：它会告诉你得到什么、承担什么、会更像哪条路线。'],
+        NEED_TITLE: ['给这场直播起标题', '稳标题保口碑，狠标题冲围观，也可能留下旧账。'],
+        NEED_INTERACTION_CHOICE: ['直播间正在等你回应', '把每个选项当成一次表态。'],
+        NEED_EVENT_CHOICE: ['今天的麻烦来了', '先看选项里的风险预览。'],
+        REPORT_READY: ['先看三行，再开下一天', '日报先看粉丝、口碑、围观和风险提示。'],
+        ENDING_READY: ['这局已经成型', '结局页会告诉你为什么走到这里。'],
+        OFF_STREAM_READY: ['下播后补一手', '这是轻量收尾：补路线、降风险，或直接跳过进日报。']
+    }[phase] || [getPhaseText(phase), '按当前面板的按钮继续。'];
+    const [title, body] = copy;
+    panel.innerHTML = '<div class="context-sidebar-item expanded" data-context-item="coach">'
+        + '<button class="context-sidebar-head" type="button" data-action="toggle-context-item" data-context-target="coach" aria-expanded="true">'
+        + '<span class="context-sidebar-title">🎯 下一步建议</span>'
+        + '<span class="context-sidebar-chevron">▾</span></button>'
+        + '<div class="context-sidebar-body">'
+        + '<div class="coach-advice-card"><strong>' + html(title) + '</strong><p>' + html(body) + '</p></div>'
+        + '</div></div>';
+}
+
+function toggleContextItem(target) {
+    const item = document.querySelector('[data-context-item="' + target + '"]');
+    if (!item) return;
+    const expanded = item.classList.toggle('expanded');
+    const head = item.querySelector('.context-sidebar-head');
+    if (head) head.setAttribute('aria-expanded', String(expanded));
+    const chevron = item.querySelector('.context-sidebar-chevron');
+    if (chevron) chevron.textContent = expanded ? '▾' : '▸';
+}
+
+// ============================================================
+// 4.5 / 4.6 平台抽屉 / 总览独立页 全屏开关
+// ============================================================
+function togglePlatformDrawer() {
+    // 复用 liveDrawer 的 'npcs' 面板，叠加全屏样式
+    if (typeof openLiveDrawer === 'function') {
+        openLiveDrawer('npcs');
+        const drawer = document.getElementById('liveDrawer');
+        if (drawer) drawer.classList.toggle('fullscreen');
+    }
+}
+
+function toggleInfoHubPage() {
+    if (typeof openLiveDrawer === 'function') {
+        openLiveDrawer('environment');
+        const drawer = document.getElementById('liveDrawer');
+        if (drawer) drawer.classList.toggle('fullscreen');
+    }
+}
+
+// ============================================================
+// 5.1 render() 拆分按区渲染
+// ============================================================
+function renderTopBar() {
+    renderHeader();
+    syncAudioSettingsPanel();
+    syncBGM();
+}
+
+function renderMainCard() {
+    renderActions();
+    renderOffStreamPanel();
+    renderFanTopics();
+    renderTitles();
+    renderEvent();
+    renderReport();
+    renderEnding();
+    renderMainDecisionCard();
+}
+
+function renderSidebar() {
+    renderCoach();
+    renderContextSidebar();
+    if (state.vup) renderOperationDiagnosis(state.vup, state.session);
+    renderInsightDigest();
+    renderAchievements();
+    renderUnlockAtlas();
+    renderEndingAtlas();
+}
+
+function renderLiveLayer() {
+    syncLiveRoomStage();
+    syncLiveDrawerSummaries();
+    renderDanmaku();
+    updateVupAvatar();
+}
+
+// 按需渲染入口（供 refreshAfterWrite 调用，避免全量重绘）
+async function renderOnDemand(scope) {
+    const s = scope || 'all';
+    if (s === 'all') { render(); return; }
+    if (s === 'topBar') { renderTopBar(); return; }
+    if (s === 'mainCard') { renderMainCard(); return; }
+    if (s === 'sidebar') { renderSidebar(); return; }
+    if (s === 'liveLayer') { renderLiveLayer(); return; }
+}
+
+// ============================================================
+// 4.2 左栏状态聚合：Chart.js 雷达图 + 粉丝饼图 + 路线分迷你条
+// ============================================================
+let statRadarChart = null;
+let statFanPieChart = null;
+
+function initStatCharts() {
+    if (typeof window === 'undefined' || !window.Chart) return;
+    const radarCanvas = document.getElementById('radarChart');
+    const pieCanvas = document.getElementById('fanPieChart');
+    if (radarCanvas && !statRadarChart) {
+        try {
+            statRadarChart = new window.Chart(radarCanvas, {
+                type: 'radar',
+                data: { labels: ['歌力', '舞力', '杂谈', '梗力', '企划', '抗压'], datasets: [{ label: '能力', data: [0,0,0,0,0,0], backgroundColor: 'rgba(251,114,153,0.15)', borderColor: '#fb7299', pointBackgroundColor: '#fb7299' }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { r: { beginAtZero: true, suggestedMax: 100, ticks: { color: '#9d9db0' }, grid: { color: 'rgba(255,255,255,0.08)' }, angleLines: { color: 'rgba(255,255,255,0.08)' }, pointLabels: { color: '#e8e8f0', font: { size: 11 } } } }, plugins: { legend: { display: false } } }
+            });
+        } catch (e) { console.warn('stat radar init failed:', e); }
+    }
+    if (pieCanvas && !statFanPieChart) {
+        try {
+            statFanPieChart = new window.Chart(pieCanvas, {
+                type: 'doughnut',
+                data: { labels: ['真爱粉', '乐子人', '独角兽', 'DD'], datasets: [{ data: [1,1,1,1], backgroundColor: ['#fb7299', '#ffd700', '#a855f7', '#23ade5'], borderColor: 'rgba(0,0,0,0.2)', borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { color: '#e8e8f0', font: { size: 10 }, boxWidth: 10 } } }, cutout: '55%' }
+            });
+        } catch (e) { console.warn('stat pie init failed:', e); }
+    }
+}
+
+function updateStatCharts() {
+    if (!state.vup) return;
+    const v = state.vup;
+    if (statRadarChart) {
+        const a = v.attributes || {};
+        statRadarChart.data.datasets[0].data = [
+            Number(a.songPower ?? 0), Number(a.dancePower ?? 0), Number(a.talkPower ?? 0),
+            Number(a.memePower ?? 0), Number(a.planPower ?? 0), Number(a.stressPower ?? 0)
+        ];
+        try { statRadarChart.update('none'); } catch (e) {}
+    }
+    if (statFanPieChart) {
+        const fs = v.fanStructure || {};
+        statFanPieChart.data.datasets[0].data = [
+            Math.max(0, Number(fs.trueFans ?? 0)),
+            Math.max(0, Number(fs.funFans ?? 0)),
+            Math.max(0, Number(fs.unicornFans ?? 0)),
+            Math.max(0, Number(fs.ddFans ?? 0))
+        ];
+        try { statFanPieChart.update('none'); } catch (e) {}
+    }
+    const mini = document.getElementById('routeScoreMini');
+    if (mini) {
+        const entries = (typeof routeScoreEntries === 'function') ? routeScoreEntries() : [];
+        const bars = entries.slice(0, 6).map(item => {
+            const pct = Math.max(2, Math.min(100, Number(item.score ?? 0)));
+            return '<div class="route-score-mini-row"><span class="route-score-mini-label">' + html(item.routeLabel || item.route || '') + '</span>'
+                + '<div class="route-score-mini-track"><div class="route-score-mini-fill" style="width:' + pct + '%"></div></div>'
+                + '<span class="route-score-mini-value">' + html(item.score ?? 0) + '</span></div>';
+        }).join('');
+        mini.innerHTML = '<div class="route-score-mini-card"><div class="route-score-mini-head">路线分</div>' + bars + '</div>';
+    }
+}
+
+// 暴露给 window 供 action-registry / app.js 调用
+window.renderCrisisAlerts = renderCrisisAlerts;
+window.renderRivalThreat = renderRivalThreat;
+window.renderEndingAtlas = renderEndingAtlas;
+window.renderTimelineReplay = renderTimelineReplay;
+window.closeTimelineReplay = closeTimelineReplay;
+window.renderContextSidebar = renderContextSidebar;
+window.renderFortunePanel = renderFortunePanel;
+window.renderComboHintPanel = renderComboHintPanel;
+window.renderCoachAdvicePanel = renderCoachAdvicePanel;
+window.toggleContextItem = toggleContextItem;
+window.togglePlatformDrawer = togglePlatformDrawer;
+window.toggleInfoHubPage = toggleInfoHubPage;
+window.renderTopBar = renderTopBar;
+window.renderMainCard = renderMainCard;
+window.renderSidebar = renderSidebar;
+window.renderLiveLayer = renderLiveLayer;
+window.renderOnDemand = renderOnDemand;
+window.initStatCharts = initStatCharts;
+window.updateStatCharts = updateStatCharts;
+window.renderMainDecisionCard = renderMainDecisionCard;

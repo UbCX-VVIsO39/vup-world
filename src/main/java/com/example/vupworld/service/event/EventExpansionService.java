@@ -1,5 +1,6 @@
 package com.example.vupworld.service.event;
 
+import com.example.vupworld.service.infra.DeterministicRngService;
 import com.example.vupworld.service.infra.JsonService;
 
 import com.example.vupworld.dto.EventDtos.EventDTO;
@@ -11,6 +12,11 @@ import java.util.Objects;
 
 @Service
 public class EventExpansionService {
+    private final DeterministicRngService rngService;
+
+    public EventExpansionService(DeterministicRngService rngService) {
+        this.rngService = rngService;
+    }
 
     private static final List<EventDTO> GOOD_EVENTS = List.of(
             new EventDTO("GOOD_01", "意外走红", "你的一段直播切片被大V转发", "粉丝+500，人气+200", "GOOD", "🌟"),
@@ -54,6 +60,14 @@ public class EventExpansionService {
             new EventDTO("MEME_10", "疯狂星期四刷屏", "粉丝刷屏把企划做成固定梗", "活动预算+50~500", "MEME", "🍗")
     );
 
+    private static final List<EventDTO> LATEGAME_EVENTS = List.of(
+            new EventDTO("LATE_01", "二创爆发现象", "粉丝二创数量突然暴增，你的形象在多个平台被传播", "真爱粉+300，围观+50", "GOOD", "🎯"),
+            new EventDTO("LATE_02", "回旋镖效应", "早期的某条内容被翻出来，引发了新一轮讨论", "围观+40，梗浓度+5", "MEME", "🪃"),
+            new EventDTO("LATE_03", "平台年终盘点", "你的直播入选了平台年度回顾，大量新观众涌入", "粉丝+400，围观+80", "GOOD", "🏆"),
+            new EventDTO("LATE_04", "粉丝群体冲突", "不同时期的粉丝群体之间产生了对立", "DD粉-50，真爱粉-30", "BAD", "⚔️"),
+            new EventDTO("LATE_05", "后辈效仿风潮", "新人主播开始模仿你的风格", "围观+20，梗浓度+8", "MEME", "🪞")
+    );
+
     public List<EventDTO> getGoodEvents() {
         return GOOD_EVENTS;
     }
@@ -72,7 +86,17 @@ public class EventExpansionService {
 
     public EventDTO getRandomEvent(int day, int fans, int watchHeat, int reputation) {
         List<EventDTO> candidates = candidateEventsFor(day, fans, watchHeat, reputation);
+        if (candidates.isEmpty()) return null;
         int index = Math.floorMod(Objects.hash(day, fans, watchHeat, reputation, candidates.size()), candidates.size());
+        return candidates.get(index);
+    }
+
+    public EventDTO getRandomEventRng(int day, int fans, int watchHeat, int reputation, com.example.vupworld.model.DaySession session) {
+        List<EventDTO> candidates = candidateEventsFor(day, fans, watchHeat, reputation);
+        if (candidates.isEmpty()) return null;
+        var ledger = rngService.createLedger(session);
+        int index = ledger.nextInt("event_expansion_pick", candidates.size());
+        rngService.finalizeLedger(session, ledger);
         return candidates.get(index);
     }
 
@@ -90,6 +114,11 @@ public class EventExpansionService {
             candidates.addAll(GOOD_EVENTS);
             candidates.addAll(BAD_EVENTS);
             candidates.addAll(MEME_EVENTS);
+        }
+
+        // Day 20+: unlock late-game events for variety
+        if (day >= 20) {
+            candidates.addAll(LATEGAME_EVENTS);
         }
 
         return List.copyOf(candidates);
@@ -119,7 +148,7 @@ public class EventExpansionService {
     }
 
     public int getTotalEventCount() {
-        return GOOD_EVENTS.size() + BAD_EVENTS.size() + CHOICE_EVENTS.size() + MEME_EVENTS.size();
+        return GOOD_EVENTS.size() + BAD_EVENTS.size() + CHOICE_EVENTS.size() + MEME_EVENTS.size() + LATEGAME_EVENTS.size();
     }
 
     public record CandidateReason(String eventType, String reason) {

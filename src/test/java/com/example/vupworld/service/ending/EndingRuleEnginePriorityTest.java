@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EndingRuleEnginePriorityTest {
     private final JsonService jsonService = new JsonService(new ObjectMapper());
-    private final EndingRuleEngine engine = new EndingRuleEngine(new BalanceConfig(30, true), jsonService);
+    private final EndingRuleEngine engine = new EndingRuleEngine(new BalanceConfig(30, true, "STANDARD"), jsonService);
 
     @Test
     void cyberGirlfriendTakesPriorityOverDdSliceAndBlackRedWhenFanServiceGateIsReady() {

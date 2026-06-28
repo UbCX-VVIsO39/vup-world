@@ -19,6 +19,12 @@ import java.util.Map;
 @Component
 public class RewardCalculator {
 
+    // Per-run boost window offset, randomized at startup
+    private static volatile int boostOffset = 0;
+    static {
+        boostOffset = (int) (Math.random() * 5); // 0-4 day shift
+    }
+
     private final BalanceConfig balanceConfig;
     private final JsonService jsonService;
 
@@ -38,7 +44,7 @@ public class RewardCalculator {
      * 非直播行动的结算（带天数，用于判断周增益）。
      */
     public RewardDelta resolveNonStreamAction(Vup vup, ActionType actionType, String npcTendency, int day) {
-        return switch (actionType) {
+        RewardDelta base = switch (actionType) {
             case TRAIN_SONG -> resolveTrainSong(vup, day);
             case TRAIN_DANCE -> resolveTrainDance(vup);
             case TRAIN_TALK -> resolveTrainTalk(vup, day);
@@ -49,6 +55,31 @@ public class RewardCalculator {
             case REST -> resolveRest();
             default -> RewardDelta.empty();
         };
+        return applyStaminaTierModifier(vup, base);
+    }
+
+    /** 体力档位对收益的横切修正：透支(-20%)，疲惫(-10%)，巅峰(+10%)。REST行动不受影响。 */
+    private RewardDelta applyStaminaTierModifier(Vup vup, RewardDelta delta) {
+        // REST不受体力档位影响
+        if (delta.staminaChange() > 0) return delta;
+        int stamina = vup.getStamina();
+        double multiplier = stamina <= 0 ? 0.7
+                : stamina <= 2 ? 0.8
+                : stamina <= 5 ? 0.9
+                : stamina >= 9 ? 1.1
+                : 1.0;
+        if (multiplier == 1.0) return delta;
+        int tf = (int)(delta.trueFanChange() * multiplier);
+        int ff = (int)(delta.funFanChange() * multiplier);
+        int uf = (int)(delta.unicornFanChange() * multiplier);
+        int df = (int)(delta.ddFanChange() * multiplier);
+        return new RewardDelta(tf, ff, uf, df, tf + ff + uf + df,
+                (int)(delta.popularityChange() * multiplier), delta.watchHeatChange(),
+                delta.reputationChange(), delta.memeChange(), delta.commercialChange(),
+                delta.coinChange(), delta.inspirationChange(), delta.staminaChange(),
+                delta.routeScoreChange(), delta.routeType(), delta.evidenceRef(),
+                delta.multiplierDetail(), delta.capDetail(), delta.clampDetail(),
+                delta.rngDetail(), delta.weightDetail());
     }
 
     /**
@@ -63,8 +94,9 @@ public class RewardCalculator {
         vup.setFans(vup.getTrueFans() + vup.getFunFans() + vup.getUnicornFans() + vup.getDdFans());
         vup.setPopularity(Math.max(0, vup.getPopularity() + delta.popularityChange()));
         vup.setWatchHeat(Math.max(0, vup.getWatchHeat() + delta.watchHeatChange()));
-        vup.setReputation(Math.min(100, Math.max(0, vup.getReputation() + delta.reputationChange())));
-        vup.setMemeLevel(Math.min(100, Math.max(0, vup.getMemeLevel() + delta.memeChange())));
+        int attrMax = balanceConfig.attributeMax();
+        vup.setReputation(Math.min(attrMax, Math.max(0, vup.getReputation() + delta.reputationChange())));
+        vup.setMemeLevel(Math.min(attrMax, Math.max(0, vup.getMemeLevel() + delta.memeChange())));
         vup.setCommercialLevel(Math.min(100, Math.max(0, vup.getCommercialLevel() + delta.commercialChange())));
         vup.setCoin(vup.getCoin() + delta.coinChange());
         vup.setInspiration(Math.max(0, vup.getInspiration() + delta.inspirationChange()));
@@ -76,9 +108,9 @@ public class RewardCalculator {
 
     private void applyAttributeChange(Vup vup, String actionType) {
         switch (actionType) {
-            case "train_song" -> vup.setSongPower(Math.min(100, vup.getSongPower() + 1));
-            case "train_dance" -> vup.setDancePower(Math.min(100, vup.getDancePower() + 1));
-            case "train_talk" -> vup.setTalkPower(Math.min(100, vup.getTalkPower() + 1));
+            case "train_song" -> vup.setSongPower(Math.min(balanceConfig.attributeMax(), vup.getSongPower() + 1));
+            case "train_dance" -> vup.setDancePower(Math.min(balanceConfig.attributeMax(), vup.getDancePower() + 1));
+            case "train_talk" -> vup.setTalkPower(Math.min(balanceConfig.attributeMax(), vup.getTalkPower() + 1));
         }
     }
 
@@ -121,7 +153,7 @@ public class RewardCalculator {
                 balanceConfig.trainSongDdFanChange(), 0,
                 balanceConfig.trainSongPopularity(),
                 0, balanceConfig.trainSongReputation(), 0, 0, 0, 0,
-                -balanceConfig.trainActionStaminaCost(),
+                0,
                 balanceConfig.standardRouteScoreChange(), "SINGING_IDOL",
                 Map.of("type", "train_song"),
                 multiplierDetail("TRAIN_SONG"), "{}",
@@ -137,7 +169,7 @@ public class RewardCalculator {
                 balanceConfig.trainDancePopularity(),
                 balanceConfig.trainDanceWatchHeat(),
                 0, balanceConfig.trainDanceMemeLevel(), 0, 0, 0,
-                -balanceConfig.trainActionStaminaCost(),
+                0,
                 balanceConfig.danceStreamRouteScoreChange(), "DANCE_MEME",
                 Map.of("type", "train_dance"),
                 multiplierDetail("TRAIN_DANCE"), "{}",
@@ -152,7 +184,7 @@ public class RewardCalculator {
                 balanceConfig.trainTalkTrueFanChange() + safeWeekBonus, 0, 0, 0, 0,
                 5,
                 0, safeWeek ? balanceConfig.trainTalkSafeWeekReputation() : balanceConfig.trainTalkReputation(), 0, 0, 0, 1,
-                -balanceConfig.trainActionStaminaCost(),
+                0,
                 0, "ELECTRONIC_PICKLE",
                 Map.of("type", "train_talk"),
                 multiplierDetail("TRAIN_TALK"), "{}",
@@ -168,7 +200,7 @@ public class RewardCalculator {
                 balanceConfig.publishVideoDdFanChange() + singingBoost * 3, 0,
                 balanceConfig.publishVideoPopularity(),
                 balanceConfig.publishVideoWatchHeat(), 0, balanceConfig.publishVideoMemeLevel(), 0, 0, 0,
-                -balanceConfig.publishVideoStaminaCost(),
+                0,
                 balanceConfig.standardRouteScoreChange(), "SLICE_SAINT",
                 Map.of("type", "publish_video"),
                 multiplierDetail("PUBLISH_VIDEO"), "{}",
@@ -182,7 +214,7 @@ public class RewardCalculator {
                 balanceConfig.publishClipDdFanChange(), 0,
                 balanceConfig.publishClipPopularity(),
                 balanceConfig.publishClipWatchHeat(), 0, balanceConfig.publishClipMemeLevel(), 0, 0, 0,
-                -balanceConfig.publishClipStaminaCost(),
+                0,
                 balanceConfig.standardRouteScoreChange(), "SLICE_SAINT",
                 Map.of("type", "publish_clip"),
                 multiplierDetail("PUBLISH_CLIP"), "{}",
@@ -197,28 +229,28 @@ public class RewardCalculator {
                     balanceConfig.npcInteractDdFanChange(), 0,
                     balanceConfig.npcInteractPopularity(),
                     8, balanceConfig.npcInteractReputation(), 0, 0, 0, 0,
-                    -3, balanceConfig.standardRouteScoreChange(), "SOCIAL_COLLAB",
+                    0, balanceConfig.standardRouteScoreChange(), "SOCIAL_COLLAB",
                     Map.of("type", "npc_raid"),
                     multiplierDetail("NPC_INTERACT"), "{}", "{}", "{}", "{}"
             );
             case "COLLAB" -> new RewardDelta(
                     balanceConfig.npcInteractTrueFanChange(), 0, 0, 18, 0,
                     10, 5, 2, 0, 0, 0, 0,
-                    -3, balanceConfig.highRouteScoreChange(), "SOCIAL_COLLAB",
+                    0, balanceConfig.highRouteScoreChange(), "SOCIAL_COLLAB",
                     Map.of("type", "npc_collab"),
                     multiplierDetail("NPC_INTERACT"), "{}", "{}", "{}", "{}"
             );
             case "BORROW_HEAT" -> new RewardDelta(
                     balanceConfig.npcInteractTrueFanChange(), 8, 0, 16, 0,
                     15, 12, -2, 0, 0, 0, 0,
-                    -3, 1, "BLACK_RED_MAIN_STAGE",
+                    0, 1, "BLACK_RED_MAIN_STAGE",
                     Map.of("type", "npc_borrow_heat"),
                     multiplierDetail("NPC_INTERACT"), "{}", "{}", "{}", "{}"
             );
             default -> new RewardDelta(
                     balanceConfig.npcInteractTrueFanChange(), 0, 0, 4, 0,
                     2, 0, 1, 0, 0, 0, 0,
-                    -3, 0, "ELECTRONIC_PICKLE",
+                    0, 0, "ELECTRONIC_PICKLE",
                     Map.of("type", "npc_avoid"),
                     multiplierDetail("NPC_INTERACT"), "{}", "{}", "{}", "{}"
             );
@@ -229,7 +261,7 @@ public class RewardCalculator {
         return new RewardDelta(
                 balanceConfig.fanGroupMaintainTrueFanChange(), 0, 0, 0, 0,
                 3, 0, balanceConfig.fanGroupMaintainReputation(), 0, 0, 0, 0,
-                -2, balanceConfig.standardRouteScoreChange(), "ELECTRONIC_PICKLE",
+                0, balanceConfig.standardRouteScoreChange(), "ELECTRONIC_PICKLE",
                 Map.of("type", "fan_group_maintain"),
                 multiplierDetail("FAN_GROUP_MAINTAIN"), "{}", "{}", "{}", "{}"
         );
@@ -255,10 +287,10 @@ public class RewardCalculator {
     }
 
     private boolean isSingingBoostWeek(int day) {
-        return day >= 8 && day <= 14;
+        return day >= (8 - boostOffset) && day <= (14 - boostOffset);
     }
 
     private boolean isSafeWeek(int day) {
-        return day >= 1 && day <= 7;
+        return day >= (1 + boostOffset) && day <= (7 + boostOffset);
     }
 }

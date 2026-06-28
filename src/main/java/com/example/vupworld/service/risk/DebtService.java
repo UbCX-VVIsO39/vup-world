@@ -4,13 +4,16 @@ import com.example.vupworld.service.infra.BalanceConfig;
 
 import com.example.vupworld.dto.ActionDtos.DebtCreatedDTO;
 import com.example.vupworld.dto.ActionDtos.TitleOptionDTO;
+import com.example.vupworld.dto.RiskToolDtos.CrisisAlertDTO;
 import com.example.vupworld.mapper.RiskDebtMapper;
+import com.example.vupworld.mapper.VupMapper;
 import com.example.vupworld.model.BusinessLog;
 import com.example.vupworld.model.DaySession;
 import com.example.vupworld.model.RiskDebt;
 import com.example.vupworld.model.Vup;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,10 +23,12 @@ import java.util.Map;
 public class DebtService {
     private final RiskDebtMapper riskDebtMapper;
     private final BalanceConfig balanceConfig;
+    private final VupMapper vupMapper;
 
-    public DebtService(RiskDebtMapper riskDebtMapper, BalanceConfig balanceConfig) {
+    public DebtService(RiskDebtMapper riskDebtMapper, BalanceConfig balanceConfig, VupMapper vupMapper) {
         this.riskDebtMapper = riskDebtMapper;
         this.balanceConfig = balanceConfig;
+        this.vupMapper = vupMapper;
     }
 
     public List<DebtCreatedDTO> createForStreamTitleIfNeeded(Vup vup, DaySession session, BusinessLog log, TitleOptionDTO title) {
@@ -283,6 +288,44 @@ public class DebtService {
 
     public List<RiskDebt> openDebts(Vup vup) {
         return riskDebtMapper.findOpenByVupId(vup.getId());
+    }
+
+    /**
+     * 危机预警：扫描 OPEN 状态的旧账，按到期紧迫度排序返回预警列表。
+     */
+    public List<CrisisAlertDTO> crisisAlerts(Long vupId) {
+        Vup vup = vupMapper.findById(vupId);
+        if (vup == null) {
+            return List.of();
+        }
+        List<RiskDebt> openDebts = riskDebtMapper.findOpenByVupId(vupId);
+        int currentDay = vup.getDayCount();
+        List<CrisisAlertDTO> alerts = new ArrayList<>();
+        for (RiskDebt debt : openDebts) {
+            int daysLeft = debt.getDueDay() - currentDay;
+            String severity = daysLeft <= 0 ? "CRITICAL"
+                    : daysLeft <= 1 ? "HIGH"
+                    : daysLeft <= 3 ? "MEDIUM"
+                    : "LOW";
+            String title = debtTitle(debt);
+            String description = "来源：" + (debt.getSourceTitle() != null ? debt.getSourceTitle() : debt.getSourceAction())
+                    + "。到期日：第" + debt.getDueDay() + "天。"
+                    + (daysLeft <= 0 ? "已逾期，需立即处理。" : "剩余" + daysLeft + "天。")
+                    + " 摘要：" + debt.getSummary();
+            alerts.add(new CrisisAlertDTO(debt.getDebtType(), title, daysLeft, severity, description));
+        }
+        alerts.sort(Comparator.comparingInt(CrisisAlertDTO::daysLeft));
+        return alerts;
+    }
+
+    private String debtTitle(RiskDebt debt) {
+        return switch (debt.getDebtType()) {
+            case "TITLE_BACKFIRE" -> "标题党反噬预警";
+            case "UNICORN_EXPECTATION" -> "独角兽期待预警";
+            case "COMMERCIAL_BACKLASH" -> "商业反噬预警";
+            case "BOOMERANG_CLIP" -> "回旋镖切片预警";
+            default -> "旧账预警";
+        };
     }
 
     public TitleDebtPreview previewForTitle(Vup vup, DaySession session, TitleOptionDTO title) {

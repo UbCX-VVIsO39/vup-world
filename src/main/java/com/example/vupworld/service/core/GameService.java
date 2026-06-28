@@ -103,7 +103,8 @@ public class GameService {
     );
     private static final CreateVupRequest DEFAULT_LOCAL_VUP = new CreateVupRequest(
             "露米",
-            "B站直播间出道新人，主打杂谈、切片和一点点黑红体质。"
+            "B站直播间出道新人，主打杂谈、切片和一点点黑红体质。",
+            "STANDARD"
     );
 
     private final AuthService authService;
@@ -244,6 +245,44 @@ public class GameService {
             manualSaveSnapshotMapper.update(userId, slotNumber, snapshot);
         }
         return toSlot(run);
+    }
+
+    /**
+     * 暂停存档：将当前 vup+day_session 状态序列化到 manual_save_snapshot（含 phase）。
+     */
+    @Transactional
+    public SaveSlotDTO pauseSave(Long userId, int slotNumber) {
+        validateSlotNumber(slotNumber);
+        Vup run = findSlotRun(userId, slotNumber);
+        if (run == null) {
+            throw new GameException("NO_SAVE", "还没有本地存档，先开始第一局。");
+        }
+        SaveSlotDTO slot = toSlot(run);
+        ManualSaveSnapshot snapshot = toManualSaveSnapshot(run, slotNumber, slot);
+        ManualSaveSnapshot existing = manualSaveSnapshotMapper.findByUserIdAndSlot(userId, slotNumber);
+        if (existing == null) {
+            manualSaveSnapshotMapper.insert(snapshot);
+        } else {
+            manualSaveSnapshotMapper.update(userId, slotNumber, snapshot);
+        }
+        return toSlot(run);
+    }
+
+    /**
+     * 恢复存档：从 manual_save_snapshot 恢复指定槽位的进度。
+     */
+    @Transactional
+    public GameStartDTO resumeSave(Long userId, int slotNumber) {
+        validateSlotNumber(slotNumber);
+        ManualSaveSnapshot snapshot = manualSaveSnapshotMapper.findByUserIdAndSlot(userId, slotNumber);
+        if (snapshot == null) {
+            throw new GameException("NO_SAVE", "该槽位没有暂停存档，先保存进度。");
+        }
+        UserDTO user = authService.getUser(userId);
+        if (user == null) {
+            throw new GameException("NO_SAVE", "用户不存在，无法恢复存档。");
+        }
+        return continueSlot(user, slotNumber);
     }
 
     @Transactional

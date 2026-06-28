@@ -124,19 +124,52 @@ public class BlackSwanService {
             40, -20, 25, 0)
     );
 
-    // 检查是否触发黑天鹅事件（5%概率）
     public Optional<BlackSwanEvent> checkTrigger(Vup vup, DaySession session) {
-        if (vup.getDayCount() < 5) return Optional.empty(); // 前5天不触发
+        if (vup.getDayCount() < 5) return Optional.empty();
 
         var ledger = rngService.createLedger(session);
         int roll = ledger.nextInt("black_swan", 100);
+
+        // Context-aware trigger rate based on player state
+        int triggerThreshold = 5; // base 5%
+        // High reputation or heat = more public exposure = more risk
+        if (vup.getReputation() >= 60 && vup.getWatchHeat() >= 40) {
+            triggerThreshold = 8; // 8%
+        } else if (vup.getReputation() < 30) {
+            triggerThreshold = 3; // 3% - less exposure, less risk
+        }
+        // DD-heavy fanbase = more drama potential
+        int totalFans = vup.getFans();
+        if (totalFans > 0 && (double) vup.getDdFans() / totalFans > 0.4) {
+            triggerThreshold += 2;
+        }
+        triggerThreshold = Math.min(12, triggerThreshold);
+
         rngService.finalizeLedger(session, ledger);
 
-        if (roll < 5) { // 5%概率
-            int index = ledger.nextInt("black_swan_pick", EVENTS.size());
-            return Optional.of(EVENTS.get(index));
+        if (roll < triggerThreshold) {
+            // Filter events by context: don't trigger "media exposure" for low-heat players
+            List<BlackSwanEvent> filtered = filterContextEvents(vup);
+            int index = ledger.nextInt("black_swan_pick", filtered.size());
+            return Optional.of(filtered.get(index));
         }
         return Optional.empty();
+    }
+
+    private List<BlackSwanEvent> filterContextEvents(Vup vup) {
+        if (vup.getWatchHeat() < 20) {
+            // Low heat: filter out events that require high public visibility
+            return EVENTS.stream()
+                    .filter(e -> !"MEDIA_EXPOSURE".equals(e.key) && !"BACKLASH_AGAINST_HATERS".equals(e.key) && !"RUMOR_DEBUNKED".equals(e.key))
+                    .toList();
+        }
+        if (vup.getReputation() > 70) {
+            // High reputation: filter out events that are more relevant to controversial streamers
+            return EVENTS.stream()
+                    .filter(e -> !"AVATAR_RIG_BREAK".equals(e.key) && !"LEAKED_INFO".equals(e.key))
+                    .toList();
+        }
+        return EVENTS;
     }
 
     public static class BlackSwanEvent {

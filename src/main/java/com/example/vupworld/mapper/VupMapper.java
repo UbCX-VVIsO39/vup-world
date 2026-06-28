@@ -17,14 +17,16 @@ public interface VupMapper {
                 stamina, max_stamina, coin, inspiration,
                 fans, true_fans, fun_fans, unicorn_fans, dd_fans,
                 popularity, watch_heat, reputation, meme_level, commercial_level,
-                current_route, expectation_json, route_score_json, tutorial_flags_json, previous_ending_id
+                current_route, expectation_json, route_score_json, tutorial_flags_json, previous_ending_id,
+                difficulty
             ) VALUES (
                 #{userId}, #{slotNumber}, #{name}, #{persona}, #{status}, #{dayCount}, #{runSeed},
                 #{songPower}, #{dancePower}, #{talkPower}, #{memePower}, #{planPower}, #{stressPower},
                 #{stamina}, #{maxStamina}, #{coin}, #{inspiration},
                 #{fans}, #{trueFans}, #{funFans}, #{unicornFans}, #{ddFans},
                 #{popularity}, #{watchHeat}, #{reputation}, #{memeLevel}, #{commercialLevel},
-                #{currentRoute}, #{expectationJson}, #{routeScoreJson}, #{tutorialFlagsJson}, #{previousEndingId}
+                #{currentRoute}, #{expectationJson}, #{routeScoreJson}, #{tutorialFlagsJson}, #{previousEndingId},
+                #{difficulty}
             )
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
@@ -99,6 +101,7 @@ public interface VupMapper {
                 expectation_json = #{expectationJson},
                 route_score_json = #{routeScoreJson},
                 tutorial_flags_json = #{tutorialFlagsJson},
+                difficulty = #{difficulty},
                 update_time = CURRENT_TIMESTAMP
             WHERE id = #{id}
             """)

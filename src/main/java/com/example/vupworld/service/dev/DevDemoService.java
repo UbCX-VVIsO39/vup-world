@@ -154,7 +154,7 @@ public class DevDemoService {
 
         var vup = vupService.createVupWithRunSeed(
                 user.getId(),
-                new CreateVupRequest(DEMO_VUP_NAME, demoPersonaFor(scenario)),
+                new CreateVupRequest(DEMO_VUP_NAME, demoPersonaFor(scenario), "STANDARD"),
                 runSeed
         );
         return new DemoResetResult(user.getId(), user.getUsername(), runSeed, vup, vupService.currentSession(user.getId()));

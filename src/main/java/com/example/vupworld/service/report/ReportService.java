@@ -27,6 +27,7 @@ import com.example.vupworld.dto.ActionDtos.ActionResultDTO;
 import com.example.vupworld.dto.ComboDtos.ComboItemDTO;
 import com.example.vupworld.mapper.BusinessLogMapper;
 import com.example.vupworld.dto.ReportDtos.DailyReportDTO;
+import com.example.vupworld.dto.ReportDtos.TimelineDTO;
 import com.example.vupworld.mapper.DailyReportMapper;
 import com.example.vupworld.mapper.RiskDebtMapper;
 import com.example.vupworld.model.BusinessLog;
@@ -35,6 +36,7 @@ import com.example.vupworld.model.DaySession;
 import com.example.vupworld.model.RiskDebt;
 import com.example.vupworld.model.Vup;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ public class ReportService {
     private final BalanceConfig balanceConfig;
     private final OperatingPressureService operatingPressureService;
     private final RouteIdentityService routeIdentityService;
+    private final TimelineService timelineService;
 
     public ReportService(
             BusinessLogMapper businessLogMapper,
@@ -68,7 +71,8 @@ public class ReportService {
             StageObjectiveService stageObjectiveService,
             BalanceConfig balanceConfig,
             OperatingPressureService operatingPressureService,
-            RouteIdentityService routeIdentityService
+            RouteIdentityService routeIdentityService,
+            TimelineService timelineService
     ) {
         this.businessLogMapper = businessLogMapper;
         this.dailyReportMapper = dailyReportMapper;
@@ -83,6 +87,14 @@ public class ReportService {
         this.balanceConfig = balanceConfig;
         this.operatingPressureService = operatingPressureService;
         this.routeIdentityService = routeIdentityService;
+        this.timelineService = timelineService;
+    }
+
+    /**
+     * 本局时间线回放：委托 TimelineService 聚合 BusinessLog 为 TimelineDTO。
+     */
+    public TimelineDTO timeline(Long vupId) {
+        return timelineService.timeline(vupId);
     }
 
     public DailyReport createReport(Vup vup, DaySession session, ActionResultDTO actionResult, BusinessLog log) {
@@ -99,6 +111,7 @@ public class ReportService {
         return createReport(vup, session, actionResult, log, selectedTitle, List.of());
     }
 
+    @Transactional
     public DailyReport createReport(
             Vup vup,
             DaySession session,

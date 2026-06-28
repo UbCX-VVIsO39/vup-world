@@ -27,6 +27,9 @@ import com.example.vupworld.service.infra.IdempotencyRunner;
 import com.example.vupworld.service.infra.RequestHashService;
 
 import com.example.vupworld.service.infra.JsonService;
+
+import com.example.vupworld.service.infra.BalanceConfig;
+import com.example.vupworld.service.content.ContentCatalogService;
 import com.example.vupworld.service.event.FormalEventPresenter;
 import com.example.vupworld.service.event.PendingInteractionPresenter;
 
@@ -35,9 +38,13 @@ import com.example.vupworld.domain.ActionType;
 import com.example.vupworld.domain.DayPhase;
 import com.example.vupworld.domain.RouteType;
 import com.example.vupworld.dto.ActionDtos.ChooseTitleRequest;
+import com.example.vupworld.dto.ActionDtos.DanmakuAccumulateDTO;
 import com.example.vupworld.dto.ActionDtos.DayResultDTO;
 import com.example.vupworld.dto.ActionDtos.FatigueInfoDTO;
+import com.example.vupworld.dto.ActionDtos.GiftAccumulateDTO;
 import com.example.vupworld.dto.ActionDtos.RerollTitleRequest;
+import com.example.vupworld.dto.ActionDtos.SendDanmakuRequest;
+import com.example.vupworld.dto.ActionDtos.SendGiftRequest;
 import com.example.vupworld.dto.ActionDtos.StreamPlanOptionDTO;
 import com.example.vupworld.dto.ActionDtos.TitleOptionDTO;
 import com.example.vupworld.dto.ActionDtos.TitleRerollResultDTO;
@@ -56,6 +63,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +107,8 @@ public class TitleService {
     private final AudiencePressureService audiencePressureService;
     private final StageObjectiveService stageObjectiveService;
     private final NpcRelationshipService npcRelationshipService;
+    private final BalanceConfig balanceConfig;
+    private final ContentCatalogService contentCatalogService;
 
     public TitleService(
             VupService vupService,
@@ -118,7 +128,9 @@ public class TitleService {
             @Lazy ActionService actionService,
             AudiencePressureService audiencePressureService,
             StageObjectiveService stageObjectiveService,
-            NpcRelationshipService npcRelationshipService
+            NpcRelationshipService npcRelationshipService,
+            BalanceConfig balanceConfig,
+            ContentCatalogService contentCatalogService
     ) {
         this.vupService = vupService;
         this.vupMapper = vupMapper;
@@ -138,10 +150,43 @@ public class TitleService {
         this.audiencePressureService = audiencePressureService;
         this.stageObjectiveService = stageObjectiveService;
         this.npcRelationshipService = npcRelationshipService;
+        this.balanceConfig = balanceConfig;
+        this.contentCatalogService = contentCatalogService;
     }
 
     public List<StreamPlanOptionDTO> streamPlans() {
         return STREAM_PLAN_OPTIONS;
+    }
+
+    /**
+     * 礼物累积：直播中收到的礼物先记到 day_session，等标题结算时折算为 watchHeat + coin。
+     */
+    @Transactional
+    public GiftAccumulateDTO accumulateGift(Long userId, SendGiftRequest request) {
+        Vup vup = vupService.requireActiveVup(userId);
+        DaySession session = dayFlowService.requireCurrentSession(vup);
+        int count = Math.max(1, request.qty());
+        int coinValue = count;
+        session.setGiftCount(session.getGiftCount() + count);
+        session.setGiftCoinValue(session.getGiftCoinValue() + coinValue);
+        daySessionMapper.updateAfterAction(session);
+        return new GiftAccumulateDTO(session.getGiftCount(), session.getGiftCoinValue(), vup.getCoin());
+    }
+
+    /**
+     * 弹幕累积：直播中弹幕密度提升 watchHeat，负面弹幕累计过多会扣口碑（结算时应用）。
+     */
+    @Transactional
+    public DanmakuAccumulateDTO accumulateDanmaku(Long userId, SendDanmakuRequest request) {
+        Vup vup = vupService.requireActiveVup(userId);
+        DaySession session = dayFlowService.requireCurrentSession(vup);
+        boolean negative = "NEGATIVE".equalsIgnoreCase(request.mood());
+        int heatDelta = negative ? -1 : 1;
+        int reputationPenalty = negative ? balanceConfig.danmakuNegativeReputationPenalty() : 0;
+        session.setDanmakuCount(session.getDanmakuCount() + 1);
+        session.setDanmakuHeat(session.getDanmakuHeat() + heatDelta);
+        daySessionMapper.updateAfterAction(session);
+        return new DanmakuAccumulateDTO(session.getDanmakuCount(), session.getDanmakuHeat(), reputationPenalty);
     }
 
     public List<TitleOptionDTO> savedTitleCandidates(Long userId) {
@@ -314,7 +359,41 @@ public class TitleService {
     }
 
     List<TitleOptionDTO> titleCandidatesFor(Vup vup, DaySession session, String planType) {
-        return enrichTitleCandidates(vup, session, titleCandidatesFor(planType, session.getDay()));
+        List<TitleOptionDTO> base = titleCandidatesFor(planType, session.getDay());
+        List<TitleOptionDTO> inherited = inheritedTitleCandidates(vup);
+        if (inherited.isEmpty()) {
+            return enrichTitleCandidates(vup, session, base);
+        }
+        List<TitleOptionDTO> combined = new ArrayList<>(base);
+        combined.addAll(inherited);
+        return enrichTitleCandidates(vup, session, combined);
+    }
+
+    /**
+     * 继承标题池：如果 vup 有 previousEndingId（前世结局），从 game_content 的 INHERITED_TITLE 类目加载专属标题。
+     */
+    private List<TitleOptionDTO> inheritedTitleCandidates(Vup vup) {
+        if (vup.getPreviousEndingId() == null) {
+            return List.of();
+        }
+        Map<String, List<ContentCatalogService.ContentEntry>> entries = contentCatalogService.getEntries("INHERITED_TITLE");
+        if (entries.isEmpty()) {
+            return List.of();
+        }
+        List<TitleOptionDTO> result = new ArrayList<>();
+        for (List<ContentCatalogService.ContentEntry> entryList : entries.values()) {
+            for (ContentCatalogService.ContentEntry ce : entryList) {
+                result.add(new TitleOptionDTO(
+                        900L + result.size(),
+                        ce.text(),
+                        "INHERITED",
+                        "继承前世结局的专属标题，自带路线倾向",
+                        "继承标题无额外旧账风险",
+                        "inherited"
+                ));
+            }
+        }
+        return result;
     }
 
     private List<TitleOptionDTO> enrichTitleCandidates(Vup vup, DaySession session, List<TitleOptionDTO> candidates) {
@@ -452,6 +531,22 @@ public class TitleService {
             watchHeatGain += fortuneModifier.watchHeatBonus();
             reputationGain += fortuneModifier.reputationBonus();
             routeScoreChange += fortuneModifier.routeScoreBonus();
+        }
+
+        // 礼物/弹幕热度加成预览（不修改 vup，仅展示）
+        int giftHeatBonus = session.getGiftCount() > 0
+                ? Math.min(balanceConfig.giftHeatBonusCap(), session.getGiftCoinValue() / balanceConfig.giftHeatBonusPerCoin())
+                : 0;
+        if (giftHeatBonus > 0) {
+            watchHeatGain += giftHeatBonus;
+            coinChange += session.getGiftCoinValue();
+        }
+        int danmakuHeatBonus = Math.min(balanceConfig.danmakuHeatBonusCap(), Math.max(0, session.getDanmakuHeat()));
+        if (danmakuHeatBonus > 0) {
+            watchHeatGain += danmakuHeatBonus;
+        }
+        if (session.getDanmakuCount() > 0 && session.getDanmakuHeat() < 0) {
+            reputationGain -= balanceConfig.danmakuNegativeReputationPenalty();
         }
 
         int fanChange = Math.max(0, trueFanChange + funFanChange + unicornFanChange + ddFanChange);
@@ -917,6 +1012,31 @@ public class TitleService {
             fanChange = trueFanChange + funFanChange + unicornFanChange + ddFanChange;
             summary = summary + " " + fortuneModifier.hint();
             evidenceRef.put("fortuneModifier", actionService.fortuneEvidence(fortuneModifier));
+        }
+
+        // 礼物热度加成：折算为 watchHeat + coin
+        int giftHeatBonus = session.getGiftCount() > 0
+                ? Math.min(balanceConfig.giftHeatBonusCap(), session.getGiftCoinValue() / balanceConfig.giftHeatBonusPerCoin())
+                : 0;
+        if (giftHeatBonus > 0) {
+            watchHeatGain += giftHeatBonus;
+            coinChange += session.getGiftCoinValue();
+            vup.setWatchHeat(clamp(vup.getWatchHeat() + giftHeatBonus, 0, 100));
+            vup.setCoin(Math.max(0, vup.getCoin() + session.getGiftCoinValue()));
+            evidenceRef.put("giftBonus", giftHeatBonus);
+        }
+        // 弹幕热度加成：密度提升 watchHeat；负面弹幕累计过多扣口碑
+        int danmakuHeatBonus = Math.min(balanceConfig.danmakuHeatBonusCap(), session.getDanmakuHeat());
+        if (danmakuHeatBonus > 0) {
+            watchHeatGain += danmakuHeatBonus;
+            vup.setWatchHeat(clamp(vup.getWatchHeat() + danmakuHeatBonus, 0, 100));
+            evidenceRef.put("danmakuHeatBonus", danmakuHeatBonus);
+        }
+        if (session.getDanmakuCount() > 0 && session.getDanmakuHeat() < 0) {
+            int reputationPenalty = balanceConfig.danmakuNegativeReputationPenalty();
+            reputationGain -= reputationPenalty;
+            vup.setReputation(clamp(vup.getReputation() - reputationPenalty, 0, 100));
+            evidenceRef.put("danmakuNegativePenalty", reputationPenalty);
         }
 
         return new ActionResultDTO(

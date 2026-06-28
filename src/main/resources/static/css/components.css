@@ -1,4 +1,175 @@
-/* components.css - 组件：所有功能模块的UI样式 */
+/* ================================================================
+   按钮全局增强 - 确保每个按钮有清晰的交互反馈
+   ================================================================ */
+
+/* 全局按钮基础样式 */
+button {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 按钮涟漪动画效果 */
+button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    transform: scale(0);
+    opacity: 0;
+    pointer-events: none;
+}
+
+button:active::after {
+    animation: button-ripple 0.4s ease-out;
+}
+
+@keyframes button-ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* 按钮悬停效果 */
+button:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 按钮按下效果 */
+button:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 按钮聚焦效果 - 无障碍增强 */
+button:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+}
+
+/* 禁用按钮样式增强 */
+button:disabled,
+button[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 禁用按钮悬停时不显示涟漪 */
+button:disabled::after,
+button[aria-disabled="true"]::after {
+    display: none;
+}
+
+/* 禁用状态增强 - 添加视觉提示 */
+.action-item[data-action-state="blocked"],
+button:disabled,
+button[aria-disabled="true"] {
+    position: relative;
+}
+
+/* 禁用状态添加虚线边框提示 */
+.action-item[data-action-state="blocked"]::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border: 2px dashed rgba(255, 114, 98, 0.3);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+
+
+/* 主色调按钮 - 主要行动 */
+.btn-primary,
+.simple-primary-action,
+.action-submit-btn:not(:disabled) {
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+    color: #fff;
+    border: none;
+    font-weight: 700;
+}
+
+.btn-primary:hover:not(:disabled),
+.simple-primary-action:hover:not(:disabled),
+.action-submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--neon-pink-deep), var(--neon-purple));
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+}
+
+/* 次要按钮样式 */
+.btn-secondary,
+.compact-action-button {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled),
+.compact-action-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+/* 卡片类按钮 - 可点击卡片 */
+.clickable-card,
+.action-item,
+.route-gallery-item,
+.cockpit-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clickable-card:hover,
+.action-item:hover,
+.route-gallery-item:hover,
+.cockpit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: var(--neon-pink);
+}
+
+.clickable-card:active,
+.action-item:active,
+.route-gallery-item:active,
+.cockpit-card:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 选中状态增强 */
+button.selected,
+.clickable-card.selected,
+.action-item.selected {
+    border-color: var(--neon-cyan) !important;
+    background: rgba(61, 214, 198, 0.15);
+    box-shadow: 0 0 0 1px var(--neon-cyan), 0 4px 16px rgba(61, 214, 198, 0.3);
+}
+
+/* 快捷键标签增强 */
+.action-hotkey {
+    transition: all 0.15s ease;
+}
+
+button:hover .action-hotkey {
+    background: rgba(243, 201, 105, 0.25);
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+}
+
+/* ================================================================
+   组件：所有功能模块的UI样式
+   ================================================================ */
 /* 新手教程 */
 .tutorial-overlay {
     position: fixed;
@@ -179,11 +350,34 @@
     font-size: 14px;
     color: var(--neon-pink);
     text-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+    animation: dayPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes dayPulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+    }
 }
 
 .phase-text {
     font-size: 14px;
     color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.phase-text::before {
+    content: '●';
+    color: var(--neon-cyan);
+    margin-right: 6px;
+    animation: phaseBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes phaseBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
 .quick-stats {
@@ -3995,12 +4189,26 @@ button.stage-objective-item {
     font-size: 16px;
     font-weight: 950;
     box-shadow: 0 12px 26px color-mix(in srgb, var(--route-accent) 28%, transparent);
+    /* 增强交互效果 */
+    position: relative;
+    overflow: hidden;
+}
+
+.simple-primary-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px color-mix(in srgb, var(--route-accent) 40%, transparent);
+}
+
+.simple-primary-action:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--route-accent) 28%, transparent);
 }
 
 .simple-primary-action:disabled {
     opacity: 0.58;
     cursor: not-allowed;
     filter: grayscale(0.35);
+    transform: none;
 }
 
 .simple-decision-strip {
@@ -4022,10 +4230,23 @@ button.stage-objective-item {
     border-radius: 9px;
     background: rgba(16, 13, 34, 0.24);
     text-align: left;
+    transition: all 0.2s ease;
 }
 
 .simple-decision-strip button {
     cursor: pointer;
+}
+
+.simple-decision-strip button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--neon-cyan);
+    background: rgba(61, 214, 198, 0.15);
+    box-shadow: 0 4px 16px rgba(61, 214, 198, 0.2);
+}
+
+.simple-decision-strip button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(61, 214, 198, 0.15);
 }
 
 .simple-decision-strip em,
@@ -4115,16 +4336,32 @@ button.stage-objective-item {
     background: rgba(16, 13, 34, 0.36);
     color: var(--text-secondary);
     text-align: left;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.simple-alt-action:hover:not(.blocked):not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--neon-cyan);
+    background: rgba(61, 214, 198, 0.12);
+    box-shadow: 0 4px 16px rgba(61, 214, 198, 0.2);
+}
+
+.simple-alt-action:active:not(.blocked):not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(61, 214, 198, 0.15);
 }
 
 .simple-alt-action.active {
     border-color: color-mix(in srgb, var(--route-accent-2) 48%, rgba(236, 229, 210, 0.18));
     background: color-mix(in srgb, var(--route-accent-2) 13%, rgba(16, 13, 34, 0.36));
     color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--neon-pink), 0 4px 16px rgba(255, 107, 157, 0.2);
 }
 
 .simple-alt-action.blocked {
     opacity: 0.56;
+    cursor: not-allowed;
 }
 
 .simple-alt-action span {
@@ -4351,12 +4588,20 @@ button.stage-objective-item {
     border-radius: 8px;
     background: rgba(16, 13, 34, 0.42);
     text-align: left;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button.cockpit-card:hover,
 button.cockpit-debt-row:hover {
     border-color: color-mix(in srgb, var(--route-accent-2) 42%, rgba(236, 229, 210, 0.16));
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.15);
+}
+
+button.cockpit-card:active,
+button.cockpit-debt-row:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(255, 107, 157, 0.1);
 }
 
 .cockpit-card span {
@@ -4690,14 +4935,20 @@ button.cockpit-debt-row:hover {
     border: 1px solid var(--border);
     border-left: 3px solid var(--border);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: left;
 }
 
 .action-item:hover {
     border-color: var(--neon-cyan);
     border-left-color: var(--neon-cyan);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(61, 214, 198, 0.15);
+}
+
+.action-item:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(61, 214, 198, 0.1);
 }
 
 .action-item[data-action-state="recommended"] {
@@ -4711,6 +4962,16 @@ button.cockpit-debt-row:hover {
 .action-item[data-action-state="blocked"] {
     border-left-color: var(--danger);
     opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.action-item[data-action-state="blocked"]:hover {
+    border-color: var(--danger);
+    border-left-color: var(--danger);
+    transform: none;
+    box-shadow: none;
 }
 
 .action-item .action-summary {
@@ -4809,8 +5070,16 @@ button.cockpit-debt-row:hover {
     text-align: center;
 }
 
-.action-submit-btn:hover {
+.action-submit-btn:hover:not(:disabled) {
     background: rgba(61, 214, 198, 0.25);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 4px 16px rgba(61, 214, 198, 0.3);
+    transform: translateY(-1px);
+}
+
+.action-submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(61, 214, 198, 0.2);
 }
 
 .action-submit-btn:disabled,
@@ -4820,6 +5089,8 @@ button.cockpit-debt-row:hover {
     border-color: var(--text-muted);
     color: var(--text-muted);
     background: transparent;
+    transform: none;
+    box-shadow: none;
 }
 
 .action-info h4 {

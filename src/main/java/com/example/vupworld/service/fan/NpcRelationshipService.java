@@ -143,10 +143,10 @@ public class NpcRelationshipService {
         // 存储临时buff，供下次直播使用
         grantStealBuff(vup, npcKey, npcType.displayName());
 
-        String buffDesc = "偷学自" + npcType.displayName() + "的技巧：下次直播所有能力+10%";
+        String buffDesc = "偷学自" + npcType.displayName() + "的技巧：下次直播对应能力+" + (10 + currentAffinity / 10) + "%";
         String message = discovered
                 ? "你偷学了" + npcType.displayName() + "的技巧，但被发现了！声望-5。"
-                : "你悄悄研究了" + npcType.displayName() + "的直播技巧，学到了不少东西。";
+                : "你悄悄研究了" + npcType.displayName() + "的直播技巧。";
         return new StealLearnResult(npcKey, npcType.displayName(), totalAffinityChange, newAffinity,
                 discovered, reputationChange, buffDesc, message);
     }

@@ -2,6 +2,7 @@ package com.example.vupworld.service;
 
 import com.example.vupworld.domain.ActionType;
 import com.example.vupworld.model.Vup;
+import com.example.vupworld.mapper.VupMapper;
 import com.example.vupworld.service.content.PlatformTrendService;
 import com.example.vupworld.service.infra.JsonService;
 import com.example.vupworld.service.operating.OperatingPressureService;
@@ -22,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OperatingPressureServiceTest {
     private final JsonService jsonService = new JsonService(new ObjectMapper());
     private final PlatformTrendService trendService = new PlatformTrendService();
-    private final OperatingPressureService service = new OperatingPressureService(jsonService, trendService);
+    private final VupMapper vupMapper = org.mockito.Mockito.mock(VupMapper.class);
+    private final OperatingPressureService service = new OperatingPressureService(jsonService, trendService, vupMapper);
 
     // ==================== Helpers ====================
 

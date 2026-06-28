@@ -2,8 +2,12 @@ package com.example.vupworld.web;
 
 import com.example.vupworld.common.ApiResponse;
 import com.example.vupworld.dto.ActionDtos.ChooseTitleRequest;
+import com.example.vupworld.dto.ActionDtos.DanmakuAccumulateDTO;
 import com.example.vupworld.dto.ActionDtos.DayResultDTO;
+import com.example.vupworld.dto.ActionDtos.GiftAccumulateDTO;
 import com.example.vupworld.dto.ActionDtos.RerollTitleRequest;
+import com.example.vupworld.dto.ActionDtos.SendDanmakuRequest;
+import com.example.vupworld.dto.ActionDtos.SendGiftRequest;
 import com.example.vupworld.dto.ActionDtos.StreamPlanOptionDTO;
 import com.example.vupworld.dto.ActionDtos.TitleOptionDTO;
 import com.example.vupworld.dto.ActionDtos.TitleRerollResultDTO;
@@ -49,5 +53,17 @@ public class StreamController {
     public ApiResponse<DayResultDTO> chooseTitle(@Valid @RequestBody ChooseTitleRequest request, HttpSession session) {
         Long userId = SessionSupport.requireUserId(session);
         return ApiResponse.ok("标题确认成功，今日直播开始结算。", titleService.chooseTitle(userId, request));
+    }
+
+    @PostMapping("/gift")
+    public ApiResponse<GiftAccumulateDTO> sendGift(@Valid @RequestBody SendGiftRequest request, HttpSession session) {
+        Long userId = SessionSupport.requireUserId(session);
+        return ApiResponse.ok("礼物累积成功，直播热度加成在结算时折算。", titleService.accumulateGift(userId, request));
+    }
+
+    @PostMapping("/danmaku")
+    public ApiResponse<DanmakuAccumulateDTO> sendDanmaku(@Valid @RequestBody SendDanmakuRequest request, HttpSession session) {
+        Long userId = SessionSupport.requireUserId(session);
+        return ApiResponse.ok("弹幕热度已记录，结算时会折算为直播质量。", titleService.accumulateDanmaku(userId, request));
     }
 }

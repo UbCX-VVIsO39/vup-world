@@ -22,4 +22,18 @@ public final class ReportDtos {
             boolean nextDayEnabled
     ) {
     }
+
+    public record TimelineDayDTO(
+            int day,
+            String action,
+            int fanChange,
+            int routeScore,
+            String highlight
+    ) {
+    }
+
+    public record TimelineDTO(
+            List<TimelineDayDTO> days
+    ) {
+    }
 }

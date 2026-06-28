@@ -1,9 +1,12 @@
 package com.example.vupworld.web;
 
 import com.example.vupworld.common.ApiResponse;
+import com.example.vupworld.dto.RiskToolDtos.CrisisAlertDTO;
 import com.example.vupworld.dto.RiskToolDtos.RiskToolOptionDTO;
 import com.example.vupworld.dto.RiskToolDtos.RiskToolResultDTO;
 import com.example.vupworld.dto.RiskToolDtos.UseRiskToolRequest;
+import com.example.vupworld.service.core.VupService;
+import com.example.vupworld.service.risk.DebtService;
 import com.example.vupworld.service.risk.RiskToolService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -19,9 +22,13 @@ import java.util.List;
 @RequestMapping("/api/risk-tool")
 public class RiskToolController {
     private final RiskToolService riskToolService;
+    private final DebtService debtService;
+    private final VupService vupService;
 
-    public RiskToolController(RiskToolService riskToolService) {
+    public RiskToolController(RiskToolService riskToolService, DebtService debtService, VupService vupService) {
         this.riskToolService = riskToolService;
+        this.debtService = debtService;
+        this.vupService = vupService;
     }
 
     @GetMapping("/options")
@@ -34,5 +41,12 @@ public class RiskToolController {
     public ApiResponse<RiskToolResultDTO> use(@Valid @RequestBody UseRiskToolRequest request, HttpSession session) {
         Long userId = SessionSupport.requireUserId(session);
         return ApiResponse.ok("米线工具使用成功，楼友先放半个法槌。", riskToolService.useTool(userId, request));
+    }
+
+    @GetMapping("/alerts")
+    public ApiResponse<List<CrisisAlertDTO>> alerts(HttpSession session) {
+        Long userId = SessionSupport.requireUserId(session);
+        Long vupId = vupService.requireActiveVup(userId).getId();
+        return ApiResponse.ok("危机倒计时读取成功，先看红色再排明天。", debtService.crisisAlerts(vupId));
     }
 }

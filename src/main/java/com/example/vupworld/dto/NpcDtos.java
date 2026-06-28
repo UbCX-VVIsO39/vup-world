@@ -1,5 +1,7 @@
 package com.example.vupworld.dto;
 
+import java.util.List;
+
 public final class NpcDtos {
     private NpcDtos() {
     }
@@ -32,6 +34,36 @@ public final class NpcDtos {
             String label,
             boolean canStealLearn,
             boolean stealUnlocked
+    ) {
+    }
+
+    public record RivalDTO(
+            String name,
+            String route,
+            int fans,
+            int growthRate,
+            String threatLevel
+    ) {
+    }
+
+    public record RivalProgressDTO(
+            List<RivalDTO> rivals,
+            boolean overtaken
+    ) {
+    }
+
+    public record LeaderboardItem(
+            String name,
+            int score,
+            String avatar,
+            boolean isPlayer
+    ) {
+    }
+
+    public record LeaderboardDTO(
+            List<LeaderboardItem> fans,
+            List<LeaderboardItem> gifts,
+            List<LeaderboardItem> danmaku
     ) {
     }
 }

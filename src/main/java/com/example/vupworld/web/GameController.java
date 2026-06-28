@@ -157,6 +157,18 @@ public class GameController {
         );
     }
 
+    @PostMapping("/save-slots/{slot}/pause-save")
+    public ApiResponse<SaveSlotDTO> pauseSave(@PathVariable int slot, HttpSession session) {
+        Long userId = SessionSupport.requireUserId(session);
+        return ApiResponse.ok("中途存档已保存，可随时退出。", gameService.pauseSave(userId, slot));
+    }
+
+    @PostMapping("/save-slots/{slot}/resume")
+    public ApiResponse<GameStartDTO> resumeSave(@PathVariable int slot, HttpSession session) {
+        Long userId = SessionSupport.requireUserId(session);
+        return ApiResponse.ok("中途存档已恢复，从暂停处继续。", gameService.resumeSave(userId, slot));
+    }
+
     private Long optionalUserId(HttpSession session) {
         Object value = session.getAttribute(USER_ID);
         return value instanceof Long userId ? userId : null;

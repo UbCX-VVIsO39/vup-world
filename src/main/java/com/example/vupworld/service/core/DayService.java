@@ -124,6 +124,13 @@ public class DayService {
         next.setRandomSeed(vup.getRunSeed() + "-day-" + nextDay);
         next.setRngCursor(0);
         next.setLocked(false);
+        int dailyAp = balanceConfig.dailyActionPoints(BalanceConfig.parseDifficulty(vup.getDifficulty()));
+        // 体力透支档（1-2）时AP上限降低，让玩家立即感受到疲劳代价
+        int apForDay = vup.getStamina() <= 2
+                ? Math.max(3, dailyAp - balanceConfig.exhaustedApPenalty())
+                : dailyAp;
+        next.setActionPoints(apForDay);
+        next.setMaxActionPoints(apForDay);
         daySessionMapper.insert(next);
 
         return vupStateMapper.toDaySessionDto(next);

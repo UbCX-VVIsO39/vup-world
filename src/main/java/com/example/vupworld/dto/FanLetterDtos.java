@@ -7,6 +7,7 @@ public class FanLetterDtos {
             String fanName,
             String content,
             String mood,
-            String icon
+            String icon,
+            String npcBinding
     ) {}
 }

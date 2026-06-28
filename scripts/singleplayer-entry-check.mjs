@@ -8,7 +8,8 @@ const sourceFiles = {
   gameController: 'src/main/java/com/example/vupworld/web/GameController.java',
   gameService: 'src/main/java/com/example/vupworld/service/core/GameService.java',
   authService: 'src/main/java/com/example/vupworld/service/AuthService.java',
-  appJs: 'src/main/resources/static/app.js'
+  appJs: 'src/main/resources/static/app.js',
+  panelBundle: 'src/main/resources/static/js/panel-bundle.js'
 };
 
 const sources = Object.fromEntries(
@@ -265,7 +266,8 @@ record(
   'localPlayerIfExists(...)'
 );
 
-const appSource = stripComments(sources.appJs || '');
+const frontendSource = `${sources.appJs || ''}\n${sources.panelBundle || ''}`;
+const appSource = stripComments(frontendSource);
 for (const endpoint of ['/start', '/continue']) {
   record(`app.js references ${endpoint}`, appSource.includes(endpoint), endpoint);
 }
@@ -285,7 +287,7 @@ record(
   'renderLocalSaveSlotCards + local-save-slot-grid'
 );
 
-const quickStartGuestBody = extractJsFunctionBody(sources.appJs || '', 'quickStartGuest');
+const quickStartGuestBody = extractJsFunctionBody(frontendSource, 'quickStartGuest');
 record('app.js has quickStartGuest function', quickStartGuestBody !== null, 'quickStartGuest');
 
 if (quickStartGuestBody !== null) {

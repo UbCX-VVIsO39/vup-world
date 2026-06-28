@@ -3,6 +3,20 @@
 // Load it from here so index.html can keep a single classic script entry before modules.
 // Defense static surface kept for acceptance checks after the bundle split:
 // function renderDefenseEvidencePanel(), SSM证据台, 梗舞练功房, 黑红法庭, 花房歌会.
+var ROUTE_AVATAR_MAP = {
+    SINGING_IDOL: '/gallery/v4/routes/singing-idol/mini-avatar.png',
+    SLICE_SAINT: '/gallery/v4/routes/slice-saint/mini-avatar.png',
+    DANCE_MEME: '/gallery/v4/routes/dance-meme/mini-avatar.png',
+    SOCIAL_COLLAB: '/gallery/v4/routes/social-collab/mini-avatar.png',
+    BLACK_RED_MAIN_STAGE: '/gallery/v4/routes/black-red-main-stage/mini-avatar.png',
+    ELECTRONIC_PICKLE: '/gallery/v4/routes/electronic-pickle/mini-avatar.png',
+    CYBER_GIRLFRIEND: '/gallery/v4/routes/cyber-girlfriend/mini-avatar.png',
+    DD_BUS_STOP: '/gallery/v4/routes/dd-bus-stop/mini-avatar.png',
+    MAIN_STAGE_KING: '/gallery/v4/routes/main-stage-king/mini-avatar.png',
+    GLORIOUS_GRADUATION: '/gallery/v4/routes/glorious-graduation/mini-avatar.png',
+    UNKNOWN: '/gallery/v4/routes/unknown/mini-avatar.png'
+};
+
 (function ensurePanelBundle() {
   if (window.__vupPanelBundleRequested) return;
   window.__vupPanelBundleRequested = true;
@@ -39,6 +53,57 @@
     console.error('Panel bundle failed to load:', bundleSrc);
   };
   document.head.appendChild(script);
+})();
+
+// === 全局点击反馈 - 增强按钮可点击的物理反馈 ===
+(function initGlobalClickFeedback() {
+  // 等待 SFX / DOM 准备好再绑定
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('button, .action-item, .cockpit-card, .clickable-card, .route-gallery-item, [data-action]');
+    if (!target) return;
+
+    // 跳过禁用状态
+    if (target.matches(':disabled, [aria-disabled="true"]') ||
+        target.closest(':disabled, [aria-disabled="true"]')) {
+      return;
+    }
+
+    // 播放点击音效
+    if (window.SFX && !window.SFX.muted) {
+      try { window.SFX.click(); } catch (err) {}
+    }
+
+    // 创建涟漪元素
+    const ripple = document.createElement('span');
+    ripple.className = 'click-ripple';
+    const rect = target.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.cssText =
+      'position:absolute;border-radius:50%;' +
+      'background:radial-gradient(circle,rgba(255,255,255,0.35) 0%,transparent 70%);' +
+      'transform:scale(0);animation:click-ripple-animation 0.45s ease-out forwards;' +
+      'pointer-events:none;z-index:9999;width:' + size + 'px;height:' + size + 'px;' +
+      'left:' + (e.clientX - rect.left - size / 2) + 'px;' +
+      'top:' + (e.clientY - rect.top - size / 2) + 'px;';
+    target.style.position = 'relative';
+    target.style.overflow = 'hidden';
+    target.appendChild(ripple);
+    setTimeout(function() {
+      if (ripple.parentNode === target) ripple.remove();
+    }, 500);
+  }, true);
+
+  // 注入涟漪动画 keyframes（仅一次）
+  if (!document.getElementById('__vup_ripple_keyframes')) {
+    const style = document.createElement('style');
+    style.id = '__vup_ripple_keyframes';
+    style.textContent =
+      '@keyframes click-ripple-animation{' +
+      '0%{transform:scale(0);opacity:0.6}' +
+      '100%{transform:scale(2.2);opacity:0}' +
+      '}';
+    document.head.appendChild(style);
+  }
 })();
 
 // === Module兼容层 ===
@@ -89,6 +154,10 @@ var state = {
     achievementProgress: null,
     restartBiasOverride: null,
     danmaku: null,
+    // 1.1 礼物累积（本日直播礼物数与折算币值）
+    giftAccum: { count: 0, coinValue: 0 },
+    // 1.2 弹幕累积（本日直播弹幕数与热度）
+    danmakuAccum: { count: 0, heat: 0 },
     configCheck: null,
     openingStyleChoice: null,
     openingStyleBackendAvailable: null,
@@ -112,7 +181,15 @@ var state = {
     tutorialSeen: false,
     pendingAction: null,
     dailyScheduleDraft: null,
-    seenDailyFeedbackKeys: {}
+    seenDailyFeedbackKeys: {},
+    // 2.2 风险预警：即将到期风险列表
+    crisisAlerts: [],
+    // 1.4 对手威胁：竞争对手数据
+    rivals: null,
+    // 2.3 结局图鉴：已解锁结局集合
+    endingAtlas: null,
+    // 2.5 回放：本局每日时间线
+    timeline: null
 };
 
 const previousStats = {
@@ -716,24 +793,45 @@ function syncLiveStageTicker() {
     ticker.innerHTML = liveStageTickerHtml();
 }
 
+// 4.7 直播间浮层按需出现：直播阶段显示底栏+右侧栏+礼物面板，否则隐藏
+const LIVE_ROOM_PHASES = new Set(['NEED_TITLE', 'ACTION_RESOLVED', 'NEED_INTERACTION_CHOICE']);
+
 function syncLiveRoomStage() {
     const viewport = document.getElementById('vupLiveViewport');
     const heatLabel = document.getElementById('vupLiveHeatLabel');
-    if (!viewport) return;
-    if (!state.vup) {
-        syncLiveStageTicker();
-        return;
+    if (viewport) {
+        if (state.vup) {
+            const heat = currentWatchHeat();
+            const tier = liveHeatTier(heat);
+            viewport.dataset.heatTier = tier;
+            if (heatLabel) {
+                const text = tier === 'hot' ? '主会场弹幕' : tier === 'warm' ? '有人围观' : '低压直播';
+                heatLabel.textContent = `围观 ${heat} · ${text}`;
+            }
+            syncLiveStageTicker();
+            if (typeof updateLiveRoomInfo === 'function') updateLiveRoomInfo();
+        } else {
+            syncLiveStageTicker();
+        }
     }
 
-    const heat = currentWatchHeat();
-    const tier = liveHeatTier(heat);
-    viewport.dataset.heatTier = tier;
-    if (heatLabel) {
-        const text = tier === 'hot' ? '主会场弹幕' : tier === 'warm' ? '有人围观' : '低压直播';
-        heatLabel.textContent = `围观 ${heat} · ${text}`;
+    // 按 phase 控制直播间浮层显隐
+    const phase = state.session?.phase || (state.vup ? 'READY' : null);
+    const showLive = !!phase && LIVE_ROOM_PHASES.has(phase);
+    const bottomBar = document.getElementById('liveRoomBottomBar');
+    const rightSidebar = document.getElementById('liveRightSidebar');
+    const giftPanel = document.getElementById('giftPanelOverlay');
+    if (bottomBar) bottomBar.classList.toggle('hidden', !showLive);
+    if (showLive) {
+        // 直播阶段：移除 hidden，恢复 toggle 行为（visible 由 bili-ui.js 管理）
+        if (rightSidebar) rightSidebar.classList.remove('hidden');
+        if (giftPanel) giftPanel.classList.remove('hidden');
+    } else {
+        // 非直播阶段：强制关闭并重置 bili-ui.js 内部状态
+        if (rightSidebar) { rightSidebar.classList.remove('visible'); rightSidebar.classList.add('hidden'); }
+        if (giftPanel) { giftPanel.classList.remove('visible'); giftPanel.classList.add('hidden'); }
+        if (typeof closeLivePanels === 'function') closeLivePanels();
     }
-    syncLiveStageTicker();
-    if (typeof updateLiveRoomInfo === 'function') updateLiveRoomInfo();
 }
 
 window.toggleSettingsPanel = toggleSettingsPanel;
@@ -948,6 +1046,10 @@ function resetGameState() {
     state.dailyScheduleDraft = null;
     state.hasSave = false;
     state.saveSlots = [];
+    state.crisisAlerts = [];
+    state.rivals = null;
+    state.endingAtlas = null;
+    state.timeline = null;
     disconnectDanmakuStream();
 }
 
@@ -1787,7 +1889,7 @@ function dailyScheduleActionOptions() {
     });
     fallbackTypes.forEach(type => {
         if (!byType.has(type)) {
-            byType.set(type, { actionType: type, name: actionLabelFor(type), enabled: true, staminaCost: dailyScheduleBaseStaminaCost(type) });
+            byType.set(type, { actionType: type, name: actionLabelFor(type), enabled: true, actionPointCost: 2 });
         }
     });
     return fallbackTypes.map(type => byType.get(type)).filter(Boolean);
@@ -1818,6 +1920,11 @@ function dailyScheduleStaminaDelta(actionType, intensity) {
     return -cost;
 }
 
+function dailyScheduleApCost(actionType, intensity) {
+    if (actionType === "REST") return 1;
+    return intensity === "LIGHT" ? 1 : intensity === "SPRINT" ? 3 : 2;
+}
+
 function dailyScheduleInspirationDelta(actionType) {
     if (actionType === "PUBLISH_VIDEO") return -1;
     if (actionType === "TRAIN_TALK" || actionType === "FAN_GROUP_MAINTAIN") return 1;
@@ -1841,7 +1948,7 @@ function dailyScheduleCoinDelta(actionType) {
 }
 
 function dailyScheduleCanApply(slot, resources) {
-    return resources.stamina + dailyScheduleStaminaDelta(slot.actionType, slot.intensity) >= 0
+    return resources.actionPoints >= dailyScheduleApCost(slot.actionType, slot.intensity)
         && resources.inspiration + dailyScheduleInspirationDelta(slot.actionType) >= 0
         && resources.material + dailyScheduleMaterialDelta(slot.actionType) >= 0
         && resources.coin + dailyScheduleCoinDelta(slot.actionType) >= 0;
@@ -1919,10 +2026,11 @@ function dailyScheduleIntensityLabel(value) {
 function dailyScheduleEstimate(slots) {
     return slots.reduce((total, slot) => ({
         stamina: total.stamina + dailyScheduleStaminaDelta(slot.actionType, slot.intensity),
+        ap: total.ap + dailyScheduleApCost(slot.actionType, slot.intensity),
         inspiration: total.inspiration + dailyScheduleInspirationDelta(slot.actionType),
         material: total.material + dailyScheduleMaterialDelta(slot.actionType),
         coin: total.coin + dailyScheduleCoinDelta(slot.actionType)
-    }), { stamina: 0, inspiration: 0, material: 0, coin: 0 });
+    }), { stamina: 0, ap: 0, inspiration: 0, material: 0, coin: 0 });
 }
 
 function dailyScheduleSigned(value) {
@@ -2108,7 +2216,7 @@ function renderDailyPlanCards(primaryAction, quickActions) {
             </div>
             ${renderDailyScheduleStrategyButtons(draft, recommendedKey)}
             <div class="daily-schedule-budget" aria-label="资源预算">
-                <span><em>体力</em><strong>${html(`${resources.stamina}/${resources.maxStamina} → ${Math.max(0, Math.min(resources.maxStamina, resources.stamina + estimate.stamina))}/${resources.maxStamina}`)}</strong></span>
+                <span><em>行动点</em><strong>${html(`${resources.actionPoints ?? '?'} → ${Math.max(0, (resources.actionPoints ?? 0) - (estimate.ap ?? 0))}`)}</strong></span>
                 <span><em>灵感</em><strong>${html(dailyScheduleSigned(estimate.inspiration))}</strong></span>
                 <span><em>素材</em><strong>${html(dailyScheduleSigned(estimate.material))}</strong></span>
                 <span><em>预算</em><strong>${html(dailyScheduleSigned(estimate.coin))}</strong></span>
@@ -3330,8 +3438,9 @@ function buildOffStreamResourcesBar() {
     const coin = Number(v.resources?.coin ?? v.coin ?? 0);
     const reputation = Number(v.opinion?.reputation ?? v.reputation ?? 0);
     const watchHeat = Number(v.opinion?.watchHeat ?? v.watchHeat ?? 0);
+    const staminaTier = stamina <= 0 ? '！崩溃' : stamina <= 2 ? '▼透支' : stamina <= 5 ? '◆疲惫' : stamina <= 8 ? '✦正常' : '⚡巅峰';
     const chips = [
-        { label: '体力', value: `${stamina}/${maxStamina}`, icon: '❤', tone: stamina <= 2 ? 'low' : 'ok' },
+        { label: '体力', value: staminaTier, icon: '❤', tone: stamina <= 2 ? 'low' : stamina <= 5 ? 'warn' : 'ok' },
         { label: '灵感', value: inspiration, icon: '✦', tone: inspiration <= 0 ? 'low' : 'ok' },
         { label: '预算', value: coin, icon: '¥', tone: coin < 20 ? 'low' : 'ok' },
         { label: '口碑', value: reputation, icon: '📊', tone: reputation < 0 ? 'low' : 'ok' },
@@ -3556,7 +3665,7 @@ function stopDanmakuOverlay() {
     }
 }
 
-function spawnDanmakuOverlayMessage(text, persona, isSC) {
+function spawnDanmakuOverlayMessage(text, persona, isSC, mood) {
     if (!danmakuOverlayContainer) return;
     const config = danmakuDensityConfig();
     if (danmakuOverlayContainer.children.length > config.limit) return;
@@ -3564,14 +3673,19 @@ function spawnDanmakuOverlayMessage(text, persona, isSC) {
     const el = document.createElement('div');
     el.className = 'danmaku-fly' + (isSC ? ' sc' : '');
 
-    const topPercent = Math.random() * 82;
-    el.style.top = topPercent + '%';
-
-    // Random color from palette (skip for SC messages, they use CSS gold)
-    if (!isSC) {
+    // 1.2 按 mood 着色：positive 绿 / neutral 白 / negative 红
+    const MOOD_COLORS = { positive: '#52c41a', neutral: '#ffffff', negative: '#ff4d4f' };
+    if (mood && MOOD_COLORS[mood]) {
+        el.classList.add('mood-' + mood);
+        if (!isSC) el.style.color = MOOD_COLORS[mood];
+    } else if (!isSC) {
+        // Random color from palette (skip for SC messages, they use CSS gold)
         const color = DANMAKU_COLORS[Math.floor(Math.random() * DANMAKU_COLORS.length)];
         el.style.color = color;
     }
+
+    const topPercent = Math.random() * 82;
+    el.style.top = topPercent + '%';
 
     const duration = config.minDuration + Math.random() * config.randomDuration;
     el.style.animationDuration = duration + 's';
@@ -8010,6 +8124,13 @@ function renderInfoBriefItem({ tab, label, value, hint, tone }) {
     `;
 }
 
+const infoTabPanels = {
+    main: ['statsSection', 'actionPanel'],
+    platform: ['npcPanel', 'platformInteractPanel'],
+    ambient: ['ambientPanel'],
+    report: ['reportPanel', 'reportHistoryPanel']
+};
+
 function renderInfoBrief() {
     const panel = document.getElementById('infoBrief');
     if (!panel) return;
@@ -9626,6 +9747,126 @@ async function renameLocalSlot(slotNumber = activeLocalSlotNumber()) {
     });
 }
 
+function localActionSlotNumber(element) {
+    const parsed = Number(element?.dataset?.slotNumber || 1);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function localActionType(element) {
+    return element?.dataset?.actionType || "";
+}
+
+function callLocalAction(fn, ...args) {
+    if (typeof fn !== "function") return false;
+    const result = fn(...args);
+    if (result && typeof result.catch === "function") {
+        result.catch(error => {
+            console.error("Local action failed:", error);
+            setStatus(error?.message || "Action failed. Please refresh and try again.", "error");
+        });
+    }
+    return true;
+}
+
+function bindLocalActionBridge() {
+    if (window.__vupLocalActionBridgeBound) return;
+    window.__vupLocalActionBridgeBound = true;
+
+    document.addEventListener("click", event => {
+        const element = event.target?.closest?.("[data-action]");
+        if (!element || !document.contains(element) || element.disabled || element.getAttribute("aria-disabled") === "true") return;
+
+        const action = element.dataset.action;
+        let handled = false;
+
+        switch (action) {
+            case "quick-start-guest":
+            case "start-local-slot":
+                handled = callLocalAction(quickStartGuest, localActionSlotNumber(element));
+                break;
+            case "continue-local-run":
+                handled = callLocalAction(continueLocalRun, localActionSlotNumber(element));
+                break;
+            case "save-local-slot":
+                handled = callLocalAction(saveLocalSlot);
+                break;
+            case "export-local-slot":
+                handled = callLocalAction(exportLocalSlot, localActionSlotNumber(element));
+                break;
+            case "import-local-slot":
+                handled = callLocalAction(importLocalSlot, localActionSlotNumber(element));
+                break;
+            case "rename-local-slot":
+                handled = callLocalAction(renameLocalSlot, localActionSlotNumber(element));
+                break;
+            case "restart-local-slot":
+                handled = callLocalAction(restartLocalSlot, localActionSlotNumber(element));
+                break;
+            case "retry-bootstrap":
+                handled = callLocalAction(hydrate);
+                break;
+            case "submit-action":
+            case "simple-primary-action":
+            case "simple-alt-action":
+            case "quick-submit-action":
+            case "detail-submit-action":
+                handled = callLocalAction(submitAction, localActionType(element));
+                break;
+            case "next-day":
+                handled = callLocalAction(nextDay);
+                break;
+            case "choose-title":
+                handled = callLocalAction(chooseTitle, Number(element.dataset.titleId));
+                break;
+            case "reroll-title":
+                handled = callLocalAction(rerollTitle);
+                break;
+            case "cancel-action":
+                handled = callLocalAction(cancelAction);
+                break;
+            case "choose-event":
+                handled = callLocalAction(chooseEvent, element.dataset.choice);
+                break;
+            case "choose-interaction":
+                handled = callLocalAction(chooseInteraction, element.dataset.choice);
+                break;
+            case "choose-fan-topic":
+                handled = callLocalAction(chooseFanTopic, element.dataset.topic, element.dataset.topicChoice);
+                break;
+            case "use-risk-tool": {
+                const targetDebtId = Number(element.dataset.targetDebtId);
+                handled = callLocalAction(
+                    useRiskTool,
+                    element.dataset.riskToolType,
+                    Number.isFinite(targetDebtId) ? targetDebtId : null
+                );
+                break;
+            }
+            case "reply-letter":
+                handled = callLocalAction(replyLetter, element.dataset.letterReply, element.dataset.letterId || "");
+                break;
+            case "opening-style-choice":
+                handled = callLocalAction(submitOpeningStyleChoice, element.dataset.openingStyle);
+                break;
+            case "skip-offstream":
+                handled = callLocalAction(skipOffStream);
+                break;
+            default:
+                if (action && action.startsWith("offstream-")) {
+                    handled = callLocalAction(submitOffStream, action.slice("offstream-".length).toUpperCase());
+                }
+                break;
+        }
+
+        if (handled) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    });
+}
+
+bindLocalActionBridge();
+
 async function logout() {
     await withBusy('退出登录中', async () => {
         await api('/api/auth/logout', { method: 'POST', body: {} });
@@ -9875,7 +10116,7 @@ function actionConfirmPanelHtml(action) {
     const effectPreview = actionPreviewText(action.effectPreview, "收获待观察");
     const riskPreview = action.riskPreview ? actionPreviewText(action.riskPreview, "风险待观察") : "低风险";
     const riskLevel = actionRiskLevelText(action.riskLevel);
-    const staminaCost = action.staminaCost || 0;
+    const apCost = action.actionPointCost || 0;
     const fanRange = action.effectPreview || "待观察";
     const decisionSummary = actionDecisionSummary(action, actionCardState(action, false, false));
     return `
@@ -9887,8 +10128,8 @@ function actionConfirmPanelHtml(action) {
             <div class="action-confirm-body">
                 <div class="action-confirm-stats">
                     <div class="action-confirm-stat">
-                        <span class="stat-label">体力消耗</span>
-                        <span class="stat-value">${staminaCost}</span>
+                        <span class="stat-label">行动点</span>
+                        <span class="stat-value">${apCost}</span>
                     </div>
                     <div class="action-confirm-stat">
                         <span class="stat-label">预期收获</span>
@@ -10474,8 +10715,16 @@ window.openLiveDrawer = openLiveDrawer;
 window.closeLiveDrawer = closeLiveDrawer;
 window.switchTab = switchTab;
 window.switchMainTab = switchMainTab;
-window.openInsightTab = openInsightTab;
-window.activateInfoTab = activateInfoTab;
+if (typeof window.activateInfoTab !== 'function') {
+    window.activateInfoTab = function(target = 'host') {
+        state.infoTab = target || 'host';
+    };
+}
+if (typeof window.openInsightTab !== 'function') {
+    window.openInsightTab = function(target = 'host') {
+        return window.activateInfoTab(target);
+    };
+}
 
 function reportDrawerElements() {
     return {
@@ -10523,21 +10772,6 @@ const INFO_TAB_TO_MAIN_TAB = {
     demo: 'infoHub'
 };
 
-// --- VUP Avatar based on route ---
-const ROUTE_AVATAR_MAP = {
-    SINGING_IDOL: '/gallery/v4/routes/singing-idol/mini-avatar.png',
-    SLICE_SAINT: '/gallery/v4/routes/slice-saint/mini-avatar.png',
-    DANCE_MEME: '/gallery/v4/routes/dance-meme/mini-avatar.png',
-    SOCIAL_COLLAB: '/gallery/v4/routes/social-collab/mini-avatar.png',
-    BLACK_RED_MAIN_STAGE: '/gallery/v4/routes/black-red-main-stage/mini-avatar.png',
-    ELECTRONIC_PICKLE: '/gallery/v4/routes/electronic-pickle/mini-avatar.png',
-    CYBER_GIRLFRIEND: '/gallery/v4/routes/cyber-girlfriend/mini-avatar.png',
-    DD_BUS_STOP: '/gallery/v4/routes/dd-bus-stop/mini-avatar.png',
-    MAIN_STAGE_KING: '/gallery/v4/routes/main-stage-king/mini-avatar.png',
-    GLORIOUS_GRADUATION: '/gallery/v4/routes/glorious-graduation/mini-avatar.png',
-    UNKNOWN: '/gallery/v4/routes/unknown/mini-avatar.png'
-};
-
 function updateVupAvatar() {
     const img = document.getElementById('vupAvatarImg');
     const badge = document.getElementById('vupAvatarBadge');
@@ -10571,6 +10805,12 @@ function initV2UI() {
     updateVupAvatar();
     initCollapsibleObservers();
 }
+
+// info-hub 区块折叠（点击标题切换）
+document.addEventListener('click', e => {
+    const title = e.target.closest('.info-hub-title');
+    if (title) title.closest('.info-hub-section')?.classList.toggle('collapsed');
+});
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
@@ -12256,3 +12496,5 @@ function renderNextStepHint() {
   if (!hint) return '';
   return '<div class="next-step-hint">' + html(hint) + '</div>';
 }
+
+window.__vupAppMainReady = true;

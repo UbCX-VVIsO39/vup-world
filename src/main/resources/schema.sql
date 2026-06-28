@@ -294,3 +294,20 @@ CREATE TABLE IF NOT EXISTS p0_seed_manifest (
     expected_count INT NOT NULL,
     detail VARCHAR(255) NOT NULL
 );
+
+-- ============================================================
+-- V3 游戏性增强字段（与 V3__add_gameplay_columns.sql 保持一致）
+-- ============================================================
+
+-- 1.1 礼物影响直播收益 / 1.2 弹幕影响直播质量 / 1.3 每日行动点系统
+ALTER TABLE day_session ADD COLUMN gift_count INT NOT NULL DEFAULT 0;
+ALTER TABLE day_session ADD COLUMN gift_coin_value INT NOT NULL DEFAULT 0;
+ALTER TABLE day_session ADD COLUMN danmaku_count INT NOT NULL DEFAULT 0;
+ALTER TABLE day_session ADD COLUMN danmaku_heat INT NOT NULL DEFAULT 0;
+ALTER TABLE day_session ADD COLUMN action_points INT NOT NULL DEFAULT 4;
+ALTER TABLE day_session ADD COLUMN max_action_points INT NOT NULL DEFAULT 4;
+
+-- 2.4 难度选择
+ALTER TABLE vup ADD COLUMN difficulty VARCHAR(16) NOT NULL DEFAULT 'STANDARD';
+
+-- 2.1 每日中途存档：manual_save_snapshot.phase 列已在上方 CREATE TABLE 中定义

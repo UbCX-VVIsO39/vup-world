@@ -45,4 +45,13 @@ public final class RiskToolDtos {
             List<String> supportedDebtTypes
     ) {
     }
+
+    public record CrisisAlertDTO(
+            String type,
+            String title,
+            int daysLeft,
+            String severity,
+            String description
+    ) {
+    }
 }

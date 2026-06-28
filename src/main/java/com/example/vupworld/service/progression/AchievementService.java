@@ -105,14 +105,15 @@ public class AchievementService {
         achievements.add(createAchievement("COMMERCIAL_HIGH", "商业化达人", "商业化等级达到50", "📊", 50, vup.getCommercialLevel()));
         achievements.add(createAchievement("REPUTATION_HIGH", "口碑担当", "口碑达到80", "🏆", 80, vup.getReputation()));
 
-        // 特殊成就
-        achievements.add(createAchievement("DAY_30_SURVIVOR", "30天出道", "完成30天挑战", "🎓", 30, vup.getDayCount()));
+        // 特殊成就（带 rewardType 的会在重开时作为开局 buff 继承到新存档）
+        achievements.add(createAchievement("DAY_30_SURVIVOR", "30天出道", "完成30天挑战", "🎓", 30, vup.getDayCount(),
+                "INSPIRATION", 5));
         achievements.add(createAchievement("ENDING_ATLAS_START", "结局图鉴开张", "完成任意1个当前结局", "册", 1,
-                (int) endingCollection.unlockedCount()));
+                (int) endingCollection.unlockedCount(), "FANS", 10));
         achievements.add(createAchievement("ENDING_ATLAS_HALF", "结局收藏家", "解锁9个当前结局中的5个", "集", 5,
-                (int) endingCollection.unlockedCount()));
+                (int) endingCollection.unlockedCount(), "FANS", 25));
         achievements.add(createAchievement("ENDING_ATLAS_FULL", "九结局全收录", "解锁全部9个当前结局", "全", 9,
-                (int) endingCollection.unlockedCount()));
+                (int) endingCollection.unlockedCount(), "INSPIRATION", 10));
         achievements.add(createAchievement("NPC_SOCIAL", "社交达人", "同台互动5次", "🤝", 5,
                 (int) logs.stream().filter(l -> "NPC_INTERACT".equals(l.getAction())).count()));
         achievements.add(createAchievement("REST_MASTER", "休息大师", "休息10次", "😴", 10,
@@ -154,13 +155,46 @@ public class AchievementService {
     }
 
     private AchievementDTO createAchievement(String id, String name, String description, String icon, int target, int progress) {
+        return createAchievement(id, name, description, icon, target, progress, null, 0);
+    }
+
+    private AchievementDTO createAchievement(String id, String name, String description, String icon, int target, int progress,
+                                             String rewardType, int rewardValue) {
         boolean unlocked = progress >= target;
         return new AchievementDTO(
                 id, name, description, icon, target,
                 Math.min(progress, target),
                 unlocked,
-                unlocked ? "已解锁" : progress + "/" + target
+                unlocked ? "已解锁" : progress + "/" + target,
+                rewardType,
+                rewardValue
         );
+    }
+
+    /**
+     * 成就解锁：按 rewardType 分发奖励到 vup。
+     * INSPIRATION → vup.inspiration += rewardValue
+     * COIN → vup.coin += rewardValue
+     * FANS → vup.fans += rewardValue
+     */
+    public void unlock(Vup vup, AchievementDTO achievement) {
+        if (!achievement.unlocked()) {
+            return;
+        }
+        String rewardType = achievement.rewardType();
+        if (rewardType == null || rewardType.isBlank()) {
+            return;
+        }
+        int value = achievement.rewardValue();
+        if (value <= 0) {
+            return;
+        }
+        switch (rewardType) {
+            case "INSPIRATION" -> vup.setInspiration(vup.getInspiration() + value);
+            case "COIN" -> vup.setCoin(vup.getCoin() + value);
+            case "FANS" -> vup.setFans(vup.getFans() + value);
+            default -> { /* 未知奖励类型不做处理 */ }
+        }
     }
 
     private List<AchievementTitleDTO> titleTrack(List<AchievementDTO> achievements) {

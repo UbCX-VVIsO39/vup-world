@@ -153,7 +153,30 @@ public class StrategyAdviceService {
             ));
         }
 
-        // 9. 收官阶段检查
+        // 9. 粉丝结构健康度检查
+        if (totalFans > 100) {
+            double trueRatio = (double) vup.getTrueFans() / totalFans * 100;
+            if (trueRatio < 15 && vup.getDdFans() > 20) {
+                advice.add(new StrategyAdviceDTO(
+                        "SUGGESTION",
+                        "⚠️",
+                        "真爱粉占比过低，DD粉偏多，基础盘不稳。",
+                        "真爱粉" + String.format("%.1f", trueRatio) + "%，如果DD退潮会直接崩盘。用杂谈复盘或粉丝群维护沉淀核心粉。"
+                ));
+            }
+        }
+
+        // 10. 梗浓度 + DD交互效应
+        if (totalFans > 50 && vup.getMemeLevel() > 50 && vup.getDdFans() > vup.getTrueFans()) {
+            advice.add(new StrategyAdviceDTO(
+                    "TIP",
+                    "🤡",
+                    "梗浓度高且DD多于真爱粉，路线可能滑向DD_BUS_STOP。",
+                    "当前状态容易被归类为DD向主播，如果想走其他路线需要补路线专属行动。"
+            ));
+        }
+
+        // 11. 收官阶段检查
         if (currentDay >= 25) {
             advice.add(new StrategyAdviceDTO(
                     "TIP",

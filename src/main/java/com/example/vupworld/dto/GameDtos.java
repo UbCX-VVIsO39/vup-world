@@ -69,4 +69,9 @@ public final class GameDtos {
             List<Map<String, Object>> statsHistory
     ) {
     }
+
+    public record QuickStartRequest(
+            String difficulty
+    ) {
+    }
 }

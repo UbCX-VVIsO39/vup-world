@@ -243,7 +243,7 @@ public class DevStressService {
 
             var vupState = vupService.createVupWithRunSeed(
                     userId,
-                    new CreateVupRequest("压测V-" + round, personaForStrategy(effectiveStrategy)),
+                    new CreateVupRequest("压测V-" + round, personaForStrategy(effectiveStrategy), "STANDARD"),
                     uniqueSeed
             );
 

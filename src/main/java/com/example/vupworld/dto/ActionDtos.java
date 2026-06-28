@@ -43,7 +43,8 @@ public final class ActionDtos {
             String comboLabel,
             String comboHint,
             boolean enabled,
-            String disabledReason
+            String disabledReason,
+            int actionPointCost
     ) {
     }
 
@@ -277,6 +278,34 @@ public final class ActionDtos {
 
     public record SubmitOffStreamRequest(
             @NotBlank(message = "下播行动类型不能为空") String offStreamType
+    ) {
+    }
+
+    public record SendGiftRequest(
+            String giftId,
+            int qty,
+            @NotBlank(message = "幂等键不能为空") String idempotencyKey
+    ) {
+    }
+
+    public record GiftAccumulateDTO(
+            int giftCount,
+            int giftCoinValue,
+            int coinBalance
+    ) {
+    }
+
+    public record SendDanmakuRequest(
+            String text,
+            String mood,
+            @NotBlank(message = "幂等键不能为空") String idempotencyKey
+    ) {
+    }
+
+    public record DanmakuAccumulateDTO(
+            int count,
+            int heat,
+            int reputationPenalty
     ) {
     }
 }

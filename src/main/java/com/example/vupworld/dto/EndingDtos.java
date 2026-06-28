@@ -60,4 +60,20 @@ public final class EndingDtos {
             boolean blocking
     ) {
     }
+
+    public record EndingAtlasItem(
+            String endingType,
+            String title,
+            boolean unlocked,
+            String hint
+    ) {
+    }
+
+    public record EndingAtlasDTO(
+            List<EndingAtlasItem> items,
+            String recommendedNext,
+            int unlockedCount,
+            int totalCount
+    ) {
+    }
 }

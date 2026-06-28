@@ -21,11 +21,14 @@ public class FormalEventPresenter {
     private final RiskDebtMapper riskDebtMapper;
     private final DayFlowService dayFlowService;
     private final JsonService jsonService;
+    private final RivalOvertakeEvent rivalOvertakeEvent;
 
-    public FormalEventPresenter(RiskDebtMapper riskDebtMapper, DayFlowService dayFlowService, JsonService jsonService) {
+    public FormalEventPresenter(RiskDebtMapper riskDebtMapper, DayFlowService dayFlowService, JsonService jsonService,
+                                RivalOvertakeEvent rivalOvertakeEvent) {
         this.riskDebtMapper = riskDebtMapper;
         this.dayFlowService = dayFlowService;
         this.jsonService = jsonService;
+        this.rivalOvertakeEvent = rivalOvertakeEvent;
     }
 
     public PendingEventDTO pending(Vup vup, DaySession session) {
@@ -64,7 +67,8 @@ public class FormalEventPresenter {
                 && ("REST_SAVED_MELTDOWN".equals(session.getFormalEventSource())
                 || "MIDGAME_EVENT".equals(session.getFormalEventSource())
                 || "LATE_GAME_EVENT".equals(session.getFormalEventSource())
-                || "RANDOM_EVENT".equals(session.getFormalEventSource()));
+                || "RANDOM_EVENT".equals(session.getFormalEventSource())
+                || RivalOvertakeEvent.SOURCE.equals(session.getFormalEventSource()));
     }
 
     private PendingEventDTO noPendingEvent() {
@@ -72,6 +76,9 @@ public class FormalEventPresenter {
     }
 
     private PendingEventDTO ordinaryPendingEvent(DaySession session) {
+        if (RivalOvertakeEvent.SOURCE.equals(session.getFormalEventSource())) {
+            return rivalOvertakeEvent.toPendingEvent(session);
+        }
         Map<String, Object> rollDetail = rollDetail(session);
         String eventType = textValue(rollDetail, "eventType", "ORDINARY_EVENT");
         String title = textValue(rollDetail, "eventTitle", "低压运营救场");

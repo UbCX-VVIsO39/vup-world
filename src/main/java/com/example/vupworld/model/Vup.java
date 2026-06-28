@@ -34,6 +34,7 @@ public class Vup {
     private String routeScoreJson;
     private String tutorialFlagsJson;
     private Long previousEndingId;
+    private String difficulty;
 
     public Long getId() {
         return id;
@@ -297,5 +298,13 @@ public class Vup {
 
     public void setPreviousEndingId(Long previousEndingId) {
         this.previousEndingId = previousEndingId;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 }

@@ -168,4 +168,12 @@ public interface BusinessLogMapper {
               )
             """)
     int countConsecutiveSameAction(@Param("vupId") Long vupId, @Param("actionType") String actionType);
+
+    @Select("""
+            SELECT day, action, fan_change, route_score_change, result
+            FROM business_log
+            WHERE vup_id = #{vupId}
+            ORDER BY day ASC, id ASC
+            """)
+    List<BusinessLog> findTimelineByVupId(@Param("vupId") Long vupId);
 }

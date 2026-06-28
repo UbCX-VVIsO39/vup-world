@@ -11,7 +11,9 @@ public class AchievementDtos {
             int target,
             int progress,
             boolean unlocked,
-            String progressText
+            String progressText,
+            String rewardType,
+            int rewardValue
     ) {}
 
     public record AchievementProgressDTO(

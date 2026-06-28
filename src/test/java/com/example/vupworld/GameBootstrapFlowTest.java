@@ -1035,19 +1035,20 @@ class GameBootstrapFlowTest {
         assertTrue(appJs.contains("const error = new Error(apiErrorMessage(payload, response.status));"));
         assertTrue(appJs.contains("<span class=\"panel-badge\">${html(profileLabelFor(devTools.profile))}</span>"));
         assertTrue(appJs.contains("<option value=\"${html(s)}\" ${s === current ? 'selected' : ''}>${html(demoStrategyName(s))}</option>"));
-        assertTrue(appJs.contains("<select id=\"demoStrategy\" class=\"demo-strategy-select\" aria-label=\"课堂演示策略\""));
-        assertTrue(appJs.contains("aria-label=\"课堂演示：跑满30天并生成验收复盘\""));
-        assertTrue(appJs.contains("aria-label=\"课堂演示：重置演示轮\""));
-        assertTrue(appJs.contains("aria-label=\"课堂演示：补到30天\""));
-        assertTrue(appJs.contains("<div class=\"demo-summary demo-status-summary\" aria-label=\"演示状态摘要\">"));
-        assertTrue(appJs.contains("<div class=\"demo-summary demo-result\" aria-label=\"演示结果摘要\">"));
+        assertTrue(appJs.contains("<select id=\"demoStrategy\" class=\"demo-strategy-select\" aria-label=\"开发验证策略\" data-change-action=\"sync-demo-strategy-selects\">"));
+        assertTrue(appJs.contains("data-action=\"demo-run\""));
+        assertTrue(appJs.contains("data-action=\"demo-reset\" aria-label=\"开发验证：重置验证轮\""));
+        assertTrue(appJs.contains("data-action=\"demo-fast-forward\""));
+        assertTrue(appJs.contains("<div class=\"demo-summary demo-status-summary\" aria-label=\"验证状态摘要\">"));
+        assertTrue(appJs.contains("<div class=\"demo-summary demo-result\" aria-label=\"验证结果摘要\">"));
         assertTrue(appJs.contains("<span>复盘号</span><strong>${state.demoResult.endingReviewId ? '已存档' : '--'}</strong>"));
         assertTrue(appJs.contains("<span>${html(tag.label)}</span>${html(tag.value)}"));
-        assertTrue(appJs.contains("onclick=\"submitAction(${jsAttr(action.actionType)})\" data-action=\"detail-submit-action\" data-action-type=\"${html(action.actionType)}\""));
-        assertTrue(appJs.contains("onclick=\"submitAction(${jsAttr(action.actionType)})\" data-action=\"quick-submit-action\" data-action-type=\"${html(action.actionType)}\""));
+        assertTrue(appJs.contains("class=\"action-submit-btn\" data-action=\"detail-submit-action\" data-action-type=\"${html(action.actionType)}\""));
+        assertTrue(appJs.contains("data-action=\"quick-submit-action\""));
+        assertFalse(appJs.contains("onclick=\"submitAction(${jsAttr(action.actionType)})\""));
         assertTrue(appJs.contains("const actionOptionsSummaryText = actionOptionsSummaryLabel"));
         assertTrue(appJs.contains("aria-label=\"${html(actionOptionsSummaryAria)}\""));
-        assertTrue(appJs.contains("<label for=\"username\">用户名</label>"));
+        assertTrue(appJs.contains("<label for=\"username\">存档名</label>"));
         assertTrue(appJs.contains("<input type=\"text\" id=\"username\" name=\"username\""));
         assertTrue(appJs.contains("<label for=\"vupName\">VUP名称</label>"));
         assertTrue(appJs.contains("<select id=\"restartBias\" class=\"ending-restart-select\" aria-label=\"选择复活赛路线倾向\""));
@@ -1172,11 +1173,11 @@ class GameBootstrapFlowTest {
         assertTrue(appJs.contains("const signalText = actionSignalText(action, cardState);"));
         assertTrue(appJs.contains("const actionName = actionNameText(action);"));
         assertTrue(appJs.contains("aria-label=\"${html(`今日主推：${actionName}，${cueText}`)}\""));
-        assertTrue(appJs.contains("<button type=\"button\" class=\"action-item\""));
+        assertTrue(appJs.contains("<div class=\"action-item\""));
         assertTrue(appJs.contains("<button type=\"button\" class=\"action-submit-btn\""));
-        assertTrue(appJs.contains("aria-label=\"${html(`${quickActionLabel(action, quickAccessibleReason)}，快捷键 ${index + 1}`)}\""));
+        assertTrue(appJs.contains("aria-label=\"${html(`${quickActionLabel(action, quickAccessibleReason)}，快捷键 ${hotkey}`)}\""));
         assertTrue(appJs.contains("${actionButtonStateAttributes(disabled, actionDisabledText(action, disabled))}"));
-        assertTrue(appJs.contains("<h4>${html(actionName)}</h4>"));
+        assertTrue(appJs.contains("<span class=\"action-name\">${html(actionName)}</span>"));
         assertTrue(appJs.contains("<p class=\"action-reason\">${html(decisionReason)}</p>"));
         assertTrue(appJs.contains("<p class=\"action-signal-copy\">${html(signalText)}</p>"));
         assertTrue(appJs.contains("<p class=\"action-effect-copy\">${html(effectPreview)}</p>"));
@@ -2099,7 +2100,8 @@ class GameBootstrapFlowTest {
         assertTrue(appJs.contains("· 点开改"));
         assertTrue(appJs.contains("点开可修改"));
         assertTrue(appJs.contains("syncActionOptionsSummary()"));
-        assertTrue(appJs.contains("onchange=\"syncActionOptionsSummary()\""));
+        assertTrue(appJs.contains("data-change-action=\"sync-action-options-summary\""));
+        assertFalse(appJs.contains("onchange=\"syncActionOptionsSummary()\""));
     }
 
     @Test

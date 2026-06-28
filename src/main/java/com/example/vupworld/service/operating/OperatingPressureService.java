@@ -1,6 +1,7 @@
 package com.example.vupworld.service.operating;
 
 import com.example.vupworld.domain.ActionType;
+import com.example.vupworld.mapper.VupMapper;
 import com.example.vupworld.model.Vup;
 import com.example.vupworld.service.content.PlatformTrendService;
 import com.example.vupworld.service.infra.JsonService;
@@ -47,10 +48,26 @@ public class OperatingPressureService {
 
     private final JsonService jsonService;
     private final PlatformTrendService platformTrendService;
+    private final VupMapper vupMapper;
 
-    public OperatingPressureService(JsonService jsonService, PlatformTrendService platformTrendService) {
+    public OperatingPressureService(JsonService jsonService, PlatformTrendService platformTrendService, VupMapper vupMapper) {
         this.jsonService = jsonService;
         this.platformTrendService = platformTrendService;
+        this.vupMapper = vupMapper;
+    }
+
+    // BalanceConfig.pressureLockoutStaminaPenalty() = 1（硬编码避免循环依赖）
+    private static final int PRESSURE_LOCKOUT_STAMINA_PENALTY = 1;
+
+    /**
+     * 返回当前压力值（0-10+）。
+     */
+    public int currentPressure(Long vupId) {
+        Vup vup = vupMapper.findById(vupId);
+        if (vup == null) {
+            return 0;
+        }
+        return pressureState(vup, vup.getDayCount()).score();
     }
 
     public PressureState pressureState(Vup vup, int day) {
@@ -122,7 +139,17 @@ public class OperatingPressureService {
         // Phase 1: Platform trend amplification
         String trendId = platformTrendService != null ? platformTrendService.trendIdForDay(day) : null;
         int trendBonus = trendAmplification(trendId, actionType);
-        int nextScore = clamp(data.score + pressureGainFor(actionType) + trendBonus);
+        // Non-linear compounding: actions add more pressure when already stressed
+        int basePressure = pressureGainFor(actionType) + trendBonus;
+        int compoundedPressure = basePressure;
+        if (basePressure > 0 && data.score >= 5) {
+            // Overload zone: each stressor adds 50% more when already overloaded
+            compoundedPressure = (int) Math.ceil(basePressure * 1.5);
+        } else if (basePressure > 0 && data.score >= 3) {
+            // Tense zone: each stressor adds 25% more
+            compoundedPressure = (int) Math.ceil(basePressure * 1.25);
+        }
+        int nextScore = clamp(data.score + compoundedPressure);
         if (actionType == ActionType.REST) {
             nextScore = Math.max(0, nextScore - 2);
         }
@@ -134,10 +161,14 @@ public class OperatingPressureService {
             if (recoveryAlternative == null || data.lockedGroupKey == null) {
                 data.lockedGroupKey = sourceKey;
             }
-            // Phase 2: lock for 6 days
-            data.lockedUntilDay = Math.max(data.lockedUntilDay, day + 6);
-            // Phase 4: wounded recovery for 1-2 days after lockout (day + 8 = lockout + 2)
-            data.woundedUntilDay = Math.max(data.woundedUntilDay, day + 8);
+            // Phase 2: lock for 4 days（首次触发扣体力）
+            boolean isNewLockout = data.lockedUntilDay <= day;
+            data.lockedUntilDay = Math.max(data.lockedUntilDay, day + 4);
+            // Phase 4: wounded recovery for 1-2 days after lockout (day + 6 = lockout + 2)
+            data.woundedUntilDay = Math.max(data.woundedUntilDay, day + 6);
+            if (isNewLockout) {
+                vup.setStamina(Math.max(0, vup.getStamina() - PRESSURE_LOCKOUT_STAMINA_PENALTY));
+            }
         } else {
             data.lockedGroupKey = null;
             data.woundedUntilDay = 0;
@@ -153,9 +184,10 @@ public class OperatingPressureService {
 
     public void advanceDay(Vup vup, int day) {
         PressureData data = load(vup);
-        // Phase 1: Natural decay (-1 per day)
+        // Non-linear natural decay: faster decay when pressure is high
         if (data.score > 0) {
-            data.score = Math.max(0, data.score - 1);
+            int decay = data.score >= 6 ? 2 : 1; // High pressure decays 2/day
+            data.score = Math.max(0, data.score - decay);
         }
         if (data.lockedUntilDay > 0 && day > data.lockedUntilDay) {
             data.lockedGroupKey = null;
@@ -328,7 +360,7 @@ public class OperatingPressureService {
                             "停下来补点新素材，别硬剪旧内容。", 1, 0, 0, -1,
                             "找点新灵感，充实素材库"),
                     new PressureAlternative(ActionType.TRAIN_SONG.name(), "证据链回顾",
-                            "翻翻以前的素材，看看哪些还有二创价值。", 0, 0, 0, 0,
+                            "翻翻以前的素材，看看哪些还有二创价值。", 0, 0, 0, -1,
                             "回顾一下走过的路，理清思路")
             );
             case "HEAT_OVERDRIVE" -> List.of(
@@ -342,7 +374,7 @@ public class OperatingPressureService {
                             "换个赛道补点低压素材，给脑子放个假。", 1, 0, 0, -1,
                             "找点新灵感，充实素材库"),
                     new PressureAlternative(ActionType.TRAIN_DANCE.name(), "证据链回顾",
-                            "复盘之前的冲热度记录，看看哪些亏了。", 0, 0, 0, 0,
+                            "复盘之前的冲热度记录，看看哪些亏了。", 0, 0, 0, -1,
                             "回顾一下走过的路，理清思路")
             );
             case "RELATION_OVERDRAWN" -> List.of(
@@ -356,7 +388,7 @@ public class OperatingPressureService {
                             "找点不需要营业的轻松素材。", 1, 0, 0, -1,
                             "找点新灵感，充实素材库"),
                     new PressureAlternative(ActionType.TRAIN_SONG.name(), "证据链回顾",
-                            "翻翻联动和私信的历史记录。", 0, 0, 0, 0,
+                            "翻翻联动和私信的历史记录。", 0, 0, 0, -1,
                             "回顾一下走过的路，理清思路")
             );
             case "OLD_LEDGER_BURN" -> List.of(
@@ -370,7 +402,7 @@ public class OperatingPressureService {
                             "准备一些正面素材对冲旧账。", 1, 0, 0, -1,
                             "找点新灵感，充实素材库"),
                     new PressureAlternative(ActionType.TRAIN_DANCE.name(), "证据链回顾",
-                            "把旧账相关的证据链整理出来。", 0, 0, 0, 0,
+                            "把旧账相关的证据链整理出来。", 0, 0, 0, -1,
                             "回顾一下走过的路，理清思路")
             );
             default -> List.of();
@@ -387,8 +419,9 @@ public class OperatingPressureService {
     private int pressureGainFor(ActionType actionType) {
         return switch (actionType) {
             case STREAM_PLAN -> 2;
-            case PUBLISH_VIDEO, PUBLISH_CLIP -> 2;
-            case NPC_INTERACT -> 2;
+            case PUBLISH_VIDEO -> 2;
+            case PUBLISH_CLIP -> 1;
+            case NPC_INTERACT -> 1;
             case FAN_GROUP_MAINTAIN, TRAIN_TALK -> 1;
             case TRAIN_SONG, TRAIN_DANCE -> 1;
             case REST -> -2;

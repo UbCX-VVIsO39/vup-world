@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/bili-theme.css">
     <link rel="stylesheet" href="/css/utilities.css">
+    <link rel="stylesheet" href="/css/enhancements.css">
     <link rel="icon" type="image/png" href="/gallery/v4/protagonist/avatars/avatar-default.png">
     <!-- Chart.js: 本地vendor优先，CDN fallback由app.js initChartJs()处理 -->
     <script src="/vendor/chartjs/chart.umd.min.js" defer data-optional-chartjs="true"></script>
@@ -88,9 +89,11 @@
         <div class="ending-fs-score" id="endingFsScore"></div>
         <div class="ending-fs-tags" id="endingFsTags"></div>
         <div class="ending-fs-actions">
+            <button class="ending-fs-btn ending-fs-replay" data-action="toggle-timeline-replay" type="button">📈 本局回放</button>
             <button class="ending-fs-btn ending-fs-review" data-action="ending-review" type="button">查看复盘</button>
             <button class="ending-fs-btn ending-fs-restart" data-action="ending-restart" type="button">选路线重开</button>
         </div>
+        <div class="timeline-replay-panel hidden" id="timelineReplayPanel" role="dialog" aria-label="本局回放"></div>
     </div>
 </div>
 
@@ -107,33 +110,7 @@
 
 <!-- 主游戏界面 -->
 <div class="game-container" id="gameContainer">
-    <!-- B站直播间顶部信息栏 -->
-    <div class="live-room-top-bar" id="liveRoomTopBar">
-        <div class="live-room-streamer">
-            <img class="live-room-streamer-avatar" id="liveRoomAvatar" src="/gallery/v4/protagonist/avatars/avatar-streaming.png" alt="主播头像">
-            <div class="live-room-streamer-info">
-                <span class="live-room-streamer-name" id="liveRoomStreamerName">VUP出道局</span>
-                <span class="live-room-streamer-id" id="liveRoomStreamerId">房间号: 23333</span>
-            </div>
-        </div>
-        <div class="live-room-meta">
-            <span class="live-room-viewers">
-                <span class="viewer-icon" aria-label="观看人数">👁</span>
-                <span id="liveRoomViewerCount">0人观看</span>
-            </span>
-            <span class="live-room-duration">
-                <span class="duration-icon" aria-label="直播时长">⏱</span>
-                <span id="liveRoomDuration">00:00:00</span>
-            </span>
-            <span class="live-room-category">
-                <span class="category-icon" aria-label="直播分类">📺</span>
-                <span>虚拟主播</span>
-            </span>
-            <span class="live-room-room-id">ID: 23333</span>
-        </div>
-    </div>
-
-    <!-- 顶部状态栏 -->
+    <!-- 统一顶部栏：游戏状态 + 直播间信息 -->
     <header class="game-header bili-style">
         <div class="header-left">
             <div class="game-logo">
@@ -143,6 +120,15 @@
             <div class="day-info">
                 <span class="day-badge" id="dayBadge">第--天</span>
                 <span class="phase-text" id="phaseText">等待开播</span>
+                <div class="day-cycle-stepper" id="dayCycleStepper">
+                    <span class="stepper-item" data-phase="ACTION">行动</span>
+                    <span class="stepper-divider"></span>
+                    <span class="stepper-item" data-phase="TITLE">标题</span>
+                    <span class="stepper-divider"></span>
+                    <span class="stepper-item" data-phase="EVENT">事件</span>
+                    <span class="stepper-divider"></span>
+                    <span class="stepper-item" data-phase="REPORT">日报</span>
+                </div>
             </div>
         </div>
         <div class="header-center">
@@ -156,12 +142,20 @@
                         </div>
         </div>
         <div class="header-right">
+            <!-- 直播间信息内嵌 -->
+            <div class="live-info-compact" id="liveInfoCompact">
+                <span class="live-info-item" aria-label="观看人数">👁 <span id="liveRoomViewerCount">0</span></span>
+                <span class="live-info-item" aria-label="直播时长">⏱ <span id="liveRoomDuration">00:00:00</span></span>
+                <span class="live-info-item" aria-label="房间号">ID: 23333</span>
+            </div>
             <div class="bgm-controls" aria-label="BGM controls">
                 <button type="button" class="bgm-toggle" id="bgmToggle" title="BGM" aria-label="Toggle BGM" aria-pressed="true" data-action="toggle-bgm">♪</button>
                 <input type="range" class="bgm-volume bgm-volume-compact" id="bgmVolume" min="0" max="100" value="30" data-input-action="set-bgm-volume" aria-label="BGM volume">
             </div>
             <button class="streamer-mode-toggle" id="streamerModeToggle" type="button" title="主播展示模式" aria-label="主播展示模式" aria-pressed="false">LIVE</button>
             <span class="streamer-mode-hint hidden" id="streamerModeHint" role="status" aria-live="polite">主播展示：大字低噪，不改规则</span>
+            <span class="gift-accum-badge hidden" id="giftAccumBadge" title="本局直播礼物累积">🎁 ×0</span>
+            <span class="danmaku-heat-badge hidden" id="danmakuHeatBadge" title="本局直播弹幕热度">💬 🔥0</span>
             <!-- 折叠菜单：设置 + 帮助 -->
             <div class="header-more-menu" id="headerMoreMenu">
                 <button class="header-more-trigger" type="button" aria-haspopup="true" aria-expanded="false" data-action="toggle-header-more">⋮</button>
@@ -209,6 +203,11 @@
 
     <!-- 主内容区 -->
     <main class="play-shell game-main" id="mainContent">
+        <!-- 右栏情报摘要与情报标签入口 -->
+        <div class="info-brief" id="infoBrief"></div>
+        <div class="info-tabs">
+            <button class="info-tab" type="button" data-tab="ambient" aria-pressed="false">环境</button>
+        </div>
         <section class="boot-state-panel" id="bootStatePanel" role="status" aria-live="polite" aria-atomic="true">
             <div class="boot-state-card loading">
                 <span class="boot-state-kicker">开播准备中</span>
@@ -234,17 +233,31 @@
                             <div class="vup-avatar-badge" id="vupAvatarBadge"></div>
                         </div>
                         <div class="vup-info-section" id="statsSection"></div>
+                        <div class="stat-charts-section" id="statChartsSection">
+                            <div class="stat-chart-card"><canvas id="radarChart" width="200" height="200"></canvas></div>
+                            <div class="stat-chart-card"><canvas id="fanPieChart" width="200" height="200"></canvas></div>
+                            <div class="route-score-mini" id="routeScoreMini"></div>
+                        </div>
                         <div class="achievement-mini" id="achievementMini"></div>
                     </div>
                 </div>
                 <!-- 右侧：行动区 -->
                 <div class="main-panel-right">
+                    <div class="context-sidebar" id="contextSidebar" aria-label="上下文情报">
+                        <div id="crisisAlertPanel"></div>
+                        <div id="rivalThreatPanel"></div>
+                        <div id="fortunePanel"></div>
+                        <div id="comboHintPanel"></div>
+                        <div id="coachAdvicePanel"></div>
+                    </div>
                     <div class="top-brief-row">
                         <div class="coach-card" id="coachPanel"></div>
                         <div class="insight-digest" id="insightDigest" aria-label="场外情报摘要"></div>
                     </div>
+                    <div class="current-goal-banner" id="currentGoalBanner" role="status" aria-live="polite"></div>
                     <div class="auth-section" id="authSection"></div>
-                    <div class="game-panels">
+                    <div class="game-panels" id="mainDecisionCard" aria-label="主决策区">
+                        <div class="main-decision-hint hidden" id="mainDecisionHint" role="status" aria-live="polite"></div>
                         <div class="panel action-panel" id="actionPanel"></div>
                         <!-- 骨架屏：行动面板 -->
                         <div class="skeleton-panel" id="actionPanelSkeleton" style="display:none;">
@@ -261,6 +274,16 @@
                                 <div class="panel danmaku-panel" id="danmakuPanel"></div>
                             </div>
                         </details>
+                    </div>
+                    <!-- 4.3 主决策区阶段进度条 -->
+                    <div class="phase-stepper" id="phaseStepper" aria-label="今日阶段进度">
+                        <div class="phase-step" data-step="action"><span class="phase-step-num">1</span><span class="phase-step-label">行动</span></div>
+                        <div class="phase-step-divider"></div>
+                        <div class="phase-step" data-step="title"><span class="phase-step-num">2</span><span class="phase-step-label">标题</span></div>
+                        <div class="phase-step-divider"></div>
+                        <div class="phase-step" data-step="event"><span class="phase-step-num">3</span><span class="phase-step-label">事件</span></div>
+                        <div class="phase-step-divider"></div>
+                        <div class="phase-step" data-step="report"><span class="phase-step-num">4</span><span class="phase-step-label">日报</span></div>
                     </div>
                 </div>
             </div>
@@ -281,7 +304,7 @@
 
         <!-- ===== Tab 3: 总览 ===== -->
         <div class="tab-panel" id="tabInfoHub">
-            <!-- 核心 6 格：一眼看清关键信息 -->
+            <!-- 核心网格：一眼看清关键信息 -->
             <div class="info-hub-grid">
                 <div class="info-hub-section timeline-section">
                     <div class="info-panel" id="timelinePanel"></div>
@@ -298,23 +321,24 @@
                     <h3 class="info-hub-title">📋 历史</h3>
                     <div class="info-panel" id="reportHistoryPanel"></div>
                 </div>
+                <div class="info-hub-section">
+                    <h3 class="info-hub-title">📊 排行榜</h3>
+                    <div class="info-panel" id="leaderboardPanel"></div>
+                </div>
+                <div class="info-hub-section">
+                    <h3 class="info-hub-title">🔮 预测</h3>
+                    <div class="info-panel" id="endingForecastPanel"></div>
+                </div>
             </div>
             <!-- 走势/路线图库：独立全宽区域，点击卡片看路线要求 -->
             <div class="route-gallery-section">
                 <div class="info-panel" id="routeGalleryPanel"></div>
+                <div class="info-panel ending-atlas-panel" id="endingAtlasPanel"></div>
             </div>
             <!-- 更多面板：折叠收起 -->
             <details class="info-hub-extra">
                 <summary>📂 更多面板</summary>
                 <div class="info-hub-grid">
-                    <div class="info-hub-section">
-                        <h3 class="info-hub-title">📊 排行榜</h3>
-                        <div class="info-panel" id="leaderboardPanel"></div>
-                    </div>
-                    <div class="info-hub-section">
-                        <h3 class="info-hub-title">🔮 预测</h3>
-                        <div class="info-panel" id="endingForecastPanel"></div>
-                    </div>
                     <div class="info-hub-section">
                         <h3 class="info-hub-title">🔥 热梗</h3>
                         <div class="info-panel" data-collapsible="true" id="memeLifecyclePanel"></div>
@@ -339,9 +363,14 @@
         </div>
     </main>
 
-    <!-- B站直播间底部互动栏 -->
-    <div class="live-room-bottom-bar" id="liveRoomBottomBar">
+    <!-- B站直播间底部互动栏（4.7：非直播阶段按需隐藏） -->
+    <div class="live-room-bottom-bar hidden" id="liveRoomBottomBar">
         <div class="danmaku-input-wrapper">
+            <div class="danmaku-mood-row" id="danmakuMoodRow" role="group" aria-label="弹幕心情">
+                <button type="button" class="danmaku-mood-btn active" data-mood="positive" data-action="select-danmaku-mood" aria-pressed="true" title="正面">😊</button>
+                <button type="button" class="danmaku-mood-btn" data-action="select-danmaku-mood" data-mood="neutral" aria-pressed="false" title="中性">😐</button>
+                <button type="button" class="danmaku-mood-btn" data-action="select-danmaku-mood" data-mood="negative" aria-pressed="false" title="负面">😡</button>
+            </div>
             <input type="text" id="danmakuInput" placeholder="发条弹幕..." maxlength="50">
             <button class="danmaku-send-btn" id="danmakuSendBtn" type="button" data-action="send-danmaku">发送</button>
         </div>

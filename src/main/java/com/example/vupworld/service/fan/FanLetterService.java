@@ -6,7 +6,9 @@ import com.example.vupworld.service.infra.DeterministicRngService;
 import com.example.vupworld.service.content.ContentCatalogService;
 
 import com.example.vupworld.dto.FanLetterDtos.FanLetterDTO;
+import com.example.vupworld.dto.MoodDtos.NpcInteractionResult;
 import com.example.vupworld.model.DaySession;
+import com.example.vupworld.model.Vup;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,48 +17,51 @@ import java.util.*;
 public class FanLetterService {
 
     private static final List<FanLetterDTO> TRUE_FAN_LETTERS = List.of(
-            new FanLetterDTO("tf1", "true_fan", "老粉小明", "主播慢慢来，我会一直支持你的。", "温暖", "❤️"),
-            new FanLetterDTO("tf2", "true_fan", "真爱粉一号", "今天的直播很好看，期待明天！", "开心", "🥰"),
-            new FanLetterDTO("tf3", "true_fan", "铁粉老王", "主播加油，我们都在！", "鼓励", "💪"),
-            new FanLetterDTO("tf4", "true_fan", "忠实观众", "虽然今天有点失误，但没关系，继续加油！", "理解", "🙏"),
-            new FanLetterDTO("tf5", "true_fan", "老粉小红", "主播的杂谈越来越有意思了！", "欣赏", "✨"),
-            new FanLetterDTO("tf6", "true_fan", "应援席三月", "应援席只是想说今晚低压台很安心，别为了节目效果硬扛。", "安心", "⚓"),
-            new FanLetterDTO("tf7", "true_fan", "群公告bot", "粉丝群公告写清楚就好，大家按公告来，不催不拱火。", "稳定", "📌")
+            new FanLetterDTO("tf1", "true_fan", "老粉小明", "主播慢慢来，我会一直支持你的。", "温暖", "❤️", null),
+            new FanLetterDTO("tf2", "true_fan", "真爱粉一号", "今天的直播很好看，期待明天！", "开心", "🥰", null),
+            new FanLetterDTO("tf3", "true_fan", "铁粉老王", "主播加油，我们都在！", "鼓励", "💪", null),
+            new FanLetterDTO("tf4", "true_fan", "忠实观众", "虽然今天有点失误，但没关系，继续加油！", "理解", "🙏", null),
+            new FanLetterDTO("tf5", "true_fan", "老粉小红", "主播的杂谈越来越有意思了！", "欣赏", "✨", null),
+            new FanLetterDTO("tf6", "true_fan", "应援席三月", "应援席只是想说今晚低压台很安心，别为了节目效果硬扛。", "安心", "⚓", null),
+            new FanLetterDTO("tf7", "true_fan", "群公告bot", "粉丝群公告写清楚就好，大家按公告来，不催不拱火。", "稳定", "📌", null)
     );
 
     private static final List<FanLetterDTO> FUN_FAN_LETTERS = List.of(
-            new FanLetterDTO("ff1", "fun_fan", "乐子人A", "今天的节目效果很好，哈哈哈！", "开心", "😂"),
-            new FanLetterDTO("ff2", "fun_fan", "围观群众", "这个切片我能看十遍！", "兴奋", "🔥"),
-            new FanLetterDTO("ff3", "fun_fan", "弹幕高手", "主播的梗越来越有意思了！", "欣赏", "👏"),
-            new FanLetterDTO("ff4", "fun_fan", "切片组成员", "今天的素材太棒了，我已经开始剪了！", "期待", "✂️"),
-            new FanLetterDTO("ff5", "fun_fan", "乐子人B", "主播今天又整活了，爱看！", "开心", "🤣"),
-            new FanLetterDTO("ff6", "fun_fan", "烤肉组值班", "烤肉组可以翻译名场面，但二创授权先问清楚，我不想给主播添麻烦。", "谨慎", "🥩"),
-            new FanLetterDTO("ff7", "fun_fan", "录播组夜班", "录播组补时间轴补好了，标题组这次别抢跑。", "可靠", "⏱️")
+            new FanLetterDTO("ff1", "fun_fan", "乐子人A", "今天的节目效果很好，哈哈哈！", "开心", "😂", null),
+            new FanLetterDTO("ff2", "fun_fan", "围观群众", "这个切片我能看十遍！", "兴奋", "🔥", null),
+            new FanLetterDTO("ff3", "fun_fan", "弹幕高手", "主播的梗越来越有意思了！", "欣赏", "👏", null),
+            new FanLetterDTO("ff4", "fun_fan", "切片组成员", "今天的素材太棒了，我已经开始剪了！", "期待", "✂️", null),
+            new FanLetterDTO("ff5", "fun_fan", "乐子人B", "主播今天又整活了，爱看！", "开心", "🤣", null),
+            new FanLetterDTO("ff6", "fun_fan", "烤肉组值班", "烤肉组可以翻译名场面，但二创授权先问清楚，我不想给主播添麻烦。", "谨慎", "🥩", null),
+            new FanLetterDTO("ff7", "fun_fan", "录播组夜班", "录播组补时间轴补好了，标题组这次别抢跑。", "可靠", "⏱️", null)
     );
 
     private static final List<FanLetterDTO> UNICORN_LETTERS = List.of(
-            new FanLetterDTO("u1", "unicorn", "独角兽一号", "主播今天和谁联动了？", "好奇", "👀"),
-            new FanLetterDTO("u2", "unicorn", "榜一", "今天的高亮互动问题主播还没回答呢。", "期待", "📌"),
-            new FanLetterDTO("u3", "unicorn", "陪伴粉", "主播今天怎么没开陪伴回？", "疑惑", "❓"),
-            new FanLetterDTO("u4", "unicorn", "独角兽二号", "主播以前不是这样的...", "怀念", "😢"),
-            new FanLetterDTO("u5", "unicorn", "陪伴粉", "陪伴回别排没了，我只是有点不适应。", "不安", "🕯️")
+            new FanLetterDTO("u1", "unicorn", "独角兽一号", "主播今天和谁联动了？", "好奇", "👀", null),
+            new FanLetterDTO("u2", "unicorn", "榜一", "今天的高亮互动问题主播还没回答呢。", "期待", "📌", null),
+            new FanLetterDTO("u3", "unicorn", "陪伴粉", "主播今天怎么没开陪伴回？", "疑惑", "❓", null),
+            new FanLetterDTO("u4", "unicorn", "独角兽二号", "主播以前不是这样的...", "怀念", "😢", null),
+            new FanLetterDTO("u5", "unicorn", "陪伴粉", "陪伴回别排没了，我只是有点不适应。", "不安", "🕯️", null)
     );
 
     private static final List<FanLetterDTO> DD_LETTERS = List.of(
-            new FanLetterDTO("dd1", "dd", "DD小张", "路过看看，主播不错！", "随意", "👋"),
-            new FanLetterDTO("dd2", "dd", "多推人", "今天看了三个主播，你是其中一个！", "开心", "🚌"),
-            new FanLetterDTO("dd3", "dd", "联动观众", "从隔壁过来的，主播好！", "友好", "🤝"),
-            new FanLetterDTO("dd4", "dd", "路人粉", "今天第一次看，感觉不错！", "新鲜", "✨"),
-            new FanLetterDTO("dd5", "dd", "DD老手", "又来坐一站了！", "习惯", "🚂"),
-            new FanLetterDTO("dd6", "dd", "路过DD", "从联动过来坐一会儿，灯牌先点上，气氛挺舒服。", "轻松", "🚌")
+            new FanLetterDTO("dd1", "dd", "DD小张", "路过看看，主播不错！", "随意", "👋", null),
+            new FanLetterDTO("dd2", "dd", "多推人", "今天看了三个主播，你是其中一个！", "开心", "🚌", null),
+            new FanLetterDTO("dd3", "dd", "联动观众", "从隔壁过来的，主播好！", "友好", "🤝", null),
+            new FanLetterDTO("dd4", "dd", "路人粉", "今天第一次看，感觉不错！", "新鲜", "✨", null),
+            new FanLetterDTO("dd5", "dd", "DD老手", "又来坐一站了！", "习惯", "🚂", null),
+            new FanLetterDTO("dd6", "dd", "路过DD", "从联动过来坐一会儿，灯牌先点上，气氛挺舒服。", "轻松", "🚌", null)
     );
 
     private final DeterministicRngService deterministicRngService;
     private final ContentCatalogService contentCatalogService;
+    private final NpcRelationshipService npcRelationshipService;
 
-    public FanLetterService(DeterministicRngService deterministicRngService, ContentCatalogService contentCatalogService) {
+    public FanLetterService(DeterministicRngService deterministicRngService, ContentCatalogService contentCatalogService,
+                           NpcRelationshipService npcRelationshipService) {
         this.deterministicRngService = deterministicRngService;
         this.contentCatalogService = contentCatalogService;
+        this.npcRelationshipService = npcRelationshipService;
     }
 
     /**
@@ -66,17 +71,19 @@ public class FanLetterService {
         String name = "";
         String mood = "";
         String icon = "";
+        String npcBinding = null;
         if (contentJson != null && !contentJson.isBlank()) {
             try {
-                // Simple JSON field extraction without extra dependencies
                 name = extractJsonString(contentJson, "name");
                 mood = extractJsonString(contentJson, "mood");
                 icon = extractJsonString(contentJson, "icon");
+                String binding = extractJsonString(contentJson, "npcBinding");
+                npcBinding = binding.isBlank() ? null : binding;
             } catch (Exception ignored) {
                 // Fall through with defaults
             }
         }
-        return new FanLetterDTO(subKey, "", name, contentText, mood, icon);
+        return new FanLetterDTO(subKey, "", name, contentText, mood, icon, npcBinding);
     }
 
     /**
@@ -183,5 +190,23 @@ public class FanLetterService {
             dbCount += list.size();
         }
         return Math.max(count, dbCount);
+    }
+
+    /**
+     * 回信：如果信件绑定了 NPC，调用 npcRelationshipService.interact 触发互动。
+     * interactionType 默认为 "FAN_LETTER_REPLY"。
+     */
+    public NpcInteractionResult reply(Vup vup, FanLetterDTO letter) {
+        return reply(vup, letter, "FAN_LETTER_REPLY");
+    }
+
+    /**
+     * 回信：如果信件绑定了 NPC，调用 npcRelationshipService.interact 触发互动。
+     */
+    public NpcInteractionResult reply(Vup vup, FanLetterDTO letter, String interactionType) {
+        if (letter == null || letter.npcBinding() == null || letter.npcBinding().isBlank()) {
+            return null;
+        }
+        return npcRelationshipService.interact(vup, letter.npcBinding(), interactionType);
     }
 }

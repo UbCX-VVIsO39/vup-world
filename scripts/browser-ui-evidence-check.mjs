@@ -488,7 +488,9 @@ function sharedBrowserHelpers() {
             };
         };
         const waitForApp = async () => {
-            const ok = await waitFor(() => typeof hydrate === 'function'
+            const ok = await waitFor(() => document.readyState !== 'loading'
+                && window.__vupAppMainReady === true
+                && typeof hydrate === 'function'
                 && typeof render === 'function'
                 && typeof state === 'object'
                 && document.getElementById('gameContainer'));

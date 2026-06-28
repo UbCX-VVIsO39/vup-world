@@ -311,6 +311,8 @@ public class ActionService {
     private final DeterministicRngService deterministicRngService;
     private final PlatformTrendService platformTrendService;
     private final DailyFortuneService dailyFortuneService;
+    private final com.example.vupworld.service.fan.RivalProgressService rivalProgressService;
+    private final com.example.vupworld.service.event.RivalOvertakeEvent rivalOvertakeEvent;
 
     public ActionService(
             VupService vupService,
@@ -338,7 +340,9 @@ public class ActionService {
             MidgameEventContentService midgameEventContentService,
             DeterministicRngService deterministicRngService,
             PlatformTrendService platformTrendService,
-            DailyFortuneService dailyFortuneService
+            DailyFortuneService dailyFortuneService,
+            com.example.vupworld.service.fan.RivalProgressService rivalProgressService,
+            com.example.vupworld.service.event.RivalOvertakeEvent rivalOvertakeEvent
     ) {
         this.vupService = vupService;
         this.vupMapper = vupMapper;
@@ -366,6 +370,8 @@ public class ActionService {
         this.deterministicRngService = deterministicRngService;
         this.platformTrendService = platformTrendService;
         this.dailyFortuneService = dailyFortuneService;
+        this.rivalProgressService = rivalProgressService;
+        this.rivalOvertakeEvent = rivalOvertakeEvent;
     }
 
     public List<ActionOptionDTO> listActions(Long userId) {
@@ -567,7 +573,6 @@ public class ActionService {
     }
 
     private void validateScheduleResources(Vup vup, DaySession session, List<ScheduleSlotPlan> slots) {
-        int stamina = vup.getStamina();
         int inspiration = vup.getInspiration();
         int coin = vup.getCoin();
         int material = materialStock(vup);
@@ -576,16 +581,6 @@ public class ActionService {
             if (slot.actionType() == ActionType.STREAM_PLAN && session.isStreamPlanCancelled()) {
                 throw new GameException("STREAM_PLAN_CANCELLED_TODAY", "今天已经取消过直播企划，排班里不能再塞直播企划。");
             }
-
-            int staminaChange = scheduleStaminaChange(slot.actionType(), slot.intensity());
-            if (stamina + staminaChange < 0) {
-                throw new GameException(
-                        "INSUFFICIENT_STAMINA",
-                        slotLabelFor(slot.slotKey()) + "的" + scheduleActionLabel(slot.actionType())
-                                + "需要体力" + Math.abs(staminaChange) + "，当前排班会把体力扣成负数。"
-                );
-            }
-            stamina = clamp(stamina + staminaChange, 0, vup.getMaxStamina());
 
             int inspirationChange = scheduleInspirationChange(slot.actionType());
             if (inspiration + inspirationChange < 0) {
@@ -614,6 +609,24 @@ public class ActionService {
             }
             coin = Math.max(0, coin + coinChange);
         }
+
+        // AP 总量校验 + 扣减
+        int totalApCost = slots.stream().mapToInt(s -> scheduleSlotApCost(s.actionType(), s.intensity())).sum();
+        if (session.getActionPoints() < totalApCost) {
+            throw new GameException("INSUFFICIENT_ACTION_POINTS",
+                    "今日行动点不足（需要 " + totalApCost + " 点，剩余 " + session.getActionPoints() + " 点），调整排班强度或减少高消耗时段。");
+        }
+        session.setActionPoints(Math.max(0, session.getActionPoints() - totalApCost));
+    }
+
+    /** 排班时段 AP 消耗：强度决定成本，REST 固定1点。 */
+    private int scheduleSlotApCost(ActionType actionType, ScheduleIntensity intensity) {
+        if (actionType == ActionType.REST) return 1;
+        return switch (intensity) {
+            case LIGHT -> 1;
+            case STANDARD -> 2;
+            case SPRINT -> 3;
+        };
     }
 
     private ScheduleSlotOutcome resolveScheduleSlot(
@@ -1005,23 +1018,12 @@ public class ActionService {
     private int scheduleStaminaChange(ActionType actionType, ScheduleIntensity intensity) {
         if (actionType == ActionType.REST) {
             return switch (intensity) {
-                case LIGHT -> Math.max(2, balanceConfig.restStaminaRecovery() - 2);
+                case LIGHT -> Math.max(2, balanceConfig.restStaminaRecovery() - 1);
                 case STANDARD, SPRINT -> balanceConfig.restStaminaRecovery();
             };
         }
-        int baseCost = switch (actionType) {
-            case STREAM_PLAN -> balanceConfig.streamPlanStaminaCost();
-            case PUBLISH_VIDEO -> balanceConfig.publishVideoStaminaCost();
-            case PUBLISH_CLIP -> balanceConfig.publishClipStaminaCost();
-            case NPC_INTERACT -> 2;
-            default -> balanceConfig.trainActionStaminaCost();
-        };
-        int cost = switch (intensity) {
-            case LIGHT -> Math.max(1, baseCost - 1);
-            case STANDARD -> baseCost;
-            case SPRINT -> baseCost + (actionType == ActionType.PUBLISH_CLIP ? 1 : 2);
-        };
-        return -cost;
+        // 非REST行动不再消耗体力，体力通过压力/惩罚机制间接下降
+        return 0;
     }
 
     private int scheduleInspirationChange(ActionType actionType) {
@@ -1341,8 +1343,9 @@ public class ActionService {
             OperatingPressureService.PressureReplacement replacement = operatingPressureService.replacementForAction(vup, session.getDay(), actionType);
             throw new GameException("OPERATIONAL_PRESSURE_LOCKED", replacement.hint());
         }
-        if (vup.getStamina() < config.staminaCost) {
-            throw new GameException("INSUFFICIENT_STAMINA", "体力不够，主播需要先喘口气。");
+        int actionPointCost = actionType.actionPointCost();
+        if (actionType != ActionType.REST && session.getActionPoints() < actionPointCost) {
+            throw new GameException("INSUFFICIENT_ACTION_POINTS", "行动点不足，今天只能休息或进入场外。");
         }
         if (actionType == ActionType.PUBLISH_VIDEO && vup.getInspiration() < 1) {
             throw new GameException("INSUFFICIENT_INSPIRATION", "灵感不足，投稿组还没攒出能发布的视频。");
@@ -1354,6 +1357,8 @@ public class ActionService {
         if (productionCoinCost > 0 && vup.getCoin() < productionCoinCost) {
             throw new GameException("INSUFFICIENT_COIN", "收官冲刺制作预算不足，先用商业标题或粉丝群维护补一点运营预算。");
         }
+        // 行动点扣减（REST 在 AP 不足时仍允许，但同样扣减）
+        session.setActionPoints(Math.max(0, session.getActionPoints() - actionPointCost));
         if (actionType == ActionType.STREAM_PLAN && session.isStreamPlanCancelled()) {
             throw new GameException("STREAM_PLAN_CANCELLED_TODAY", "今天已经取消过直播企划，标题组不能靠刷新池子加班。");
         }
@@ -1383,13 +1388,15 @@ public class ActionService {
         }
         session.setSelectedAction(actionType.name());
         session.setPendingActionResultJson(jsonService.write(actionResult));
-        DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
-        if (midgameEvent != null) {
-            return midgameEvent;
-        }
-        DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
-        if (lateGameEvent != null) {
-            return lateGameEvent;
+        if (!shouldKeepRouteActionUninterrupted(vup, session, actionResult)) {
+            DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
+            if (midgameEvent != null) {
+                return midgameEvent;
+            }
+            DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
+            if (lateGameEvent != null) {
+                return lateGameEvent;
+            }
         }
         DayResultDTO pendingEvent = pauseForDueDebtIfNeeded(userId, vup, session, actionResult, idempotencyKey, requestHash, buildRecord);
         if (pendingEvent != null) {
@@ -1413,6 +1420,11 @@ public class ActionService {
         DayResultDTO ordinaryEvent = pauseForOrdinaryEventIfNeeded(userId, vup, session, actionResult, idempotencyKey, requestHash, buildRecord);
         if (ordinaryEvent != null) {
             return ordinaryEvent;
+        }
+
+        DayResultDTO rivalOvertake = pauseForRivalOvertakeIfNeeded(vup, session, actionResult);
+        if (rivalOvertake != null) {
+            return rivalOvertake;
         }
 
         return queueOffStreamSettlement(session, actionResult);
@@ -1600,13 +1612,15 @@ public class ActionService {
         }
         applyOffStreamLogImpact(log, actionResult);
 
-        DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
-        if (midgameEvent != null) {
-            return midgameEvent;
-        }
-        DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
-        if (lateGameEvent != null) {
-            return lateGameEvent;
+        if (!shouldKeepRouteActionUninterrupted(vup, session, actionResult)) {
+            DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
+            if (midgameEvent != null) {
+                return midgameEvent;
+            }
+            DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
+            if (lateGameEvent != null) {
+                return lateGameEvent;
+            }
         }
 
         DayResultDTO pendingEvent = pauseForDueDebtIfNeeded(userId, vup, session, actionResult, null, null, null);
@@ -1991,13 +2005,15 @@ public class ActionService {
             );
         }
 
-        DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
-        if (midgameEvent != null) {
-            return midgameEvent;
-        }
-        DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
-        if (lateGameEvent != null) {
-            return lateGameEvent;
+        if (!shouldKeepRouteActionUninterrupted(vup, session, actionResult)) {
+            DayResultDTO midgameEvent = pauseForMidgameEventIfNeeded(vup, session, actionResult);
+            if (midgameEvent != null) {
+                return midgameEvent;
+            }
+            DayResultDTO lateGameEvent = pauseForLateGameEventIfNeeded(vup, session, actionResult);
+            if (lateGameEvent != null) {
+                return lateGameEvent;
+            }
         }
 
         RandomEventDTO randomEvent = rollRandomOrdinaryEvent(vup, session, actionResult);
@@ -2016,6 +2032,36 @@ public class ActionService {
                 actionResult,
                 null,
                 formalEventPresenter.pending(vup, session),
+                null,
+                false,
+                null,
+                null
+        );
+    }
+
+    DayResultDTO pauseForRivalOvertakeIfNeeded(Vup vup, DaySession session, ActionResultDTO actionResult) {
+        com.example.vupworld.dto.NpcDtos.RivalProgressDTO progress = rivalProgressService.progress(vup);
+        if (progress == null || !progress.overtaken()) {
+            return null;
+        }
+        com.example.vupworld.dto.NpcDtos.RivalDTO topRival = progress.rivals().stream()
+                .max(java.util.Comparator.comparingInt(com.example.vupworld.dto.NpcDtos.RivalDTO::fans))
+                .orElse(null);
+        if (topRival == null || topRival.fans() <= vup.getFans()) {
+            return null;
+        }
+        session.setPhase(DayPhase.NEED_EVENT_CHOICE.name());
+        session.setFormalEventSlotStatus("RESERVED");
+        session.setFormalEventSource(rivalOvertakeEvent.SOURCE);
+        session.setFormalEventPriority(25);
+        session.setFormalEventRollDetailJson(rivalOvertakeEvent.buildRollDetailJson(vup, topRival));
+        daySessionMapper.updateAfterAction(session);
+
+        return new DayResultDTO(
+                session.getPhase(),
+                actionResult,
+                null,
+                rivalOvertakeEvent.toPendingEvent(session),
                 null,
                 false,
                 null,
@@ -4358,7 +4404,8 @@ public class ActionService {
                 comboLabel,
                 comboHint,
                 enabled,
-                disabledReason
+                disabledReason,
+                config.actionType.actionPointCost()
         );
     }
 

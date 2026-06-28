@@ -12,7 +12,8 @@ public final class VupDtos {
 
     public record CreateVupRequest(
             @NotBlank(message = "VUP名称不能为空") @Size(min = 1, max = 64, message = "名称长度1-64") String name,
-            @NotBlank(message = "人设不能为空") @Size(min = 1, max = 255, message = "人设长度1-255") String persona
+            @NotBlank(message = "人设不能为空") @Size(min = 1, max = 255, message = "人设长度1-255") String persona,
+            String difficulty
     ) {
     }
 

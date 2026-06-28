@@ -155,6 +155,48 @@ function creationStyleKey(context) {
   return dataset(context).creationStyle || context?.element?.value;
 }
 
+function closeHeaderMoreMenu() {
+  const menu = globalThis.document?.getElementById('headerMoreMenu');
+  const trigger = menu?.querySelector('.header-more-trigger');
+  const dropdown = menu?.querySelector('.header-more-dropdown');
+  if (!menu || !trigger || !dropdown) return;
+  menu.classList.remove('open');
+  trigger.setAttribute('aria-expanded', 'false');
+  dropdown.classList.add('hidden');
+}
+
+function toggleHeaderMoreAction(context) {
+  const menu = context?.element?.closest('.header-more-menu');
+  const trigger = menu?.querySelector('.header-more-trigger');
+  const dropdown = menu?.querySelector('.header-more-dropdown');
+  if (!menu || !trigger || !dropdown) return;
+
+  const nextOpen = dropdown.classList.contains('hidden');
+  menu.classList.toggle('open', nextOpen);
+  trigger.setAttribute('aria-expanded', String(nextOpen));
+  dropdown.classList.toggle('hidden', !nextOpen);
+}
+
+function closeHeaderMoreAfter(handler) {
+  return context => {
+    const result = handler(context);
+    closeHeaderMoreMenu();
+    return result;
+  };
+}
+
+function bindHeaderMoreDismissal() {
+  if (globalThis.__vupHeaderMoreDismissBound || !globalThis.document) return;
+  globalThis.__vupHeaderMoreDismissBound = true;
+  globalThis.document.addEventListener('click', event => {
+    if (event.target?.closest?.('#headerMoreMenu')) return;
+    closeHeaderMoreMenu();
+  });
+  globalThis.document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeHeaderMoreMenu();
+  });
+}
+
 export function registerAction(name, handler) {
   actions[name] = handler;
 }
@@ -174,6 +216,8 @@ export function runAction(name, context) {
 
 // 注册所有现有动作
 export function registerAllActions() {
+  bindHeaderMoreDismissal();
+
   // 认证和单机存档
   registerAction('login', legacyAction('login'));
   registerAction('register', legacyAction('register'));
@@ -268,7 +312,8 @@ export function registerAllActions() {
   });
 
   // 设置
-  registerAction('toggle-settings-panel', legacyAction('toggleSettingsPanel'));
+  registerAction('toggle-header-more', toggleHeaderMoreAction);
+  registerAction('toggle-settings-panel', closeHeaderMoreAfter(legacyAction('toggleSettingsPanel')));
   registerAction('close-settings-panel', legacyAction('closeSettingsPanel'));
 
   // 教练卡收起/展开
@@ -315,7 +360,7 @@ export function registerAllActions() {
   // 教程相关
   registerAction('close-tutorial', legacyAction('hideTutorial'));
   registerAction('skip-tutorial', legacyAction('hideTutorial'));
-  registerAction('open-metric-help', legacyAction('showMetricHelp'));
+  registerAction('open-metric-help', closeHeaderMoreAfter(legacyAction('showMetricHelp')));
   registerAction('close-metric-help', legacyAction('hideMetricHelp'));
 
   // 音频
@@ -419,4 +464,21 @@ export function registerAllActions() {
     return key ? [key] : [];
   }));
   registerAction('create-loadout-summary', noopAction);
+
+  // 体验闭环：上下文侧栏 / 回放 / 平台抽屉 / 总览页
+  registerAction('toggle-context-item', context => {
+    const target = dataset(context).contextTarget;
+    if (target) callGlobal('toggleContextItem', target);
+  });
+  registerAction('close-timeline-replay', () => callGlobal('closeTimelineReplay'));
+  registerAction('toggle-timeline-replay', () => {
+    const panel = globalThis.document?.getElementById('timelineReplayPanel');
+    if (panel && panel.classList.contains('hidden')) {
+      callGlobal('renderTimelineReplay');
+    } else {
+      callGlobal('closeTimelineReplay');
+    }
+  });
+  registerAction('toggle-platform-drawer', () => callGlobal('togglePlatformDrawer'));
+  registerAction('toggle-info-hub', () => callGlobal('toggleInfoHubPage'));
 }

@@ -131,7 +131,7 @@ public class VupService {
             String routeBiasType,
             String restartTargetType
     ) {
-        Vup vup = defaultVup(previous.getUserId(), new CreateVupRequest(previous.getName(), previous.getPersona()));
+        Vup vup = defaultVup(previous.getUserId(), new CreateVupRequest(previous.getName(), previous.getPersona(), previous.getDifficulty()));
         vup.setSlotNumber(Math.max(1, previous.getSlotNumber()));
         vup.setPreviousEndingId(previousEndingId);
         applyRestartBias(vup, fanBiasType);
@@ -187,6 +187,7 @@ public class VupService {
         vup.setMemeLevel(0);
         vup.setCommercialLevel(0);
         vup.setCurrentRoute(RouteType.UNKNOWN.name());
+        vup.setDifficulty(BalanceConfig.parseDifficulty(request.difficulty()).name());
         vup.setExpectationJson("{}");
         vup.setRouteScoreJson("""
                 {"ELECTRONIC_PICKLE":0,"SINGING_IDOL":0,"SLICE_SAINT":0,"SOCIAL_COLLAB":0,"DANCE_MEME":0,"BLACK_RED_MAIN_STAGE":0,"UNKNOWN":0}

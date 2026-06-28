@@ -76,8 +76,14 @@ public class DailyFortuneService {
             "休息"
     );
 
-    public DailyFortuneDTO getFortune(int day, int fans, int reputation, DaySession session) {
+    public DailyFortuneDTO getFortune(int day, int fans, int reputation, DaySession session, int stamina) {
         int rand = stableDailyRoll(day, fans, reputation, session);
+        // Stamina penalty: low stamina shifts fortune worse
+        if (stamina <= 2) {
+            rand = Math.min(99, rand + 8);
+        } else if (stamina <= 4) {
+            rand = Math.min(99, rand + 3);
+        }
 
         // 声望高时，好运势概率增加
         if (reputation >= 70) {
@@ -108,10 +114,20 @@ public class DailyFortuneService {
         return FORTUNES.get(6); // 大凶
     }
 
+    public DailyFortuneDTO getFortune(int day, int fans, int reputation, DaySession session) {
+        return getFortune(day, fans, reputation, session, 5);
+    }
+
     private int stableDailyRoll(int day, int fans, int reputation, DaySession session) {
         String seed = (session == null || session.getRandomSeed() == null ? "daily-fortune" : session.getRandomSeed())
-                + ":" + day + ":" + Math.max(0, fans / 50) + ":" + Math.max(0, reputation / 10);
-        return Math.floorMod(seed.hashCode(), 100);
+                + ":" + day + ":" + fans + ":" + reputation + ":" + Math.max(0, fans / 25) + ":" + Math.max(0, reputation / 5);
+        // Use 31-bit hash to avoid negative bias from String.hashCode
+        int h = 0;
+        byte[] bytes = seed.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        for (byte b : bytes) {
+            h = 31 * h + (b & 0xFF);
+        }
+        return Math.floorMod(h, 100);
     }
 
     public int getFortuneCount() {

@@ -8,9 +8,13 @@ import com.example.vupworld.service.infra.RequestHashService;
 
 import com.example.vupworld.service.infra.JsonService;
 
+import com.example.vupworld.service.progression.AchievementService;
+
 import com.example.vupworld.common.GameException;
 import com.example.vupworld.domain.DayPhase;
 import com.example.vupworld.domain.VupStatus;
+import com.example.vupworld.dto.AchievementDtos.AchievementDTO;
+import com.example.vupworld.dto.AchievementDtos.AchievementProgressDTO;
 import com.example.vupworld.dto.RebirthDtos.RestartRequest;
 import com.example.vupworld.dto.RebirthDtos.RestartResultDTO;
 import com.example.vupworld.mapper.DaySessionMapper;
@@ -24,6 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -43,6 +50,7 @@ public class RebirthService {
     private final IdempotencyRunner idempotencyRunner;
     private final RequestHashService requestHashService;
     private final EndingAtlasService endingAtlasService;
+    private final AchievementService achievementService;
 
     public RebirthService(
             VupService vupService,
@@ -52,7 +60,8 @@ public class RebirthService {
             JsonService jsonService,
             IdempotencyRunner idempotencyRunner,
             RequestHashService requestHashService,
-            EndingAtlasService endingAtlasService
+            EndingAtlasService endingAtlasService,
+            AchievementService achievementService
     ) {
         this.vupService = vupService;
         this.vupMapper = vupMapper;
@@ -62,6 +71,7 @@ public class RebirthService {
         this.idempotencyRunner = idempotencyRunner;
         this.requestHashService = requestHashService;
         this.endingAtlasService = endingAtlasService;
+        this.achievementService = achievementService;
     }
 
     @Transactional
@@ -114,24 +124,75 @@ public class RebirthService {
         );
         userAccountMapper.incrementRestartCount(userId);
 
-        log.info("Restart completed: newVupId={}, fanBias={}, routeBias={}, target={}",
-                next.getId(), fanBiasType, restartTarget.routeBiasType(), restartTarget.targetType());
+        // Task 3.4: check unlocked achievements for opening buff
+        AchievementProgressDTO progress = achievementService.getAchievementProgress(userId, previous);
+        List<String> appliedBuffs = new ArrayList<>();
+        int inspirationBuff = 0;
+        int coinBuff = 0;
+        int fansBuff = 0;
+        for (AchievementDTO achievement : progress.achievements()) {
+            if (!achievement.unlocked()) {
+                continue;
+            }
+            String rewardType = achievement.rewardType();
+            if (rewardType == null || rewardType.isBlank()) {
+                continue;
+            }
+            int value = achievement.rewardValue();
+            if (value <= 0) {
+                continue;
+            }
+            switch (rewardType) {
+                case "INSPIRATION" -> {
+                    inspirationBuff += value;
+                    appliedBuffs.add(achievement.name() + ":+" + value + "灵感");
+                }
+                case "COIN" -> {
+                    coinBuff += value;
+                    appliedBuffs.add(achievement.name() + ":+" + value + "硬币");
+                }
+                case "FANS" -> {
+                    fansBuff += value;
+                    appliedBuffs.add(achievement.name() + ":+" + value + "粉丝");
+                }
+                default -> { /* 未知奖励类型不做处理 */ }
+            }
+        }
+        if (inspirationBuff > 0) {
+            next.setInspiration(next.getInspiration() + inspirationBuff);
+        }
+        if (coinBuff > 0) {
+            next.setCoin(next.getCoin() + coinBuff);
+        }
+        if (fansBuff > 0) {
+            next.setFans(next.getFans() + fansBuff);
+        }
+        if (inspirationBuff > 0 || coinBuff > 0 || fansBuff > 0) {
+            vupMapper.updateState(next);
+        }
+
+        log.info("Restart completed: newVupId={}, fanBias={}, routeBias={}, target={}, buffs={}",
+                next.getId(), fanBiasType, restartTarget.routeBiasType(), restartTarget.targetType(), appliedBuffs);
 
         DaySession nextSession = daySessionMapper.findByVupIdAndDay(next.getId(), next.getDayCount());
+        Map<String, Object> hintMap = new LinkedHashMap<>();
+        hintMap.put("targetType", restartTarget.targetType());
+        hintMap.put("routeBiasType", restartTarget.routeBiasType());
+        hintMap.put("biasType", fanBiasType);
+        hintMap.put("fanBiasPercent", FAN_BIAS_PERCENT);
+        hintMap.put("openingAdvice", restartTarget.openingAdvice());
+        hintMap.put("legacyTag", restartTarget.legacyTag());
+        hintMap.put("runObjective", restartTarget.runObjective());
+        hintMap.put("boundary", restartTarget.boundary());
+        hintMap.put("achievementBuffs", appliedBuffs);
+        hintMap.put("inspirationBuff", inspirationBuff);
+        hintMap.put("coinBuff", coinBuff);
+        hintMap.put("fansBuff", fansBuff);
         return new RestartResultDTO(
                 next.getId(),
                 nextSession.getDay(),
                 nextSession.getPhase(),
-                Map.of(
-                        "targetType", restartTarget.targetType(),
-                        "routeBiasType", restartTarget.routeBiasType(),
-                        "biasType", fanBiasType,
-                        "fanBiasPercent", FAN_BIAS_PERCENT,
-                        "openingAdvice", restartTarget.openingAdvice(),
-                        "legacyTag", restartTarget.legacyTag(),
-                        "runObjective", restartTarget.runObjective(),
-                        "boundary", restartTarget.boundary()
-                )
+                hintMap
         );
     }
 

@@ -127,6 +127,34 @@ public class DayFlowService {
     }
 
     /**
+     * 路线分衰减：非当前最高路线的分数随天数自然衰减。
+     * 每次变更时调用，让路线切换有真实成本。
+     */
+    public void applyRouteScoreDecay(Vup vup) {
+        Map<String, Integer> routeScores = routeScores(vup);
+        int maxScore = routeScores.values().stream().max(Integer::compare).orElse(0);
+        if (maxScore <= 0) return;
+
+        // Non-top routes decay by 1 point (minimum 0)
+        boolean decayed = false;
+        for (Map.Entry<String, Integer> entry : routeScores.entrySet()) {
+            if (!RouteType.UNKNOWN.name().equals(entry.getKey()) && entry.getValue() < maxScore && entry.getValue() > 0) {
+                routeScores.put(entry.getKey(), Math.max(0, entry.getValue() - 1));
+                decayed = true;
+            }
+        }
+        if (decayed) {
+            vup.setRouteScoreJson(jsonService.write(routeScores));
+            // Recalculate current route after decay
+            vup.setCurrentRoute(routeScores.entrySet().stream()
+                    .filter(e -> !RouteType.UNKNOWN.name().equals(e.getKey()))
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse(RouteType.UNKNOWN.name()));
+        }
+    }
+
+    /**
      * 解析路线分 JSON。
      */
     public Map<String, Integer> routeScores(Vup vup) {

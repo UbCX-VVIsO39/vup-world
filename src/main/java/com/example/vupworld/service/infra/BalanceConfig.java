@@ -10,18 +10,53 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class BalanceConfig {
+
+    /** 运行难度：影响 AP 上限、旧账延迟、对手强度等。 */
+    public enum Difficulty {
+        EASY,
+        STANDARD,
+        HARD
+    }
+
     private final int maxDay;
     private final boolean offStreamRequired;
+    private final Difficulty difficulty;
 
     public BalanceConfig(
             @Value("${game.run.max-day:30}") int maxDay,
-            @Value("${game.run.off-stream-required:true}") boolean offStreamRequired
+            @Value("${game.run.off-stream-required:true}") boolean offStreamRequired,
+            @Value("${game.run.difficulty:STANDARD}") String difficulty
     ) {
         if (maxDay < 1) {
             throw new IllegalArgumentException("game.run.max-day must be positive");
         }
         this.maxDay = maxDay;
         this.offStreamRequired = offStreamRequired;
+        this.difficulty = parseDifficulty(difficulty);
+    }
+
+    public Difficulty difficulty() {
+        return difficulty;
+    }
+
+    public static Difficulty parseDifficulty(String value) {
+        if (value == null || value.isBlank()) {
+            return Difficulty.STANDARD;
+        }
+        try {
+            return Difficulty.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Difficulty.STANDARD;
+        }
+    }
+
+    /** 旧账延迟的难度修正：EASY +2 天缓冲，HARD -2 天紧迫。 */
+    private int debtDelayBonus(Difficulty d) {
+        return switch (d) {
+            case EASY -> 2;
+            case STANDARD -> 0;
+            case HARD -> -2;
+        };
     }
 
     // === 粉丝变化 ===
@@ -113,13 +148,15 @@ public class BalanceConfig {
     public int danceStreamRouteScoreChange() { return 4; }
 
     // === 体力消耗 ===
-    // [数值调整] 3→4: 体力预算过紧，30天总预算从97升至126，行动密度提升30%
-    public int dailyStaminaRecovery() { return 4; }
+    // [数值调整] AP制重构：体力变长期状态，每日自然回复改为1，REST回复改为3
+    public int dailyStaminaRecovery() { return 1; }
     public int streamPlanStaminaCost() { return 3; }
     public int publishVideoStaminaCost() { return 4; }
     public int publishClipStaminaCost() { return 1; }
     public int trainActionStaminaCost() { return 2; }
-    public int restStaminaRecovery() { return 5; }
+    public int restStaminaRecovery() { return 3; }
+    /** 运营压力锁定首次触发时扣除的体力惩罚量。 */
+    public int pressureLockoutStaminaPenalty() { return 1; }
 
     // === 硬币变化 ===
     public int fanServiceScThanksCoin() { return 600; }
@@ -153,15 +190,15 @@ public class BalanceConfig {
     public int breakoutStageFanCap() { return 2000; }
     public int topStageFanCap() { return 3000; }
 
-    // === 债务时机 ===
-    public int titleBackfireDebtDelay() { return 3; }
-    public int unicornExpectationDebtDelay() { return 3; }
-    public int commercialBacklashDebtDelay() { return 3; }
-    public int boomerangClipDebtDelay() { return 2; }
+    // === 债务时机（含难度分支：EASY +2 / HARD -2）===
+    public int titleBackfireDebtDelay() { return Math.max(1, 3 + debtDelayBonus(difficulty)); }
+    public int unicornExpectationDebtDelay() { return Math.max(1, 3 + debtDelayBonus(difficulty)); }
+    public int commercialBacklashDebtDelay() { return Math.max(1, 3 + debtDelayBonus(difficulty)); }
+    public int boomerangClipDebtDelay() { return Math.max(1, 2 + debtDelayBonus(difficulty)); }
     public int debtRepeatSeverityStep() { return 1; }
     // [数值调整] 1→2: 债务雪崩风险过高，延长回流窗口给玩家更多缓冲时间
-    public int trafficRolloverDebtDelay() { return 2; }
-    public int memeRolloverDebtDelay() { return 2; }
+    public int trafficRolloverDebtDelay() { return Math.max(1, 2 + debtDelayBonus(difficulty)); }
+    public int memeRolloverDebtDelay() { return Math.max(1, 2 + debtDelayBonus(difficulty)); }
     public int trafficRolloverSeverityBump() { return 1; }
     public int memeRolloverSeverityBump() { return 0; }
 
@@ -228,4 +265,29 @@ public class BalanceConfig {
     public int startingUnicornFans() { return 5; }
     public int startingDdFans() { return 7; }
     public int startingReputation() { return 60; }
+
+    // === 礼物热度加成 ===
+    public int giftHeatBonusCap() { return 20; }
+    public int giftHeatBonusPerCoin() { return 500; }
+
+    // === 弹幕热度加成 ===
+    public int danmakuHeatBonusCap() { return 15; }
+    public int danmakuNegativeReputationPenalty() { return 2; }
+
+    // === 每日行动点（含难度分支：EASY=12 / STANDARD=10 / HARD=8）===
+    public int dailyActionPoints() { return dailyActionPoints(difficulty); }
+
+    public int dailyActionPoints(Difficulty d) {
+        return switch (d) {
+            case EASY -> 12;
+            case STANDARD -> 10;
+            case HARD -> 8;
+        };
+    }
+
+    /** 体力透支档（1-2）时每日AP上限的缩减量。 */
+    public int exhaustedApPenalty() { return 2; }
+
+    // === 对手威胁阈值：对手粉丝超过玩家×该系数视为被超越 ===
+    public int rivalOvertakeThresholdPercent() { return 120; }
 }

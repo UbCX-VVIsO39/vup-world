@@ -27,6 +27,12 @@ public class DaySession {
     private int rngCursor;
     private boolean locked;
     private String offStreamAction;
+    private int giftCount;
+    private int giftCoinValue;
+    private int danmakuCount;
+    private int danmakuHeat;
+    private int actionPoints;
+    private int maxActionPoints;
 
     public Long getId() {
         return id;
@@ -234,5 +240,53 @@ public class DaySession {
 
     public void setOffStreamAction(String offStreamAction) {
         this.offStreamAction = offStreamAction;
+    }
+
+    public int getGiftCount() {
+        return giftCount;
+    }
+
+    public void setGiftCount(int giftCount) {
+        this.giftCount = giftCount;
+    }
+
+    public int getGiftCoinValue() {
+        return giftCoinValue;
+    }
+
+    public void setGiftCoinValue(int giftCoinValue) {
+        this.giftCoinValue = giftCoinValue;
+    }
+
+    public int getDanmakuCount() {
+        return danmakuCount;
+    }
+
+    public void setDanmakuCount(int danmakuCount) {
+        this.danmakuCount = danmakuCount;
+    }
+
+    public int getDanmakuHeat() {
+        return danmakuHeat;
+    }
+
+    public void setDanmakuHeat(int danmakuHeat) {
+        this.danmakuHeat = danmakuHeat;
+    }
+
+    public int getActionPoints() {
+        return actionPoints;
+    }
+
+    public void setActionPoints(int actionPoints) {
+        this.actionPoints = actionPoints;
+    }
+
+    public int getMaxActionPoints() {
+        return maxActionPoints;
+    }
+
+    public void setMaxActionPoints(int maxActionPoints) {
+        this.maxActionPoints = maxActionPoints;
     }
 }

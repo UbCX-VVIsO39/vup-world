@@ -4,6 +4,7 @@ import com.example.vupworld.model.DaySession;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -67,12 +68,49 @@ public interface DaySessionMapper {
                 report_id = #{reportId},
                 ending_review_id = #{endingReviewId},
                 off_stream_action = #{offStreamAction},
+                gift_count = #{giftCount},
+                gift_coin_value = #{giftCoinValue},
+                danmaku_count = #{danmakuCount},
+                danmaku_heat = #{danmakuHeat},
+                action_points = #{actionPoints},
+                max_action_points = #{maxActionPoints},
                 update_time = CURRENT_TIMESTAMP
             WHERE id = #{id}
             """)
     void updateAfterAction(DaySession daySession);
 
     @Update("UPDATE day_session SET rng_cursor = #{cursor} WHERE id = #{id}")
-    void updateRngCursor(@org.apache.ibatis.annotations.Param("id") Long id,
-                         @org.apache.ibatis.annotations.Param("cursor") int cursor);
+    void updateRngCursor(@Param("id") Long id, @Param("cursor") int cursor);
+
+    @Update("""
+            UPDATE day_session
+            SET gift_count = gift_count + #{count},
+                gift_coin_value = gift_coin_value + #{coinValue},
+                update_time = CURRENT_TIMESTAMP
+            WHERE vup_id = #{vupId} AND day = #{day}
+            """)
+    void incrementGift(@Param("vupId") Long vupId,
+                       @Param("day") int day,
+                       @Param("count") int count,
+                       @Param("coinValue") int coinValue);
+
+    @Update("""
+            UPDATE day_session
+            SET danmaku_heat = danmaku_heat + #{heatDelta},
+                update_time = CURRENT_TIMESTAMP
+            WHERE vup_id = #{vupId} AND day = #{day}
+            """)
+    void incrementDanmaku(@Param("vupId") Long vupId,
+                          @Param("day") int day,
+                          @Param("heatDelta") int heatDelta);
+
+    @Update("""
+            UPDATE day_session
+            SET phase = #{phase},
+                update_time = CURRENT_TIMESTAMP
+            WHERE vup_id = #{vupId} AND day = #{day}
+            """)
+    void updatePhase(@Param("vupId") Long vupId,
+                     @Param("day") int day,
+                     @Param("phase") String phase);
 }
